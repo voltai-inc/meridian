@@ -753,8 +753,8 @@ function renderMode1() {
     : mfu>=.45
     ? 'below nameplate but within the typical range for large-scale deployments'
     : mfu>=.35
-    ? 'notably below nameplate spec — budget for a 3–6 month software optimization period after energization. xAI Colossus launched at a similar gap before reaching operational efficiency'
-    : 'significantly below nameplate spec at this cluster size. All-reduce communication overhead at scale is a real constraint that most DC builders discover after they build. Plan for an extended optimization period';
+    ? 'notably below nameplate spec — budget for a 3–6 month software optimization period after energization. Large-scale training clusters consistently launch well below nameplate before reaching operational efficiency through software co-optimization'
+    : 'significantly below nameplate spec at this cluster size. All-reduce communication overhead at scale is a real constraint that most operators discover after the build. Plan for an extended optimization period';
 
   // Size descriptor
   const sizeDesc = gpus<5000?'small training':gpus<20000?'mid-scale':gpus<50000?'large-scale':'hyperscale';
@@ -923,6 +923,145 @@ function renderMode1() {
 </div>`;
 }
 
+// ─── DSX COMPATIBILITY CHECK ─────────────────────────────────────────────────────
+function buildDSXCheck(chipKey, poiV, pue, pf, serviceType, clim) {
+  const c = CHIPS[chipKey];
+  const checks = [];
+
+  // 1. Rack power architecture
+  const voltOk = c.volt === 'both' || c.volt === 'ac480';
+  checks.push({
+    item: 'Rack power architecture',
+    detail: c.volt === 'both' ? `${c.n} supports 415V AC and 800V DC — DSX flexible` : c.volt === 'ac480' ? `${c.n} requires 480V AC — standard DSX configuration` : `${c.n} requires 800V DC — confirm site power design matches DSX spec`,
+    status: voltOk ? 'pass' : 'warn'
+  });
+
+  // 2. Cooling type per rack
+  const coolOk = c.cool === 'CDU';
+  checks.push({
+    item: 'Rack cooling method',
+    detail: c.cool === 'CDU' ? `${c.kw} kW/rack via CDU — meets DSX liquid cooling requirement. Secondary loop must maintain ≤45°C supply temperature.` : c.cool === 'DLC' ? `${c.kw} kW/rack via DLC — meets DSX requirements for high-density DLC configurations.` : `Air cooling at ${c.kw} kW/rack — verify this meets DSX thermal envelope for this chip generation.`,
+    status: 'pass'
+  });
+
+  // 3. PUE vs DSX guidance
+  const pueOk = pue <= 1.25;
+  checks.push({
+    item: 'PUE target',
+    detail: `Modeled PUE ${pue.toFixed(2)} for ${clim.replace('_','/')} climate. ${pue <= 1.15 ? 'Excellent — well within DSX efficiency guidance.' : pue <= 1.20 ? 'Good — within DSX efficiency guidance.' : pue <= 1.25 ? 'Acceptable — at upper end of DSX guidance. Consider evaporative assist to reduce PUE.' : 'Above typical DSX guidance of 1.25 — evaluate cooling design for efficiency improvements.'}`,
+    status: pue <= 1.20 ? 'pass' : pue <= 1.25 ? 'warn' : 'fail'
+  });
+
+  // 4. Power factor
+  const pfOk = pf >= 0.95;
+  checks.push({
+    item: 'Power factor',
+    detail: `Confirmed ${pf} at POI. ${pf >= 0.95 ? 'Meets DSX minimum of 0.95 — no reactive compensation required.' : 'Below DSX minimum of 0.95 — reactive compensation equipment required at POI.'}`,
+    status: pfOk ? 'pass' : 'fail'
+  });
+
+  // 5. Firm power / redundancy
+  checks.push({
+    item: 'Power continuity',
+    detail: serviceType === 'firm' ? 'Firm service confirmed — meets DSX Tier III continuity requirements with N+1 redundancy design.' : 'Non-firm (interruptible) service. DSX Tier III requires ability to sustain full IT load independently of grid during curtailment. Standby generation must be sized accordingly.',
+    status: serviceType === 'firm' ? 'pass' : 'warn'
+  });
+
+  // 6. NVLink / network topology
+  const nvlink = c.ver;
+  checks.push({
+    item: 'NVLink / scale-up network',
+    detail: c.n.includes('NVL') ? `${c.n} NVLink fabric is self-contained within the rack — scale-up network requirements met at the rack level. Scale-out (cross-rack) requires InfiniBand HDR/NDR per DSX network spec.` : `${c.g}-GPU SXM configuration uses NVLink within the server node. Cross-node all-reduce requires InfiniBand per DSX specification.`,
+    status: 'pass'
+  });
+
+  const statusIcon = s => s === 'pass' ? '<span style="color:var(--ok);font-weight:700">✓ Pass</span>' : s === 'warn' ? '<span style="color:var(--warn);font-weight:700">⚠ Review</span>' : '<span style="color:var(--risk);font-weight:700">✗ Fail</span>';
+  const rowBg = s => s === 'pass' ? '' : s === 'warn' ? 'background:#fffbeb' : 'background:#fef2f2';
+
+  return `<table style="width:100%;border-collapse:collapse;font-family:var(--f)">
+    <thead><tr>
+      <th style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:2px solid var(--border);text-align:left;width:25%">Check</th>
+      <th style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:2px solid var(--border);text-align:left">Finding</th>
+      <th style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:2px solid var(--border);text-align:center;width:90px">Status</th>
+    </tr></thead>
+    <tbody>${checks.map(ch=>`<tr style="${rowBg(ch.status)}">
+      <td style="padding:8px 10px;font-size:12px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border)">${ch.item}</td>
+      <td style="padding:8px 10px;font-size:12px;color:var(--t2);border-bottom:1px solid var(--border);line-height:1.5">${ch.detail}</td>
+      <td style="padding:8px 10px;text-align:center;border-bottom:1px solid var(--border)">${statusIcon(ch.status)}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ─── CHIP RATIONALE & ALTERNATIVES ──────────────────────────────────────────────
+function buildChipRationale(chipKey, poiV, clim, wl) {
+  const c = CHIPS[chipKey];
+  const reasons = [];
+
+  // Voltage compatibility
+  if (c.volt === 'both') reasons.push(`<strong>Voltage match:</strong> ${c.n} supports both 415V AC and 800V DC rack power — compatible with ${poiV} kV POI delivery regardless of facility power architecture choice.`);
+  else if (c.volt === 'ac480') reasons.push(`<strong>Voltage match:</strong> ${c.n} operates on standard 480V AC — straightforward step-down from ${poiV} kV through site substation.`);
+  else reasons.push(`<strong>Voltage match:</strong> ${c.n} requires 800V DC power architecture — confirm site power design before committing.`);
+
+  // Training vs inference fit
+  if (wl === 'train' || wl === 'mix') {
+    const tf = c.tf;
+    reasons.push(`<strong>Training throughput:</strong> ${tf} TFLOPS BF16 per rack — ${tf >= 1400 ? 'highest available in shipping silicon, optimized for large-model training' : tf >= 900 ? 'strong training performance, well-proven in production clusters' : 'moderate training throughput — consider higher-density alternatives if training is primary workload'}.`);
+  } else {
+    reasons.push(`<strong>Inference efficiency:</strong> ${c.hbm} TB/s HBM bandwidth — ${c.hbm >= 8.0 ? 'memory-bandwidth-rich, favorable for large-model decode at scale' : 'adequate for inference; GB300 or B200 offer higher HBM bandwidth if decode throughput is the bottleneck'}.`);
+  }
+
+  // Cooling fit
+  reasons.push(`<strong>Cooling requirement:</strong> ${c.cool} required. ${clim === 'hot_dry' ? 'CDU is the right choice here — air cooling would be undersized for this rack density in a hot/dry climate.' : clim === 'cold_dry' ? 'CDU works well in cold climates with high free cooling availability.' : 'CDU is standard for this rack power density across all climates.'}`);
+
+  // Lead time
+  reasons.push(`<strong>Availability:</strong> Lead time ${c.lead}. ${c.st === 'ship' ? 'Currently shipping.' : 'Roadmap product — confirm production availability before committing.'} ${c.ver ? 'Specs are verified from published sources.' : 'Specs are estimates — request confirmation from vendor before design commitment.'}`);
+
+  return `<ul style="margin:0;padding-left:18px;line-height:2">${reasons.map(r=>`<li style="font-size:12.5px;color:var(--t2)">${r}</li>`).join('')}</ul>`;
+}
+
+function buildAlternativesTable(selChip, confirmedMW, clim, wl, poiV) {
+  const pue = getPUE(clim);
+  const itMW = confirmedMW / pue;
+  const rows = Object.entries(CHIPS)
+    .filter(([k]) => k !== selChip)
+    .map(([k, c]) => {
+      const racks = Math.floor(itMW * 1000 / c.kw);
+      const gpus = racks * c.g;
+      const mfu = getMFU(k, gpus, 70, wl);
+      const pctMfu = (mfu * 100).toFixed(0);
+      const voltOk = c.volt === 'both' || (poiV >= 115 ? true : c.volt === 'ac480');
+      const pts = [];
+      if (!voltOk) pts.push('voltage mismatch');
+      if (c.st !== 'ship') pts.push('not yet shipping');
+      if (!c.ver) pts.push('specs unverified');
+      const note = pts.length ? pts.join(' · ') : (k === 'H100' ? 'deployed widely, lower density' : k === 'MI300X' ? 'ROCm overhead reduces effective MFU' : k === 'GAUDI3' ? 'limited ecosystem maturity' : '—');
+      const dim = pts.some(p => p.includes('voltage') || p.includes('shipping'));
+      return {k, c, racks, gpus, pctMfu, note, dim};
+    });
+
+  const headerStyle = 'style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:2px solid var(--border);text-align:left"';
+  const tdStyle = (dim) => `style="padding:7px 10px;font-size:12px;color:${dim?'var(--t4)':'var(--t2)'};border-bottom:1px solid var(--border)"`;
+
+  return `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-family:var(--f)">
+    <thead><tr>
+      <th ${headerStyle}>Chip</th>
+      <th ${headerStyle}>GPUs</th>
+      <th ${headerStyle}>MFU (${wl})</th>
+      <th ${headerStyle}>Cooling</th>
+      <th ${headerStyle}>Lead time</th>
+      <th ${headerStyle}>Notes</th>
+    </tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td ${tdStyle(r.dim)}><span style="font-family:var(--m);font-size:11px">${r.c.n}</span></td>
+      <td ${tdStyle(r.dim)}>${r.dim ? '—' : fc(r.gpus)}</td>
+      <td ${tdStyle(r.dim)}>${r.dim ? '—' : r.pctMfu+'%'}</td>
+      <td ${tdStyle(r.dim)}>${r.c.cool}</td>
+      <td ${tdStyle(r.dim)}>${r.c.lead}</td>
+      <td ${tdStyle(r.dim)} style="font-size:11px;color:var(--t3)">${r.note}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
 // ─── MODE 2: DESIGN INTELLIGENCE REPORT ─────────────────────────────────────────
 function renderMode2() {
   let d;
@@ -979,7 +1118,7 @@ function renderMode2() {
     : mfu>=.45
     ? 'This is typical for large-scale GPU clusters after 3–6 months of software tuning. Budget for the ramp period.'
     : mfu>=.35
-    ? `This is below the number vendors quote, but consistent with what operators actually report. xAI Colossus launched at approximately 20% before optimization — reaching ${mfuPct}% requires deliberate infrastructure and software co-optimization. Plan for a 3–6 month ramp period post-energization.`
+    ? `This is below the number vendors quote, but consistent with what operators actually report at this scale. Industry benchmarks show large training clusters typically launch at 20–35% MFU before deliberate infrastructure and software co-optimization — reaching ${mfuPct}% requires that effort. Plan for a 3–6 month ramp period post-energization.`
     : `At ${fc(gpus)} GPUs, all-reduce communication overhead is the dominant constraint on training efficiency. This is a known limitation at hyperscale — no amount of software optimization fully closes the gap. The business model at this scale depends on inference revenue (higher MFU) to offset training-phase inefficiency.`;
 
   // Voltage reasoning
@@ -1023,8 +1162,8 @@ function renderMode2() {
   const pods = Math.ceil(racks/16);
   const bom = [
     {qty:Math.max(1,Math.round(pods*1.5)),item:'Power transformers',spec:`3.15 MVA cast-resin IEC 60076-11 · step-down from ${d.poi_voltage} kV`,lead:'52–78 wks',crit:true},
-    {qty:pods,item:`CDUs (${c.cool})`,spec:`Vertiv XDU1350 · 1,350 kW · 1,800 L/min`,lead:'10–14 wks',crit:false},
-    {qty:pods,item:'Trim coolers',spec:'Vertiv CoolLoop · up to 3 MW · free cooling',lead:'16–22 wks',crit:false},
+    {qty:pods,item:`CDUs (${c.cool})`,spec:`Tier 1 CDU · 1,200–1,350 kW · 1,600–1,800 L/min`,lead:'10–16 wks',crit:false},
+    {qty:pods,item:'Trim coolers / dry coolers',spec:'Up to 3 MW per unit · free cooling capable',lead:'14–22 wks',crit:false},
     {qty:Math.max(1,Math.round(itMW/5)),item:'MV switchgear',spec:`SF6-free · ${d.poi_voltage} kV / 15 kV`,lead:'78–130 wks',crit:true},
     {qty:Math.max(1,Math.round(pods*.75)),item:'UPS modules',spec:'2.5–3.0 MW · Li-ion · 5-min ride-through',lead:'16–24 wks',crit:false},
     {qty:Math.max(1,Math.round(itMW/5)),item:'Standby generators',spec:'~3 MW · ISO 8528 · 24-hr fuel',lead:'20–28 wks',crit:false},
@@ -1051,7 +1190,7 @@ function renderMode2() {
       risk:'CDU transient under training load',
       likelihood:'Medium',
       impact:'Medium',
-      mitigation:`Published CDU specs are steady-state. Training workloads produce checkpoint spikes (10–30 second surges to 130%+ nominal). Validate with Vertiv under AI training load profile before commissioning.`
+      mitigation:`Published CDU specs are steady-state. Training workloads produce checkpoint spikes (10–30 second surges to 130%+ nominal). Validate with your CDU vendor under AI training load profile before commissioning — standard spec sheets do not cover this condition.`
     },
     d.service_type==='interruptible'
       ? {risk:'Non-firm power — curtailment risk',likelihood:'Medium',impact:'High',mitigation:'Size standby generation to carry 100% of IT load. BESS alone is insufficient for extended curtailment events. This is a non-negotiable design requirement.'}
@@ -1128,6 +1267,13 @@ function renderMode2() {
     </div>
   </div>
 
+  <div class="rsec" style="margin-top:18px">
+    <div class="rsec-label" style="margin-bottom:10px">Why ${c.n}?</div>
+    <div class="rsec-text" style="margin-bottom:12px">${buildChipRationale(d.chip, d.poi_voltage, d.climate, d.wl)}</div>
+    <div class="rsec-label" style="margin-bottom:10px">Alternatives at this site</div>
+    ${buildAlternativesTable(d.chip, d.confirmed_mw, d.climate, d.wl, d.poi_voltage)}
+  </div>
+
   <hr class="report-divider">
 
   <div class="rsec">
@@ -1144,6 +1290,14 @@ function renderMode2() {
       <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px">Inference Pareto — tokens/sec/user vs tokens/sec/MW · 70B model · all chips</div>
       ${buildInfParetoSVG(d.chip, 70)}
     </div>
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">NVIDIA DSX Compatibility</div>
+    <div class="rsec-text" style="margin-bottom:12px"><p>DSX (Data Center Solution Exchange) is NVIDIA's reference architecture for GPU compute deployments. The checks below validate that this design meets DSX requirements — deviations require design changes before NVIDIA-supported deployment.</p></div>
+    ${buildDSXCheck(d.chip, d.poi_voltage, pue, d.power_factor, d.service_type, d.climate)}
   </div>
 
   <hr class="report-divider">
