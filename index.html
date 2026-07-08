@@ -377,13 +377,17 @@ const CDUS={
   dlc_generic:{n:'DLC Unit',cap:'~2,000 kW',flow:'~1,500 L/min',lead:'14–18 wks',src:'◐ est. · vendor TBD',ver:false,compat:['DLC']},
 };
 // Cool compat by chip
-const CHIP_COOL={GB300:['CDU'],B200:['Air','CDU'],VERA:['CDU'],MI355X:['DLC'],GAUDI3:['Air','CDU']};
+const CHIP_COOL={GB300:['CDU'],B200:['Air','CDU'],VERA:['CDU'],MI355X:['DLC'],GAUDI3:['Air','CDU'],H100:['Air','CDU'],H200:['Air','CDU'],GB200:['CDU'],MI300X:['Air','CDU']};
 let selCDU='vertiv_1350',selCoolType='CDU';
 const CHIPS={
   GB300:{n:'NVIDIA GB300 NVL72',g:72,kw:130,kw_max:142,cool:'CDU',p:3.00,mt:.58,mi:.72,tf:1400,hbm:8.0,ver:true,st:'ship',lead:'12–14 mo'},
+  GB200:{n:'NVIDIA GB200 NVL36',g:36,kw:65,kw_max:72,cool:'CDU',p:2.80,mt:.57,mi:.71,tf:1400,hbm:8.0,ver:true,st:'ship',lead:'12–14 mo'},
   B200:{n:'NVIDIA B200 SXM',g:8,kw:90,kw_max:100,cool:'CDU',p:2.50,mt:.62,mi:.76,tf:900,hbm:8.0,ver:true,st:'ship',lead:'12–14 mo'},
+  H200:{n:'NVIDIA H200 SXM',g:8,kw:70,kw_max:80,cool:'CDU',p:2.40,mt:.55,mi:.68,tf:990,hbm:4.8,ver:true,st:'ship',lead:'8–10 mo'},
+  H100:{n:'NVIDIA H100 SXM5',g:8,kw:70,kw_max:80,cool:'CDU',p:2.00,mt:.50,mi:.65,tf:990,hbm:3.35,ver:true,st:'ship',lead:'6–8 mo'},
   VERA:{n:'Vera Rubin NVL72',g:72,kw:210,kw_max:227,cool:'CDU',p:6.00,mt:.60,mi:.74,tf:1800,hbm:10.0,ver:false,st:'road',lead:'2026→'},
   MI355X:{n:'AMD MI355X Helios',g:8,kw:230,kw_max:250,cool:'DLC',p:8.00,mt:.45,mi:.62,tf:1300,hbm:5.3,ver:false,st:'ship',lead:'14–16 mo'},
+  MI300X:{n:'AMD MI300X OAM',g:8,kw:110,kw_max:125,cool:'CDU',p:1.80,mt:.38,mi:.55,tf:1307,hbm:7.68,ver:false,st:'ship',lead:'10–12 mo'},
   GAUDI3:{n:'Intel Gaudi 3',g:8,kw:90,kw_max:110,cool:'CDU',p:1.50,mt:.42,mi:.60,tf:800,hbm:3.7,ver:false,st:'ship',lead:'12–14 mo'},
 };
 const PUE={cold_dry:1.10,temperate:1.14,hot_dry:1.18,hot_humid:1.22};
@@ -400,7 +404,7 @@ function getPUE(hr,clim){return (HR_PUE[hr]||HR_PUE.trim)[clim]||1.20;}
 function selHR(v,el){selHeatRej=v;document.querySelectorAll('.hr-c').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');calc();}
 const BTMC={'Natural gas (on-site peaker)':1200000,'Solar + Battery':2500000,'Hydro (utility-owned)':0};
 let clim='temperate',goKey='pjm',selC='GB300',selWl='train';
-function getMFU(chip,gpus,modelB,top,wl){const c=CHIPS[chip];let m=wl==='train'?c.mt:c.mi;if(wl==='train'){if(gpus>8)m-=Math.log2(gpus/8)*.025;if(modelB>=405)m-=.05;else if(modelB>=70)m-=.02;}m+={fat:0,rail:.08,dragon:.05}[top]||0;return Math.max(.22,Math.min(.88,m));}
+function getMFU(chip,gpus,modelB,top,wl){const c=CHIPS[chip];let m=wl==='train'?c.mt:(wl==='mix'?(c.mt+c.mi)/2:c.mi);if(wl==='train'){if(gpus>8)m-=Math.log2(gpus/8)*.025;if(modelB>=405)m-=.05;else if(modelB>=70)m-=.02;}else if(wl==='infer'){if(gpus>512)m-=Math.log2(gpus/512)*.010;}else if(wl==='mix'){if(gpus>64)m-=Math.log2(gpus/64)*.016;}m+={fat:0,rail:.08,dragon:.05}[top]||0;return Math.max(.22,Math.min(.88,m));}
 const fm=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+(a/1e9).toFixed(2)+'B':a>=1e6?s+'$'+(a/1e6).toFixed(1)+'M':a>=1e3?s+'$'+(a/1e3).toFixed(0)+'K':s+'$'+Math.round(a)};
 const fc=n=>Math.round(n).toLocaleString();
 const pct=n=>((n||0)*100).toFixed(0)+'%';
@@ -515,14 +519,14 @@ function calc(){
   const chips=Object.keys(CHIPS);
   const rows=[['GPUs (this site)',k=>fc(all[k].gpus)],['Racks',k=>''+all[k].racks],['Dynamic MFU',k=>pct(all[k].m)],['Revenue @ 80%',k=>fm(all[k].rev)],['Revenue / MW IT',k=>fm(all[k].rpm)+'/MW'],['Power sign-off',k=>all[k].pchk?'✓ Pass':'⚠ BESS needed'],['Facility capex',k=>fm(all[k].cap)],['Lead time',k=>CHIPS[k].lead],['Cooling',k=>CHIPS[k].cool]];
   document.getElementById('cmp_tbl').innerHTML=`<table class="cmp-tbl"><thead><tr><th></th>${chips.map(k=>`<th><div class="col-h${k===selC?' sel':''}" data-k="${k}" onclick="selChip('${k}')"><div class="cbadge ${CHIPS[k].st==='ship'?'ship':'road'}">${CHIPS[k].st==='ship'?'● Shipping':'◐ 2026'}</div><div class="cn">${CHIPS[k].n}</div><div class="cv">${CHIPS[k].g}</div><div class="cs">GPUs/rack · ${CHIPS[k].kw}kW</div></div></th>`).join('')}</tr></thead><tbody>${rows.map(([l,fn],ri)=>`<tr class="ctr${ri===0?' top':''}"><td>${l}</td>${chips.map(k=>{const v=fn(k);const sel=k===selC;const ok=v.includes('✓');const w=v.includes('⚠');return`<td${sel?' class="sc"':''} style="${ok?'color:var(--ok)':w?'color:var(--w)':''}">${v}</td>`;}).join('')}</tr>`).join('')}</tbody></table>`;
-  const sz=[8,64,256,1024,4096,8192,16384],cW=380,cH=175,cp=30;
+  const sz=[8,64,512,4096,16384,65536,131072],cW=380,cH=175,cp=30;
   const mp=sz.map(n=>({n,m:getMFU(selC,n,modelB,top,selWl)}));
-  const mxm=Math.max(...mp.map(p=>p.m))*1.05;
-  const sx=v=>(Math.log(v/8)/Math.log(16384/8))*(cW-cp*2)+cp;
-  const sy=v=>(1-v/mxm)*(cH-cp*2)+cp;
+  const yMin=0.20,yMax=0.88;
+  const sx=v=>(Math.log(v/sz[0])/Math.log(sz[sz.length-1]/sz[0]))*(cW-cp*2)+cp;
+  const sy=v=>cp+(1-(v-yMin)/(yMax-yMin))*(cH-cp*2);
   const path=mp.map((p,i)=>`${i?'L':'M'}${sx(p.n).toFixed(1)},${sy(p.m).toFixed(1)}`).join(' ');
-  const cg=Math.min(gpus,16384);
-  document.getElementById('mfu_ch').innerHTML=`<div class="cbox"><svg width="${cW}" height="${cH}">${[.3,.4,.5,.6,.7].map(m=>`<line x1="${cp}" y1="${sy(m).toFixed(0)}" x2="${cW-cp}" y2="${sy(m).toFixed(0)}" stroke="#e2eaf2" stroke-width="1"/><text x="${cp-3}" y="${sy(m)+4}" text-anchor="end" style="font-family:var(--m);font-size:8px;fill:var(--t4)">${(m*100).toFixed(0)}%</text>`).join('')}<path d="${path}" fill="none" stroke="var(--v)" stroke-width="2.5" stroke-linejoin="round"/>${mp.map(p=>`<circle cx="${sx(p.n).toFixed(1)}" cy="${sy(p.m).toFixed(1)}" r="3.5" fill="var(--v)"/>`).join('')}<circle cx="${sx(cg).toFixed(1)}" cy="${sy(selM).toFixed(1)}" r="6" fill="none" stroke="var(--ok)" stroke-width="2"/><text x="${sx(cg)}" y="${sy(selM)-10}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--ok)">This site</text>${sz.map(n=>`<text x="${sx(n).toFixed(0)}" y="${cH-cp+13}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--t4)">${n>=1000?(n/1000)+'K':n}</text>`).join('')}<text x="${cW/2}" y="${cH-3}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--t4)">Cluster size (GPUs)</text></svg></div>`;
+  const cg=Math.min(gpus,sz[sz.length-1]);
+  document.getElementById('mfu_ch').innerHTML=`<div class="cbox"><svg width="${cW}" height="${cH}">${[.3,.4,.5,.6,.7,.8].map(m=>`<line x1="${cp}" y1="${sy(m).toFixed(0)}" x2="${cW-cp}" y2="${sy(m).toFixed(0)}" stroke="#e2eaf2" stroke-width="1"/><text x="${cp-3}" y="${sy(m)+4}" text-anchor="end" style="font-family:var(--m);font-size:8px;fill:var(--t4)">${(m*100).toFixed(0)}%</text>`).join('')}<path d="${path}" fill="none" stroke="var(--v)" stroke-width="2.5" stroke-linejoin="round"/>${mp.map(p=>`<circle cx="${sx(p.n).toFixed(1)}" cy="${sy(p.m).toFixed(1)}" r="3.5" fill="var(--v)"/>`).join('')}<circle cx="${sx(cg).toFixed(1)}" cy="${sy(selM).toFixed(1)}" r="6" fill="none" stroke="var(--ok)" stroke-width="2"/><text x="${sx(cg)}" y="${sy(selM)-10}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--ok)">This site</text>${sz.map(n=>`<text x="${sx(n).toFixed(0)}" y="${cH-cp+13}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--t4)">${n>=1000?Math.round(n/1000)+'K':n}</text>`).join('')}<text x="${cW/2}" y="${cH-3}" text-anchor="middle" style="font-family:var(--m);font-size:8px;fill:var(--t4)">Cluster size (GPUs)</text></svg></div>`;
   const iW=380,iH=195,iP=36;const ipts=[];
   for(const b of[1,2,4,8,16,32,64,128,256,512]){const mb=modelB*1e9*2;const memT=(mb+b*2048*2*32*128*2)/(SC.hbm*1e12*gpus);const cmpT=(2*modelB*1e9*b)/(SC.tf*1e12*gpus);const st=Math.max(memT,cmpT);ipts.push({b,u:1/st,mw:(b/st)/(gpus*SC.kw*.70/1000),mem:memT>cmpT});}
   const ix0=Math.min(...ipts.map(p=>p.u))*.8,ix1=Math.max(...ipts.map(p=>p.u))*1.2;
