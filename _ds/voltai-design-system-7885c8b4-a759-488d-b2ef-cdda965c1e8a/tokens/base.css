@@ -1,0 +1,88 @@
+/* ============================================================
+   Voltai — Base / reset layer
+   Light, opt-in defaults. Sets the canvas, body type, selection,
+   focus-visible ring, and a few brand-level helpers. Components
+   never depend on these; they style themselves from tokens.
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-body);
+  font: var(--type-body);
+  font-feature-settings: "ss01", "cv01";
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+:where(h1, h2, h3, h4) {
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+:where(a) {
+  color: var(--accent);
+  text-decoration: none;
+}
+:where(a:hover) {
+  color: var(--accent-hover);
+}
+
+:where(:focus-visible) {
+  outline: var(--ring-width) solid var(--focus-ring);
+  outline-offset: var(--ring-offset);
+}
+
+:where(code, kbd, samp) {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* ---- Brand helpers ---- */
+
+/* Technical eyebrow / spec label — the "VOLTAI™ · NDA RESTRICTED" register */
+.v-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Diffraction-grating microgrid — the Voltai surface texture.
+   Layer over any dark surface for the signature wafer look. */
+.v-grid-texture {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

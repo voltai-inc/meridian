@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power Sign-Off Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --blue:#2E75B6; --green:#1E8449; --amber:#D9A400; --red:#C0392B; --ink:#1a1a1a; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: var(--ink); margin: 0;
+         background: #f4f6f8; }
+  header { background: #fff; border-bottom: 3px solid var(--blue); padding: 14px 22px; }
+  header h1 { font-size: 19px; margin: 0; }
+  header .sub { color: #667; font-size: 12.5px; margin-top: 2px; }
+  .wrap { display: flex; gap: 16px; padding: 16px 22px; align-items: flex-start; }
+  .panel { background: #fff; border: 1px solid #e2e6ea; border-radius: 10px; padding: 14px 16px; }
+  aside.panel { width: 330px; flex-shrink: 0; position: sticky; top: 12px;
+                max-height: calc(100vh - 40px); overflow-y: auto; }
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  fieldset { border: 1px solid #e2e6ea; border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 10px; }
+  legend { font-size: 12px; font-weight: bold; color: var(--blue); padding: 0 4px; }
+  .row { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; gap: 8px; }
+  .row label { font-size: 12px; flex: 1; }
+  .row input[type=number], .row select { width: 96px; padding: 3px 6px; font-size: 12.5px;
+        border: 1px solid #ccd; border-radius: 5px; text-align: right; }
+  .row select { width: 150px; text-align: left; }
+  .hint { font-size: 10.5px; color: #99a; margin: -2px 0 4px; }
+  button.run { width: 100%; background: var(--blue); color: #fff; border: 0; border-radius: 8px;
+               padding: 11px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 4px; }
+  button.run:hover { background: #245e94; }
+  .presets { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .chip { font-size: 11.5px; border: 1px solid var(--blue); color: var(--blue); background: #fff;
+          border-radius: 20px; padding: 4px 10px; cursor: pointer; }
+  .chip.active { background: var(--blue); color: #fff; }
+  #verdictCard { display: none; }
+  .verdict { display: inline-block; padding: 10px 24px; border-radius: 8px; color: #fff;
+             font-size: 20px; font-weight: bold; }
+  .stats { display: flex; gap: 22px; margin-top: 10px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: #667; }
+  .stat b { display: block; font-size: 17px; color: var(--ink); }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { border: 1px solid #e2e6ea; padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--blue); color: #fff; position: sticky; top: 0; }
+  .badge { color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 10.5px; }
+  .detail { color: #778; font-size: 10.5px; margin-top: 1px; }
+  h2 { font-size: 14px; color: var(--blue); margin: 0 0 8px; }
+  canvas { max-width: 100%; }
+  .chartbox { position: relative; height: 260px; }
+  .chartbox.tall { height: 300px; }
+  .foot { color: #99a; font-size: 11px; padding: 4px 22px 18px; }
+  .dl { font-size: 12px; color: var(--blue); cursor: pointer; text-decoration: underline;
+        background: none; border: none; padding: 0; margin-left: 14px; }
+  #spinner { display: none; color: #667; font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pre-Build Power Sign-Off Simulator <span style="color:#99a;font-weight:normal">— MVP web UI</span></h1>
+  <div class="sub">Validate an electrical design against AI workload power transients before construction.
+  Edit the design, site, and workload on the left; Run re-simulates in your browser (nothing leaves your machine).</div>
+</header>
+
+<div class="wrap">
+<aside class="panel">
+  <div class="presets">
+    <button class="chip active" data-preset="training">Training (worst case)</button>
+    <button class="chip" data-preset="mixed">Mixed fleet</button>
+    <button class="chip" data-preset="inference">Inference</button>
+    <button class="chip" data-preset="csv">Import CSV…</button>
+  </div>
+  <input type="file" id="csvFile" accept=".csv" style="display:none">
+  <div class="hint" id="csvInfo"></div>
+
+  <fieldset><legend>Design (2N reference block)</legend>
+    <div class="row"><label>Critical IT load (MW)</label><input type="number" id="itMw" value="12" step="0.5"></div>
+    <div class="row"><label>Per-path capacity: feed/MV/TX/LV (MW)</label><input type="number" id="pathMw" value="17.1" step="0.1"></div>
+    <div class="row"><label>UPS rating per path (MW)</label><input type="number" id="upsMw" value="12" step="0.5"></div>
+    <div class="row"><label>UPS short-time (× rating)</label><input type="number" id="upsSt" value="1.25" step="0.05"></div>
+    <div class="row"><label>PDU rating per path (MW)</label><input type="number" id="pduMw" value="12" step="0.5"></div>
+    <div class="row"><label>Genset firm per path, N+1 (MW)</label><input type="number" id="genMw" value="13" step="0.5"></div>
+    <div class="row"><label>Genset step tolerance (fraction)</label><input type="number" id="genStep" value="0.40" step="0.05"></div>
+    <div class="row"><label>BESS power per path (MW)</label><input type="number" id="bessMw" value="5" step="0.5"></div>
+    <div class="row"><label>BESS energy per path (MWh)</label><input type="number" id="bessMwh" value="2.5" step="0.5"></div>
+    <div class="row"><label>BESS smoothing target (s)</label><input type="number" id="bessTau" value="30" step="5"></div>
+    <div class="row"><label>Mech base load (MW)</label><input type="number" id="mechBase" value="0.6" step="0.1"></div>
+    <div class="row"><label>Cooling MW per IT MW</label><input type="number" id="coolRatio" value="0.20" step="0.02"></div>
+  </fieldset>
+
+  <fieldset><legend>Site / interconnection</legend>
+    <div class="row"><label>Contracted capacity (MW)</label><input type="number" id="contracted" value="16" step="0.5"></div>
+    <div class="row"><label>Ramp limit (MW/s, assumed)</label><input type="number" id="rampLim" value="1.0" step="0.1"></div>
+    <div class="row"><label>Oscillation limit (× avg load)</label><input type="number" id="oscLim" value="0.10" step="0.01"></div>
+  </fieldset>
+
+  <fieldset id="wlFields"><legend>Workload</legend>
+    <div class="row"><label>Duration (s)</label><input type="number" id="duration" value="1800" step="300"></div>
+    <div class="row wl-train"><label>Iteration period (s)</label><input type="number" id="iterPeriod" value="3" step="0.5"></div>
+    <div class="row wl-train"><label>Duty cycle (high phase)</label><input type="number" id="duty" value="0.70" step="0.05"></div>
+    <div class="row wl-train"><label>Low phase (× TDP)</label><input type="number" id="lowFrac" value="0.45" step="0.05"></div>
+    <div class="row wl-train"><label>Synchronized fraction of fleet</label><input type="number" id="syncFrac" value="1.0" step="0.1"></div>
+    <div class="row wl-train"><label>Checkpoint every (s)</label><input type="number" id="ckptEvery" value="1200" step="100"></div>
+    <div class="row wl-train"><label>Checkpoint duration (s)</label><input type="number" id="ckptDur" value="20" step="5"></div>
+    <div class="row wl-train"><label>Job ends at (fraction of run)</label><input type="number" id="jobEnd" value="0.85" step="0.05"></div>
+    <div class="row wl-mixed" style="display:none"><label>Training share of fleet</label><input type="number" id="trainShare" value="0.6" step="0.1"></div>
+  </fieldset>
+
+  <button class="run" id="runBtn">Run sign-off simulation</button>
+  <div id="spinner">Simulating…</div>
+</aside>
+
+<main>
+  <div class="panel" id="verdictCard">
+    <span class="verdict" id="verdictBadge">—</span>
+    <button class="dl" id="dlJson">download results JSON</button>
+    <div class="stats">
+      <div class="stat"><b id="stCounts">—</b>checks pass / warn / fail</div>
+      <div class="stat"><b id="stPeak">—</b>facility peak at meter</div>
+      <div class="stat"><b id="stHeadroom">—</b>headroom vs contracted</div>
+      <div class="stat"><b id="stRamp">—</b>worst grid ramp (no BESS → BESS)</div>
+      <div class="stat"><b id="stOsc">—</b>0.05–1 Hz oscillation (no BESS → BESS)</div>
+    </div>
+  </div>
+
+  <div class="panel" id="checksCard" style="display:none">
+    <h2>All checks</h2>
+    <div style="max-height:340px;overflow-y:auto">
+    <table id="checksTable">
+      <thead><tr><th style="width:58px">Status</th><th>Check</th><th>Observed</th><th>Limit</th><th style="width:86px">Margin</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="panel" style="display:none" id="c1card"><h2>Facility power at the utility meter</h2>
+    <div class="chartbox"><canvas id="chartTimeline"></canvas></div></div>
+  <div class="panel" style="display:none" id="c2card"><h2>60-second zoom — transients as the grid sees them</h2>
+    <div class="chartbox"><canvas id="chartZoom"></canvas></div></div>
+  <div class="panel" style="display:none" id="c3card"><h2>Component loading vs. ratings (p95)</h2>
+    <div class="chartbox tall"><canvas id="chartLoading"></canvas></div></div>
+  <div class="panel" style="display:none" id="c4card"><h2>Demand spectrum — forced-oscillation screen</h2>
+    <div class="chartbox"><canvas id="chartSpectrum"></canvas></div></div>
+</main>
+</div>
+
+<div class="foot">MVP caveats: hierarchical power flow (not AC load flow); ratings are design placeholders;
+utility ramp/oscillation limits are assumptions pending the utility's large-load study. Synthetic traces reproduce
+published fluctuation characteristics — import measured telemetry (CSV: time_s, power_mw) for project sign-off.
+Charts need internet once (CDN); the simulation itself runs fully offline.</div>
+
+<script>
+/* Power Sign-Off Simulator - JS engine (mirrors the Python power_signoff package).
+   Kept DOM-free so it can be unit-tested under node. */
+"use strict";
+
+// ---------- tiny deterministic RNG (mulberry32) + gaussian ----------------
+function makeRng(seed) {
+  let a = seed >>> 0;
+  const u = () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  let spare = null;
+  const gauss = () => {
+    if (spare !== null) { const v = spare; spare = null; return v; }
+    let u1 = 0, u2 = 0;
+    do { u1 = u(); } while (u1 <= 1e-12);
+    u2 = u();
+    const r = Math.sqrt(-2 * Math.log(u1));
+    spare = r * Math.sin(2 * Math.PI * u2);
+    return r * Math.cos(2 * Math.PI * u2);
+  };
+  return { uniform: u, gauss };
+}
+
+// ---------- workload traces ------------------------------------------------
+function trainingTrace(cap, opts = {}) {
+  const o = Object.assign({
+    duration_s: 1800, dt: 0.1, iteration_period_s: 3.0, duty_cycle: 0.70,
+    high_frac: 1.00, low_frac: 0.45, sync_fraction: 1.0,
+    checkpoint_every_s: 1200, checkpoint_dur_s: 20, checkpoint_frac: 0.15,
+    startup_ramp_s: 180, job_end_at_s: null, idle_frac: 0.10,
+    noise_frac: 0.02, seed: 7,
+  }, opts);
+  const rng = makeRng(o.seed);
+  const n = Math.floor(o.duration_s / o.dt);
+  const t = new Float64Array(n), p = new Float64Array(n);
+  const steady = cap * (1 - o.sync_fraction) * 0.5 * (o.high_frac + o.low_frac);
+  for (let i = 0; i < n; i++) {
+    const ti = i * o.dt;
+    t[i] = ti;
+    const phase = (ti % o.iteration_period_s) / o.iteration_period_s;
+    let w = phase < o.duty_cycle ? o.high_frac : o.low_frac;
+    if (ti % o.checkpoint_every_s < o.checkpoint_dur_s && ti > o.checkpoint_dur_s)
+      w = o.checkpoint_frac;
+    const ramp = Math.min(1, ti / o.startup_ramp_s);
+    w = o.idle_frac + (w - o.idle_frac) * ramp;
+    if (o.job_end_at_s !== null && ti >= o.job_end_at_s) w = o.idle_frac;
+    let v = cap * o.sync_fraction * w + steady + rng.gauss() * o.noise_frac * cap;
+    p[i] = Math.min(cap, Math.max(0, v));
+  }
+  return { t, p, dt: o.dt, name: "training", params: o };
+}
+
+function inferenceTrace(cap, opts = {}) {
+  const o = Object.assign({
+    duration_s: 1800, dt: 0.1, base_frac: 0.55, swing_frac: 0.20,
+    demand_period_s: 900, batch_noise_frac: 0.05, seed: 11,
+  }, opts);
+  const rng = makeRng(o.seed);
+  const n = Math.floor(o.duration_s / o.dt);
+  const t = new Float64Array(n), p = new Float64Array(n);
+  const alpha = Math.exp(-o.dt / 2.0);
+  const sigEps = o.batch_noise_frac * Math.sqrt(1 - alpha * alpha);
+  let ar = 0;
+  for (let i = 0; i < n; i++) {
+    const ti = i * o.dt;
+    t[i] = ti;
+    const demand = o.base_frac + o.swing_frac * 0.5 * (1 + Math.sin(2 * Math.PI * ti / o.demand_period_s));
+    ar = alpha * ar + rng.gauss() * sigEps;
+    p[i] = Math.min(cap, Math.max(0, cap * (demand + ar)));
+  }
+  return { t, p, dt: o.dt, name: "inference", params: o };
+}
+
+function mixedTrace(cap, opts = {}) {
+  const share = opts.training_share ?? 0.6;
+  const tr = trainingTrace(cap * share, opts);
+  const inf = inferenceTrace(cap * (1 - share), { duration_s: opts.duration_s ?? 1800, dt: opts.dt ?? 0.1 });
+  const n = Math.min(tr.p.length, inf.p.length);
+  const p = new Float64Array(n);
+  for (let i = 0; i < n; i++) p[i] = tr.p[i] + inf.p[i];
+  return { t: tr.t.slice(0, n), p, dt: tr.dt, name: "mixed", params: opts };
+}
+
+// ---------- simulation -----------------------------------------------------
+function firstOrderLag(x, dt, tau) {
+  const y = new Float64Array(x.length);
+  if (tau <= 0) { y.set(x); return y; }
+  const a = dt / (tau + dt);
+  y[0] = x[0];
+  for (let i = 1; i < x.length; i++) y[i] = y[i - 1] + a * (x[i] - y[i - 1]);
+  return y;
+}
+
+function chainLoads(design, pIt, pMech, share) {
+  // loading recorded at each component's OUTPUT (rating convention);
+  // input = output/eff becomes next upstream component's output.
+  const loads = {};
+  const n = pIt.length;
+  let p = new Float64Array(n);
+  for (let i = 0; i < n; i++) p[i] = pIt[i] * share;
+  let mechAdded = false;
+  const comps = design.path_components;
+  for (let c = comps.length - 1; c >= 0; c--) {
+    const comp = comps[c];
+    if (comp.kind === "lv_switchgear" && !mechAdded) {
+      for (let i = 0; i < n; i++) p[i] += pMech[i] * share;
+      mechAdded = true;
+    }
+    loads[comp.id] = Float64Array.from(p);
+    const eff = comp.efficiency ?? 1.0;
+    if (eff !== 1.0) for (let i = 0; i < n; i++) p[i] /= eff;
+  }
+  if (!mechAdded) for (let i = 0; i < n; i++) p[i] += pMech[i] * share;
+  return { loads, gridSide: p };
+}
+
+function simulate(design, trace, bessTau = 30.0) {
+  const { p: pIt, dt } = trace;
+  const n = pIt.length;
+  const mechRaw = new Float64Array(n);
+  for (let i = 0; i < n; i++)
+    mechRaw[i] = design.mech_base_mw + design.mech_cooling_ratio * pIt[i];
+  const pMech = firstOrderLag(mechRaw, dt, design.mech_lag_s);
+
+  const norm = chainLoads(design, pIt, pMech, 0.5);
+  const n1 = chainLoads(design, pIt, pMech, 1.0);
+
+  const pMeter = new Float64Array(n);
+  for (let i = 0; i < n; i++) pMeter[i] = 2 * norm.gridSide[i];
+
+  const target = firstOrderLag(pMeter, dt, bessTau);
+  const cap = 2 * design.bess_power_mw;
+  const pBess = new Float64Array(n), pSm = new Float64Array(n);
+  let clipped = false, eUsed = 0;
+  for (let i = 0; i < n; i++) {
+    const want = pMeter[i] - target[i];
+    const b = Math.max(-cap, Math.min(cap, want));
+    if (Math.abs(want) > cap + 1e-9) clipped = true;
+    pBess[i] = b; pSm[i] = pMeter[i] - b;
+    if (b > 0) eUsed += b * dt / 3600;
+  }
+  return {
+    trace, design, t: trace.t, pIt, pMech, pMeter, pMeterSm: pSm, pBess,
+    bessEnergyUsedMwh: eUsed, bessClipped: clipped,
+    nodeNormal: norm.loads, nodeN1: n1.loads,
+  };
+}
+
+// ---------- signal analysis ------------------------------------------------
+function percentile(arr, q) {
+  const a = Float64Array.from(arr).sort();
+  const idx = Math.min(a.length - 1, Math.max(0, (q / 100) * (a.length - 1)));
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return a[lo] + (a[hi] - a[lo]) * (idx - lo);
+}
+const amax = (a) => { let m = -1e30; for (const v of a) if (v > m) m = v; return m; };
+const amin = (a) => { let m = 1e30; for (const v of a) if (v < m) m = v; return m; };
+const amean = (a) => { let s = 0; for (const v of a) s += v; return s / a.length; };
+
+function maxRamp(p, dt, windowS = 1.0) {
+  const k = Math.max(1, Math.round(windowS / dt));
+  let m = 0;
+  for (let i = k; i < p.length; i++) m = Math.max(m, Math.abs(p[i] - p[i - k]));
+  return m / (k * dt);
+}
+function maxStep(p, dt, windowS = 10.0) {
+  const k = Math.max(1, Math.round(windowS / dt));
+  let m = 0;
+  for (let i = k; i < p.length; i++) m = Math.max(m, Math.abs(p[i] - p[i - k]));
+  return m;
+}
+
+// iterative radix-2 FFT (in-place, complex)
+function fft(re, im, invert) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = (2 * Math.PI / len) * (invert ? 1 : -1);
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cwr = 1, cwi = 0;
+      for (let j = 0; j < len / 2; j++) {
+        const ur = re[i + j], ui = im[i + j];
+        const vr = re[i + j + len / 2] * cwr - im[i + j + len / 2] * cwi;
+        const vi = re[i + j + len / 2] * cwi + im[i + j + len / 2] * cwr;
+        re[i + j] = ur + vr; im[i + j] = ui + vi;
+        re[i + j + len / 2] = ur - vr; im[i + j + len / 2] = ui - vi;
+        const nwr = cwr * wr - cwi * wi;
+        cwi = cwr * wi + cwi * wr; cwr = nwr;
+      }
+    }
+  }
+  if (invert) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+
+function oscillationBand(p, dt, fLo = 0.05, fHi = 1.0) {
+  const n0 = p.length;
+  let n = 1; while (n < n0) n <<= 1;
+  const mean = amean(p);
+  const re = new Float64Array(n), im = new Float64Array(n);
+  const reW = new Float64Array(n), imW = new Float64Array(n);
+  for (let i = 0; i < n0; i++) {
+    const x = p[i] - mean;
+    re[i] = x;
+    reW[i] = x * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n0 - 1))); // hann over data
+  }
+  fft(reW, imW, false);
+  const df = 1 / (n * dt);
+  let domF = 0, best = -1;
+  const kLo = Math.ceil(fLo / df), kHi = Math.floor(fHi / df);
+  for (let k = kLo; k <= Math.min(kHi, n / 2); k++) {
+    const mag = reW[k] * reW[k] + imW[k] * imW[k];
+    if (mag > best) { best = mag; domF = k * df; }
+  }
+  if (best < 0) return { domFreq: 0, p2p: 0 };
+  // band-pass raw signal: zero out-of-band bins (keep conjugate symmetry), invert
+  fft(re, im, false);
+  for (let k = 0; k <= n / 2; k++) {
+    const f = k * df;
+    if (f < fLo || f > fHi) {
+      re[k] = im[k] = 0;
+      if (k > 0 && k < n / 2) { re[n - k] = im[n - k] = 0; }
+    } else if (k > 0 && k < n / 2) {
+      // keep mirror as-is (it is within band by symmetry)
+    }
+  }
+  fft(re, im, true);
+  const lo = Math.floor(n0 / 10), hi = n0 - Math.floor(n0 / 10);
+  let mx = -1e30, mn = 1e30;
+  for (let i = lo; i < hi; i++) { if (re[i] > mx) mx = re[i]; if (re[i] < mn) mn = re[i]; }
+  return { domFreq: domF, p2p: mx - mn };
+}
+
+// ---------- checks ---------------------------------------------------------
+function runChecks(sim, site) {
+  const d = sim.design, dt = sim.trace.dt;
+  const checks = [];
+  const stat = (loading, warnAt, failAt = 1.0) =>
+    loading > failAt ? "FAIL" : loading > warnAt ? "WARN" : "PASS";
+
+  const compCheck = (comp, series, label, detail) => {
+    const cont = percentile(series, 95), peak = amax(series);
+    const cl = cont / comp.rating_mw;
+    const pl = peak / (comp.rating_mw * comp.short_time_factor);
+    checks.push({
+      id: `${label}_${comp.id}`, name: `${comp.name} — ${label}`,
+      status: stat(Math.max(cl, pl), comp.warn_loading ?? 0.8),
+      value: `${cont.toFixed(2)} MW p95 / ${peak.toFixed(2)} MW peak`,
+      limit: `${comp.rating_mw} MW cont / ${(comp.rating_mw * comp.short_time_factor).toFixed(1)} MW short-time`,
+      margin: `${((1 - cl) * 100).toFixed(0)}% cont`, detail,
+      contLoad: cl, n1: label.startsWith("N-1"),
+    });
+  };
+  for (const c of d.path_components)
+    compCheck(c, sim.nodeNormal[c.id], "normal 2N", "both paths sharing load (per-path figure)");
+  for (const c of d.path_components)
+    compCheck(c, sim.nodeN1[c.id], "N-1 (single path)", "full facility load on the surviving path during the worst transient");
+
+  const peakMeter = amax(sim.pMeter);
+  const load = peakMeter / site.contracted_mw;
+  checks.push({
+    id: "contracted", name: "Contracted utility capacity", status: stat(load, 0.90),
+    value: `${peakMeter.toFixed(2)} MW peak at meter`, limit: `${site.contracted_mw} MW contracted`,
+    margin: `${((1 - load) * 100).toFixed(0)}%`,
+    detail: "facility peak vs. interconnection agreement",
+  });
+  const headroomMw = site.contracted_mw - peakMeter;
+
+  const rampRaw = maxRamp(sim.pMeter, dt), rampSm = maxRamp(sim.pMeterSm, dt);
+  checks.push({
+    id: "ramp_raw", name: "Grid ramp rate — no BESS smoothing",
+    status: rampRaw <= site.ramp_limit_mw_per_s ? "PASS" : "FAIL",
+    value: `${rampRaw.toFixed(2)} MW/s`, limit: `${site.ramp_limit_mw_per_s} MW/s (assumed)`,
+    margin: `${(site.ramp_limit_mw_per_s - rampRaw).toFixed(2)} MW/s`,
+    detail: "worst 1-second change in meter power, workload hitting the grid directly",
+  });
+  checks.push({
+    id: "ramp_bess", name: "Grid ramp rate — with BESS smoothing",
+    status: rampSm <= site.ramp_limit_mw_per_s ? "PASS" : "FAIL",
+    value: `${rampSm.toFixed(2)} MW/s`, limit: `${site.ramp_limit_mw_per_s} MW/s`,
+    margin: `${(site.ramp_limit_mw_per_s - rampSm).toFixed(2)} MW/s`,
+    detail: `BESS ${2 * d.bess_power_mw} MW total absorbing the fast component` +
+      (sim.bessClipped ? " (BESS power limit reached)" : "") +
+      `; ${sim.bessEnergyUsedMwh.toFixed(2)} MWh cycled vs ${2 * d.bess_energy_mwh} MWh installed`,
+  });
+
+  const avg = amean(sim.pMeter);
+  const limMw = site.osc_p2p_limit_frac * avg;
+  const oR = oscillationBand(sim.pMeter, dt);
+  const oS = oscillationBand(sim.pMeterSm, dt);
+  const oStat = (v) => v <= limMw ? "PASS" : v <= 2 * limMw ? "WARN" : "FAIL";
+  checks.push({
+    id: "osc", name: "Forced-oscillation screen (0.05-1 Hz)", status: oStat(oR.p2p),
+    value: `${oR.p2p.toFixed(2)} MW p2p at ~${oR.domFreq.toFixed(2)} Hz`,
+    limit: `${limMw.toFixed(2)} MW p2p (${(site.osc_p2p_limit_frac * 100).toFixed(0)}% of avg load)`,
+    margin: `${(limMw - oR.p2p).toFixed(2)} MW`,
+    detail: "periodic demand that can couple to grid inter-area modes; forcing set by the iteration period",
+  });
+  checks.push({
+    id: "osc_bess", name: "Forced-oscillation screen — with BESS", status: oStat(oS.p2p),
+    value: `${oS.p2p.toFixed(2)} MW p2p`, limit: `${limMw.toFixed(2)} MW p2p`,
+    margin: `${(limMw - oS.p2p).toFixed(2)} MW`,
+    detail: "same screen on the BESS-smoothed meter profile",
+  });
+
+  const srcId = d.path_components[0].id;
+  const peakIsland = amax(sim.nodeN1[srcId]);
+  const gl = d.genset_firm_mw > 0 ? peakIsland / d.genset_firm_mw : 99;
+  checks.push({
+    id: "genset_cap", name: "Genset firm capacity (islanded, single path)",
+    status: stat(gl, 0.90),
+    value: `${peakIsland.toFixed(2)} MW peak`, limit: `${d.genset_firm_mw} MW firm (N+1)`,
+    margin: `${((1 - gl) * 100).toFixed(0)}%`,
+    detail: "utility lost AND one path down — surviving path's gensets carry everything",
+  });
+  const step = maxStep(sim.pMeter, dt);
+  const stepAllow = d.genset_step_frac * d.genset_firm_mw;
+  checks.push({
+    id: "genset_step", name: "Genset step-load tolerance (islanded)",
+    status: step <= stepAllow ? "PASS" : "FAIL",
+    value: `${step.toFixed(2)} MW worst 10 s step`,
+    limit: `${stepAllow.toFixed(1)} MW (${(d.genset_step_frac * 100).toFixed(0)}% of firm)`,
+    margin: `${(stepAllow - step).toFixed(2)} MW`,
+    detail: "workload swings the gensets must absorb when islanded without BESS support",
+  });
+
+  const counts = { PASS: 0, WARN: 0, FAIL: 0 };
+  for (const c of checks) counts[c.status]++;
+  const verdict = counts.FAIL ? "FAIL" : counts.WARN ? "WARN" : "PASS";
+  return { checks, counts, verdict, headroomMw, headroomFrac: headroomMw / site.contracted_mw,
+           oscRaw: oR, oscSm: oS, rampRaw, rampSm, peakMeter };
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { trainingTrace, inferenceTrace, mixedTrace, simulate, runChecks,
+                     oscillationBand, maxRamp, maxStep, percentile };
+}
+
+</script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const COLORS = { PASS: "#1E8449", WARN: "#D9A400", FAIL: "#C0392B" };
+let preset = "training";
+let csvTrace = null;
+let lastResults = null;
+const charts = {};
+
+document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", () => {
+  if (ch.dataset.preset === "csv") { $("csvFile").click(); return; }
+  preset = ch.dataset.preset;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === ch));
+  document.querySelectorAll(".wl-train").forEach(r => r.style.display = preset === "inference" ? "none" : "flex");
+  document.querySelectorAll(".wl-mixed").forEach(r => r.style.display = preset === "mixed" ? "flex" : "none");
+}));
+
+$("csvFile").addEventListener("change", (ev) => {
+  const f = ev.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const lines = rd.result.split(/\r?\n/).filter(l => l.trim());
+    const start = /[a-zA-Z]/.test(lines[0]) ? 1 : 0;
+    const t = [], p = [];
+    for (let i = start; i < lines.length; i++) {
+      const parts = lines[i].split(",");
+      const ti = parseFloat(parts[0]), pi = parseFloat(parts[1]);
+      if (isFinite(ti) && isFinite(pi)) { t.push(ti); p.push(pi); }
+    }
+    if (t.length < 100) { $("csvInfo").textContent = "CSV too short or unparseable (need time_s,power_mw rows)"; return; }
+    const dt = t[1] - t[0];
+    csvTrace = { t: Float64Array.from(t), p: Float64Array.from(p), dt, name: f.name, params: { source: f.name } };
+    preset = "csv";
+    document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.preset === "csv"));
+    $("csvInfo").textContent = `Loaded ${f.name}: ${p.length} samples, dt ${dt.toFixed(3)} s, ` +
+      `mean ${(p.reduce((a,b)=>a+b,0)/p.length).toFixed(2)} MW`;
+  };
+  rd.readAsText(f);
+});
+
+function designFromInputs() {
+  const path = parseFloat($("pathMw").value);
+  return {
+    name: "Voltai 2N reference block (web)", revision: "web-ui",
+    critical_it_mw: parseFloat($("itMw").value), redundancy: "2N",
+    genset_firm_mw: parseFloat($("genMw").value),
+    genset_step_frac: parseFloat($("genStep").value),
+    bess_power_mw: parseFloat($("bessMw").value),
+    bess_energy_mwh: parseFloat($("bessMwh").value),
+    mech_base_mw: parseFloat($("mechBase").value),
+    mech_cooling_ratio: parseFloat($("coolRatio").value),
+    mech_lag_s: 180,
+    path_components: [
+      { id: "feed", name: "Utility feed (34.5 kV)", kind: "utility_feed", rating_mw: path, short_time_factor: 1.05, efficiency: 1.0, warn_loading: 0.8 },
+      { id: "mv_swgr", name: "MV switchgear", kind: "mv_switchgear", rating_mw: path, short_time_factor: 1.10, efficiency: 1.0, warn_loading: 0.8 },
+      { id: "tx", name: "Transformer 34.5/0.48 kV", kind: "transformer", rating_mw: path, short_time_factor: 1.10, efficiency: 0.99, warn_loading: 0.8 },
+      { id: "lv_swgr", name: "LV switchgear (480 V)", kind: "lv_switchgear", rating_mw: path, short_time_factor: 1.10, efficiency: 1.0, warn_loading: 0.8 },
+      { id: "ups", name: "UPS (2N)", kind: "ups", rating_mw: parseFloat($("upsMw").value), short_time_factor: parseFloat($("upsSt").value), efficiency: 0.96, warn_loading: 0.85 },
+      { id: "pdu", name: "PDU / RPP / busway", kind: "pdu", rating_mw: parseFloat($("pduMw").value), short_time_factor: 1.10, efficiency: 0.995, warn_loading: 0.8 },
+    ],
+  };
+}
+
+function traceFromInputs(design) {
+  const dur = parseFloat($("duration").value);
+  if (preset === "csv") {
+    if (!csvTrace) { alert("Load a CSV first (time_s,power_mw)."); throw new Error("no csv"); }
+    return csvTrace;
+  }
+  const opts = {
+    duration_s: dur,
+    iteration_period_s: parseFloat($("iterPeriod").value),
+    duty_cycle: parseFloat($("duty").value),
+    low_frac: parseFloat($("lowFrac").value),
+    sync_fraction: parseFloat($("syncFrac").value),
+    checkpoint_every_s: parseFloat($("ckptEvery").value),
+    checkpoint_dur_s: parseFloat($("ckptDur").value),
+    job_end_at_s: parseFloat($("jobEnd").value) > 0 && parseFloat($("jobEnd").value) < 1
+      ? dur * parseFloat($("jobEnd").value) : null,
+  };
+  if (preset === "training") return trainingTrace(design.critical_it_mw, opts);
+  if (preset === "mixed") return mixedTrace(design.critical_it_mw, Object.assign(opts, { training_share: parseFloat($("trainShare").value) }));
+  return inferenceTrace(design.critical_it_mw, { duration_s: dur });
+}
+
+// min/max envelope decimation for big series
+function envelope(t, p, buckets = 900) {
+  const n = p.length, per = Math.max(1, Math.floor(n / buckets));
+  const xs = [], mins = [], maxs = [], means = [];
+  for (let i = 0; i < n; i += per) {
+    let mn = 1e30, mx = -1e30, s = 0, c = 0;
+    for (let j = i; j < Math.min(i + per, n); j++) { const v = p[j]; if (v < mn) mn = v; if (v > mx) mx = v; s += v; c++; }
+    xs.push(t[i] / 60); mins.push(mn); maxs.push(mx); means.push(s / c);
+  }
+  return { xs, mins, maxs, means };
+}
+
+function destroy(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function drawTimeline(sim, site) {
+  destroy("timeline");
+  const e1 = envelope(sim.t, sim.pMeter);
+  const e2 = envelope(sim.t, sim.pMeterSm);
+  charts.timeline = new Chart($("chartTimeline"), {
+    type: "line",
+    data: { labels: e1.xs.map(v => v.toFixed(1)), datasets: [
+      { label: "Meter max (no BESS)", data: e1.maxs, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: "rgba(46,117,182,0.25)" },
+      { label: "Meter min (no BESS)", data: e1.mins, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 },
+      { label: "Meter (BESS-smoothed)", data: e2.means, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
+      { label: `Contracted ${site.contracted_mw} MW`, data: e1.xs.map(() => site.contracted_mw), borderColor: "#C0392B", borderDash: [6, 4], borderWidth: 1.2, pointRadius: 0 },
+    ]},
+    options: { animation: false, maintainAspectRatio: false,
+      scales: { x: { title: { display: true, text: "minutes" }, ticks: { maxTicksLimit: 12 } },
+                y: { title: { display: true, text: "MW" } } },
+      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } } } },
+  });
+}
+
+function drawZoom(sim) {
+  destroy("zoom");
+  const dt = sim.trace.dt;
+  const i0 = Math.floor(0.25 * sim.t.length);
+  const i1 = Math.min(i0 + Math.floor(60 / dt), sim.t.length);
+  const xs = [], raw = [], sm = [];
+  for (let i = i0; i < i1; i++) { xs.push(sim.t[i].toFixed(1)); raw.push(sim.pMeter[i]); sm.push(sim.pMeterSm[i]); }
+  charts.zoom = new Chart($("chartZoom"), {
+    type: "line",
+    data: { labels: xs, datasets: [
+      { label: "Meter (no BESS)", data: raw, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 },
+      { label: "Meter (BESS-smoothed)", data: sm, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
+    ]},
+    options: { animation: false, maintainAspectRatio: false,
+      scales: { x: { title: { display: true, text: "seconds" }, ticks: { maxTicksLimit: 10 } },
+                y: { title: { display: true, text: "MW" } } },
+      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } } } },
+  });
+}
+
+const vline = { id: "vline", afterDraw(chart, args, o) {
+  const x = chart.scales.x.getPixelForValue(o.at);
+  const { top, bottom } = chart.chartArea;
+  const ctx = chart.ctx;
+  ctx.save(); ctx.strokeStyle = "#C0392B"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.restore();
+}};
+
+function drawLoading(sim) {
+  destroy("loading");
+  const names = [], normal = [], n1 = [];
+  for (const c of sim.design.path_components) {
+    names.push(c.name);
+    normal.push(100 * percentile(sim.nodeNormal[c.id], 95) / c.rating_mw);
+    n1.push(100 * percentile(sim.nodeN1[c.id], 95) / c.rating_mw);
+  }
+  charts.loading = new Chart($("chartLoading"), {
+    type: "bar",
+    data: { labels: names, datasets: [
+      { label: "Normal 2N (per path)", data: normal, backgroundColor: "#2E75B6" },
+      { label: "N-1 (single path)", data: n1, backgroundColor: "#D9A400" },
+    ]},
+    options: { indexAxis: "y", animation: false, maintainAspectRatio: false,
+      scales: { x: { max: Math.max(120, Math.ceil(Math.max(...n1) / 10) * 10 + 10),
+                     title: { display: true, text: "% of continuous rating (p95) — red line = 100%" } } },
+      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } }, vline: { at: 100 } } },
+    plugins: [vline],
+  });
+}
+
+function drawSpectrum(sim, rep) {
+  destroy("spectrum");
+  // windowed amplitude spectrum, log-decimated
+  const p = sim.pMeter, n0 = p.length;
+  let n = 1; while (n < n0) n <<= 1;
+  const mean = p.reduce((a, b) => a + b, 0) / n0;
+  const re = new Float64Array(n), im = new Float64Array(n);
+  for (let i = 0; i < n0; i++) re[i] = (p[i] - mean) * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n0 - 1)));
+  fft(re, im, false);
+  const df = 1 / (n * sim.trace.dt);
+  const xs = [], ys = [];
+  let k = Math.max(1, Math.floor(0.002 / df));
+  while (k * df <= 5.0 && k < n / 2) {
+    // local max within a log-spaced bucket, keeps spectral lines visible
+    const kNext = Math.max(k + 1, Math.floor(k * 1.06));
+    let best = 0;
+    for (let kk = k; kk < Math.min(kNext, n / 2); kk++)
+      best = Math.max(best, 4 * Math.hypot(re[kk], im[kk]) / n0);
+    xs.push(k * df); ys.push(best);
+    k = kNext;
+  }
+  charts.spectrum = new Chart($("chartSpectrum"), {
+    type: "line",
+    data: { datasets: [{ label: "amplitude (MW)", data: xs.map((x, i) => ({ x, y: ys[i] })),
+      borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 }]},
+    options: { animation: false, maintainAspectRatio: false, parsing: false,
+      scales: { x: { type: "logarithmic", min: 0.002, max: 5,
+                     title: { display: true, text: `Hz — shaded 0.05–1 Hz band is grid-critical; dominant ~${rep.oscRaw.domFreq.toFixed(2)} Hz, ${rep.oscRaw.p2p.toFixed(1)} MW p2p` } },
+                y: { title: { display: true, text: "MW" } } },
+      plugins: { legend: { display: false }, band: {} } },
+    plugins: [{ id: "band", beforeDraw(chart) {
+      const x1 = chart.scales.x.getPixelForValue(0.05), x2 = chart.scales.x.getPixelForValue(1.0);
+      const { top, bottom } = chart.chartArea; const ctx = chart.ctx;
+      ctx.save(); ctx.fillStyle = "rgba(192,57,43,0.10)"; ctx.fillRect(x1, top, x2 - x1, bottom - top); ctx.restore();
+    }}],
+  });
+}
+
+function renderChecks(rep) {
+  const tb = $("checksTable").querySelector("tbody");
+  tb.innerHTML = "";
+  for (const c of rep.checks) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><span class="badge" style="background:${COLORS[c.status]}">${c.status}</span></td>` +
+      `<td><b>${c.name}</b><div class="detail">${c.detail}</div></td>` +
+      `<td>${c.value}</td><td>${c.limit}</td><td>${c.margin}</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+$("runBtn").addEventListener("click", () => {
+  $("spinner").style.display = "block";
+  setTimeout(() => {
+    try {
+      const design = designFromInputs();
+      const site = { contracted_mw: parseFloat($("contracted").value),
+                     ramp_limit_mw_per_s: parseFloat($("rampLim").value),
+                     osc_p2p_limit_frac: parseFloat($("oscLim").value) };
+      const trace = traceFromInputs(design);
+      const sim = simulate(design, trace, parseFloat($("bessTau").value));
+      const rep = runChecks(sim, site);
+      lastResults = { generated: new Date().toISOString(), design, site,
+        workload: { name: trace.name, params: trace.params || {} },
+        verdict: rep.verdict, counts: rep.counts,
+        headroom_mw: rep.headroomMw, checks: rep.checks };
+
+      const badge = $("verdictBadge");
+      const label = { PASS: "PASS — sign-off supported", WARN: "WARN — sign-off with conditions",
+                      FAIL: "FAIL — do not sign off as-is" }[rep.verdict];
+      badge.textContent = label;
+      badge.style.background = COLORS[rep.verdict];
+      $("stCounts").textContent = `${rep.counts.PASS} / ${rep.counts.WARN} / ${rep.counts.FAIL}`;
+      $("stPeak").textContent = `${rep.peakMeter.toFixed(2)} MW`;
+      $("stHeadroom").textContent = `${rep.headroomMw.toFixed(2)} MW (${(100 * rep.headroomFrac).toFixed(0)}%)`;
+      $("stRamp").textContent = `${rep.rampRaw.toFixed(1)} → ${rep.rampSm.toFixed(2)} MW/s`;
+      $("stOsc").textContent = `${rep.oscRaw.p2p.toFixed(1)} → ${rep.oscSm.p2p.toFixed(2)} MW p2p`;
+      ["verdictCard", "checksCard", "c1card", "c2card", "c3card", "c4card"].forEach(id => $(id).style.display = "block");
+
+      renderChecks(rep);
+      drawTimeline(sim, site);
+      drawZoom(sim);
+      drawLoading(sim);
+      drawSpectrum(sim, rep);
+    } catch (err) {
+      if (err.message !== "no csv") { console.error(err); alert("Simulation error: " + err.message); }
+    } finally {
+      $("spinner").style.display = "none";
+    }
+  }, 30);
+});
+
+$("dlJson").addEventListener("click", () => {
+  if (!lastResults) return;
+  const blob = new Blob([JSON.stringify(lastResults, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `signoff_${lastResults.workload.name}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// run once on load so the page isn't empty
+window.addEventListener("load", () => $("runBtn").click());
+</script>
+</body>
+</html>

@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian — DC Site Intelligence</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --page:#f4f6fa;      /* page background */
+  --sb:#ffffff;        /* sidebar — pure white */
+  --sb-border:#e4eaf0; /* sidebar section dividers */
+  --field-bg:#f0f4f8;  /* input backgrounds */
+  --field-border:#d0dae6;
+  --text-h:#0f1d2b;    /* headings */
+  --text-b:#2d3f52;    /* body */
+  --text-s:#5a7a95;    /* secondary */
+  --text-m:#6b8aa4;    /* muted */
+  --card-bg:#ffffff;
+  --card-border:#dde8f2;
+  --main-bg:#f0f4f8;
+  --volt:#1d6fa4;      /* primary brand blue */
+  --volt-mid:#2a8fd4;
+  --volt-light:#e6f3fb;
+  --volt4:#4fb0e6;
+  --ok:#15803d;--ok-bg:#f0fdf4;--ok-b:#bbf7d0;
+  --warn:#b45309;--warn-bg:#fffbeb;--warn-b:#fde68a;
+  --err:#b91c1c;--err-bg:#fef2f2;--err-b:#fecaca;
+  --purple:#6d28d9;--purple-bg:#faf5ff;
+  --font:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--page);color:var(--text-b);font-family:var(--font);font-size:13px;line-height:1.6}
+
+/* ── HEADER ── */
+.hdr{height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:#fff;border-bottom:1px solid var(--card-border);flex-shrink:0;box-shadow:0 2px 6px rgba(20,50,80,.07)}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.logo{font-size:17px;font-weight:800;color:var(--volt);letter-spacing:.03em;text-transform:uppercase}
+.logo span{color:var(--volt-mid)} .logo+span{font-size:11px!important}
+.site-name{font-size:12px;color:var(--text-s);border-left:1px solid var(--card-border);padding-left:12px}
+.hdr-badges{display:flex;gap:6px;align-items:center}
+.badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:500}
+.badge.ok{color:var(--ok);border:1px solid var(--ok-b);background:var(--ok-bg)}
+.badge.warn{color:var(--warn);border:1px solid var(--warn-b);background:var(--warn-bg)}
+.badge.draft{color:var(--text-m);border:1px solid var(--card-border);background:var(--page)}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:288px 1fr;height:calc(100vh - 50px);overflow:hidden}
+.sidebar{background:var(--sb);border-right:1px solid var(--sb-border);overflow-y:auto;display:flex;flex-direction:column}
+.main{overflow-y:auto;background:var(--main-bg)}
+
+/* ── SIDEBAR SECTIONS ── */
+.sb-block{border-bottom:1px solid var(--sb-border)}
+.sb-hdr{display:flex;align-items:center;gap:7px;padding:11px 16px 9px;cursor:pointer;user-select:none;transition:background .1s}
+.sb-hdr:hover{background:var(--page)}
+.sb-hdr-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+.sb-hdr-title{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt);flex:1;font-weight:700}
+.sb-hdr-tag{font-size:10px;color:var(--text-m);font-family:var(--mono)}
+.sb-body{padding:6px 16px 14px}
+.sb-block.collapsed .sb-body{display:none}
+.sb-block.collapsed .sb-hdr-tag::after{content:'▸'}
+.sb-hdr-tag::after{content:'▾'}
+
+/* ── FIELD ── */
+.f{margin-bottom:11px}
+.f:last-child{margin-bottom:0}
+.f label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-s);margin-bottom:3px;font-weight:500}
+.fv{font-family:var(--mono);font-size:11px;color:var(--volt)}
+.fi{width:100%;background:var(--field-bg);border:1px solid var(--field-border);color:var(--text-h);padding:7px 10px;border-radius:4px;font-size:11px;font-family:var(--font)}
+.fi:focus{outline:none;border-color:var(--volt-mid);background:#fff}
+input[type=range]{width:100%;accent-color:var(--volt);cursor:pointer;margin-top:2px}
+.fn{font-size:11px;color:var(--text-s);margin-top:4px;line-height:1.5}
+
+/* ── PILLS ── */
+.pills{display:flex;gap:4px;flex-wrap:wrap}
+.pills input[type=radio]{display:none}
+.pills label{cursor:pointer;padding:3px 9px;border-radius:3px;border:1px solid var(--field-border);font-size:11px;color:var(--text-s);background:var(--field-bg);transition:all .1s;white-space:nowrap;font-weight:500}
+.pills label:hover{border-color:var(--volt-mid);color:var(--volt)}
+.pills input:checked+label{background:var(--volt-light);border-color:var(--volt-mid);color:var(--volt);font-weight:600}
+
+/* ── TOGGLE ── */
+.tog-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tog{position:relative;width:32px;height:16px;cursor:pointer;flex-shrink:0}
+.tog input{display:none}
+.ttrack{position:absolute;inset:0;background:var(--field-border);border-radius:8px;transition:.15s}
+.tog input:checked~.ttrack{background:var(--volt-mid)}
+.tthumb{position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tog input:checked~.tthumb{left:18px}
+.tog-lbl{font-size:11px;color:var(--text-b);font-weight:500}
+
+/* ── FETCH BTN ── */
+.fetch-row{display:flex;gap:4px}
+.fetch-row .fi{flex:1}
+.fetch-btn{background:var(--volt);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;white-space:nowrap;font-family:var(--font);font-weight:600}
+.fetch-btn:hover{background:var(--volt-mid)}
+
+/* ── DATA ROOM DOCS ── */
+.dr-doc{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--field-border);border-radius:4px;margin-bottom:4px;cursor:pointer;transition:.1s;background:var(--field-bg)}
+.dr-doc:hover{border-color:var(--volt-mid)}
+.dr-doc.ok{border-color:var(--ok-b);background:var(--ok-bg)}
+.dr-doc.miss{border-color:var(--err-b);background:var(--err-bg)}
+.dr-name{flex:1;font-size:11px;color:var(--text-b);font-weight:500}
+.dr-doc.ok .dr-name{color:var(--ok)}
+.dr-doc.miss .dr-name{color:var(--err)}
+.dr-stat{font-family:var(--mono);font-size:9px;font-weight:600}
+.dr-doc.ok .dr-stat{color:var(--ok)}
+.dr-doc.miss .dr-stat{color:var(--err)}
+
+/* ── MAIN CONTENT ── */
+.main-inner{padding:18px 22px}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:6px;padding:14px 16px;box-shadow:0 2px 8px rgba(20,50,80,.08);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--volt),var(--volt-mid))}
+.kv{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text-h);line-height:1;margin-bottom:3px}
+.kv.big{font-size:26px}
+.kl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-s);font-weight:500}
+.ks{font-size:11px;color:var(--text-s);margin-top:3px}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:2px solid var(--card-border);margin-bottom:16px;padding:0 4px;gap:4px}
+.tab{padding:9px 16px;font-size:12px;color:var(--text-s);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font);transition:.1s;font-weight:500;margin-bottom:-2px;border-radius:3px 3px 0 0}
+.tab:hover{color:var(--text-b);background:#f1f5f9}
+.tab.on{color:var(--volt);border-bottom-color:var(--volt);background:#f8fafc}
+.tp{display:none}.tp.on{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:6px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(20,50,80,.07)}
+.card:last-child{margin-bottom:0}
+.card-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-h);margin-bottom:10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--card-border)}
+
+/* ── FLAGS ── */
+.flag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:2px;white-space:nowrap;font-weight:500}
+.flag.ok{color:var(--ok);background:var(--ok-bg);border:1px solid #86efac40}
+.flag.warn{color:var(--warn);background:var(--warn-bg);border:1px solid #fcd34d40}
+.flag.err{color:var(--err);background:var(--err-bg);border:1px solid #fca5a540}
+.flag.info{color:var(--info);background:#eff6ff;border:1px solid #93c5fd40}
+.flag.unk{color:var(--purple);background:#faf5ff;border:1px solid #c4b5fd40}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-b);padding:6px 8px;border-bottom:1px solid var(--card-border);text-align:right;font-weight:500;background:#f8fafc}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:6px 8px;border-bottom:1px solid #f1f5f9;font-size:12px;text-align:right;color:var(--text-b);font-family:var(--mono)}
+.tbl td:first-child{text-align:left;color:var(--text-h);font-family:var(--font);font-weight:500;font-size:12px}
+.tbl td.hi{color:var(--ok);font-weight:600}
+.tbl td.neg{color:var(--err)}
+.tbl tr.total td{border-top:2px solid var(--volt);color:var(--volt-mid);font-weight:600;background:#f0f7ff}
+.tbl tr:hover td{background:#f8fafc}
+.tbl tr.pre td{color:#94a3b8;font-style:italic}
+
+/* ── ROW ── */
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #e8eef4}
+.row:last-child{border:none}
+.rn{font-size:12px;color:var(--text-b);font-weight:500}
+.rv{font-family:var(--mono);font-size:12px;color:var(--text-h);font-weight:600}
+.rv.ok{color:var(--ok)}.rv.warn{color:var(--warn)}.rv.err{color:var(--err)}.rv.unk{color:var(--purple)}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* ── MINI CHART (CSS bars) ── */
+.chart{margin:10px 0}
+.bar-row{display:grid;grid-template-columns:60px 1fr 70px;align-items:center;gap:8px;margin-bottom:4px}
+.bar-lbl{font-size:11px;color:var(--text-b);font-family:var(--mono)}
+.bar-track{height:6px;background:var(--main-bg);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.bar-val{font-family:var(--mono);font-size:11px;text-align:right;color:var(--text-h)}
+
+/* ── BOM ITEM ── */
+.bom-item{background:var(--card-bg);border:1px solid var(--card-border);border-left:4px solid var(--volt);border-radius:4px;padding:12px 14px;box-shadow:0 2px 6px rgba(20,50,80,.07)}
+.bom-qty{font-family:var(--mono);font-size:20px;color:var(--volt-mid);font-weight:600}
+.bom-name{font-size:12px;color:var(--text-b);margin:2px 0 4px;font-weight:600}
+.bom-spec{font-size:11px;color:var(--text-b);font-family:var(--mono)}
+.bom-lead{font-size:11px;color:var(--warn);margin-top:4px;font-weight:600}
+.bom-src{font-size:10px;color:var(--text-s)}
+.bom-ver{font-size:10px;color:var(--ok);font-weight:600}
+
+/* ── GAP BLOCK ── */
+.gap{border-radius:6px;padding:14px 16px;margin-bottom:10px}
+.gap-hdr{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.gap-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.gap-team{font-size:12px;font-weight:700}
+.gap-list{list-style:none}
+.gap-list li{font-size:11px;color:var(--text-b);padding:4px 0;border-bottom:1px solid #e2e8f0;display:flex;gap:6px}
+.gap-list li:last-child{border:none}
+.gap-list li::before{content:'→';color:var(--text-s);flex-shrink:0;font-size:9px;margin-top:1px}
+.gap-cur{font-size:11px;font-family:var(--mono);margin-top:6px;padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;color:var(--text-b)}
+
+/* ── PHASE BARS ── */
+.phase-timeline{display:grid;grid-template-columns:60px 1fr;gap:8px;align-items:center;margin-bottom:6px}
+.ph-lbl{font-size:12px;color:var(--text-b);font-weight:500}
+.ph-bar{height:8px;background:#f1f5f9;border-radius:4px;position:relative}
+.ph-seg{position:absolute;top:0;height:100%;border-radius:4px;transition:all .3s}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <span class="logo">MERIDIAN</span><span style="font-size:10px;color:var(--text-m);font-weight:400;margin-left:-4px"> by Voltai</span>
+    <span class="site-name" id="h_site">—</span>
+    <div class="hdr-badges" id="h_flags"></div>
+  </div>
+  <div class="hdr-badges">
+    <span class="badge ok">● VERIFIED FROM DATASHEET</span>
+    <span class="badge warn">◐ ESTIMATED</span>
+    <span class="badge" style="color:var(--purple);border:1px solid #c4b5fd;background:var(--purple-bg)">◯ TEAM INPUT NEEDED</span>
+    <span class="badge draft">DC INTELLIGENCE v1.0 · INTERNAL</span>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<div class="sidebar">
+
+  <!-- SITE FACTS -->
+  <div class="sb-block" id="blk_site">
+    <div class="sb-hdr" onclick="toggle('blk_site')">
+      <div class="sb-hdr-dot" style="background:var(--warn)"></div>
+      <span class="sb-hdr-title">Site Facts</span>
+      <span class="sb-hdr-tag">from data room</span>
+    </div>
+    <div class="sb-body">
+      <div class="f">
+        <label>Address</label>
+        <div class="fetch-row">
+          <input class="fi" id="address" value="Calvert City, KY 42029" onkeydown="if(event.key==='Enter')fetchSite()">
+          <button class="fetch-btn" onclick="fetchSite()">Fetch →</button>
+        </div>
+        <div class="fn" id="site_status" style="color:var(--ok)">✓ Climate + grid auto-detected</div>
+      </div>
+
+      <!-- Auto-detected -->
+      <div style="background:var(--volt-light);border:1px solid #c3ddf0;border-radius:6px;padding:10px 12px;margin-bottom:10px" id="auto_panel">
+        <div style="font-size:8px;font-family:var(--mono);color:var(--volt);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">Auto-detected</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--volt);line-height:1" id="a_grid_op">PJM</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Grid operator</div></div>
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-b);line-height:1" id="a_saidi">1–2/yr</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Outages/yr</div></div>
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-b);line-height:1" id="a_db">34°C</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Peak dry bulb</div></div>
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-b);line-height:1" id="a_wb">22°C</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Peak wet bulb</div></div>
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-b);line-height:1" id="a_awb">18°C</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Annual avg WB</div></div>
+          <div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--volt);line-height:1" id="a_fc">62%</div><div style="font-size:8px;color:var(--text-s);margin-top:3px">Free cooling hrs</div></div>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>Current Grid Capacity (MW)</label>
+        <input class="fi" type="number" id="grid_mw" value="15" min="1" max="500" oninput="calc()">
+        <div class="fn">Confirmed from utility interconnect study — not a guess</div>
+      </div>
+
+      <div class="f">
+        <label>Expansion Capacity (MW) <span class="fv" id="v_exp_flag"></span></label>
+        <input class="fi" type="number" id="exp_mw" value="35" min="0" max="1000" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>Months to Expansion Online</label>
+        <input class="fi" type="number" id="exp_months" value="36" min="0" max="120" oninput="calc()">
+        <div class="fn">From today → expansion power available</div>
+      </div>
+
+      <div class="f">
+        <label>Land Area (acres)</label>
+        <input class="fi" type="number" id="land_acres" value="200" min="1" max="5000" oninput="calc()">
+        <div class="fn" id="acres_note" style="color:var(--text-m)">Enter land area to check build feasibility</div>
+      </div>
+      <div class="f">
+        <label>Delivery Voltage</label>
+        <select class="fi" id="voltage" onchange="calc()">
+          <option value="115">115 kV — HV transmission (large)</option>
+          <option value="69" selected>69 kV — transmission (typical)</option>
+          <option value="34.5">34.5 kV — sub-transmission</option>
+          <option value="13.2">13.2 kV — distribution</option>
+        </select>
+        <div class="fn" id="voltage_note">Affects switchgear + transformer BOM. From interconnect study.</div>
+      </div>
+      <div class="f">
+        <label>Circuit Config</label>
+        <div class="pills">
+          <input type="radio" name="circuit" id="c_dual" value="dual" onchange="calc()"><label for="c_dual">Dual (N+1)</label>
+          <input type="radio" name="circuit" id="c_single" value="single" onchange="calc()" checked><label for="c_single">Single</label>
+          <input type="radio" name="circuit" id="c_ring" value="ring" onchange="calc()"><label for="c_ring">Ring bus</label>
+        </div>
+      </div>
+      <div class="f">
+        <label>Substation Transformer <span class="fv" id="v_sub">100 MVA</span></label>
+        <input type="range" id="sub_mva" min="20" max="500" value="100" step="10" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>Short-circuit Level <span class="fv" id="v_sc">500 MVA</span></label>
+        <input type="range" id="sc_mva" min="50" max="2000" value="500" step="50" oninput="calc()">
+        <div class="fn">Grid stiffness — higher = less voltage sag during training ramps</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BTM -->
+  <div class="sb-block collapsed" id="blk_btm">
+    <div class="sb-hdr" onclick="toggle('blk_btm')">
+      <div class="sb-hdr-dot" style="background:var(--purple)"></div>
+      <span class="sb-hdr-title">Behind-the-Meter</span>
+      <span class="sb-hdr-tag">optional</span>
+    </div>
+    <div class="sb-body">
+      <div class="tog-row">
+        <label class="tog"><input type="checkbox" id="btm_on" onchange="calc()"><div class="ttrack"></div><div class="tthumb"></div></label>
+        <span class="tog-lbl">BTM power available</span>
+      </div>
+      <div id="btm_fields" style="display:none">
+        <div class="f">
+          <label>BTM Source</label>
+          <select class="fi" id="btm_src" onchange="calc()">
+            <option value="gas">Natural gas (on-site peaker)</option>
+            <option value="solar">Solar + Battery</option>
+            <option value="hydro">Hydro (utility-owned)</option>
+            <option value="wind">Wind + Battery</option>
+          </select>
+        </div>
+        <div class="f">
+          <label>BTM Capacity <span class="fv" id="v_btm">5 MW</span></label>
+          <input type="range" id="btm_mw" min="1" max="200" value="5" step="1" oninput="calc()">
+          <div class="fn" id="btm_note">Production: pull gas pipeline capacity from Enverus API</div>
+        </div>
+        <div class="f">
+          <label>BTM Power Cost ($/kWh) <span class="fv" id="v_btm_rate">$0.025</span></label>
+          <input type="range" id="btm_rate" min="0.01" max="0.08" value="0.025" step="0.005" oninput="calc()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGN DECISIONS -->
+  <div class="sb-block" id="blk_design">
+    <div class="sb-hdr" onclick="toggle('blk_design')">
+      <div class="sb-hdr-dot" style="background:var(--volt)"></div>
+      <span class="sb-hdr-title">Design Decisions</span>
+      <span class="sb-hdr-tag">you choose</span>
+    </div>
+    <div class="sb-body">
+      <div class="f">
+        <label>Chip Generation</label>
+        <select class="fi" id="chip" onchange="onChipChange()">
+          <option value="GB300">NVIDIA GB300 NVL72 — shipping</option>
+          <option value="B200">NVIDIA B200 SXM — shipping</option>
+          <option value="VERA">NVIDIA Vera Rubin NVL72 — 2026 roadmap</option>
+          <option value="MI355X">AMD MI355X Helios OAM — shipping</option>
+          <option value="GAUDI3">Intel Gaudi 3 — shipping</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Workload</label>
+        <div class="pills">
+          <input type="radio" name="wl" id="wl_t" value="train" onchange="onWlChange()" checked><label for="wl_t">LLM Training</label>
+          <input type="radio" name="wl" id="wl_i" value="infer" onchange="onWlChange()"><label for="wl_i">Inference</label>
+          <input type="radio" name="wl" id="wl_m" value="mix" onchange="onWlChange()"><label for="wl_m">Mixed</label>
+        </div>
+      </div>
+      <div class="f" id="mix_split_row" style="display:none">
+        <label>Training split <span class="fv" id="v_train_pct">70%</span> · Inference <span class="fv" id="v_infer_pct">30%</span></label>
+        <input type="range" id="train_pct" min="10" max="90" value="70" step="10" oninput="calc()">
+        <div class="fn">How capacity is split between training and inference workloads</div>
+      </div>
+      <div class="f">
+        <label>CDU Product</label>
+        <select class="fi" id="cdu" onchange="calc()">
+          <option value="motivair_2300">Motivair 2.3 MW CDU ● 2350 kW verified</option>
+          <option value="vertiv_1350" selected>Vertiv XDU1350 ● 1350 kW verified</option>
+          <option value="vertiv_450">Vertiv XDU450 ● 975 kW verified</option>
+          <option value="coolit">CoolIT CHx1500 ◐ ~1500 kW est.</option>
+          <option value="beehe_cdu">BEEHE CDU ◐ ~1200 kW · Asia supply chain · 3–4 mo</option>
+          <option value="delta_cdu">Delta Electronics CDU ◐ ~1800 kW est.</option>
+          <option value="stulz">Stulz CyberCool ◐ ~1000 kW est.</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Heat Rejection</label>
+        <select class="fi" id="heat_rej" onchange="calc()">
+          <option value="trim" selected>Trim cooler / dry cooler (free cooling)</option>
+          <option value="hybrid">Hybrid (trim + chiller assist)</option>
+          <option value="chiller">Full mechanical chiller</option>
+          <option value="evap">Evaporative cooling tower</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Deployment Model</label>
+        <select class="fi" id="deploy" onchange="calc()">
+          <option value="factory" selected>Factory-integrated / skidded (Vertiv modular) </option>
+          <option value="field">Field-integrated (conventional)</option>
+          <option value="container">Containerized (low density only)</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Phase 1 Go-Live (months from now)</label>
+        <input class="fi" type="number" id="p1_months" value="10" min="4" max="60" oninput="calc()">
+        <div class="fn" id="golive_note">Factory-integrated: 8–12 mo · Field-integrated: 14–18 mo · Mod42 modular: 3–5 mo</div>
+      </div>
+      <div class="f">
+        <label>Voltai Role</label>
+        <select class="fi" id="voltai_role" onchange="calc()">
+          <option value="tech_pack">Tech Pack — paid diligence ($25–100K)</option>
+          <option value="owner_rep">Owner Rep — success fee on lease</option>
+          <option value="developer">Developer of Record — equity stake</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIAL ASSUMPTIONS -->
+  <div class="sb-block collapsed" id="blk_fin">
+    <div class="sb-hdr" onclick="toggle('blk_fin')">
+      <div class="sb-hdr-dot" style="background:var(--ok)"></div>
+      <span class="sb-hdr-title">Financial Assumptions</span>
+      <span class="sb-hdr-tag">market estimates</span>
+    </div>
+    <div class="sb-body">
+      <div class="f">
+        <label>GPU Rate ($/GPU hr) <span class="fv" id="v_price">$3.00</span></label>
+        <input type="range" id="price" min="0.50" max="30" value="3.00" step="0.25" oninput="calc()">
+        <div class="fn" id="price_note">Market range varies by chip — see Chip tab</div>
+      </div>
+      <div class="f">
+        <label>Revenue Model</label>
+        <div class="pills">
+          <input type="radio" name="rev_model" id="rm_lease" value="lease" onchange="calc()" checked><label for="rm_lease">Fixed lease ($/kW/mo)</label>
+          <input type="radio" name="rev_model" id="rm_spot" value="spot" onchange="calc()"><label for="rm_spot">Spot GPU hrs</label>
+        </div>
+        <div class="fn" id="rev_model_note">Fixed lease: revenue locked in at signing — no erosion. Typical for DC developer deals (Play 2).</div>
+      </div>
+      <div class="f" id="erosion_row">
+        <label>GPU Price Erosion (%/yr) <span class="fv" id="v_erosion">10%</span></label>
+        <input type="range" id="erosion" min="0" max="50" value="10" step="5" oninput="calc()">
+        <div class="fn">Only applies in spot model. H100: ~40% drop over 18 mo. GB300 forward estimate: 10–20%/yr.</div>
+      </div>
+      <div class="f">
+        <label>Grid Power Cost <span class="fv" id="v_pwr">$0.05/kWh</span></label>
+        <input type="range" id="pwr_rate" min="0.01" max="0.15" value="0.05" step="0.005" oninput="calc()">
+        <div class="fn">Vidalia hydro ~$0.03 · Texas ~$0.04 · National avg ~$0.07</div>
+      </div>
+      <div class="f">
+        <label>Target Utilization <span class="fv" id="v_util">80%</span></label>
+        <input type="range" id="util" min="40" max="95" value="80" step="5" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>Fill-up Ramp (months) <span class="fv" id="v_ramp">15</span></label>
+        <input type="range" id="ramp_mo" min="3" max="36" value="15" step="3" oninput="calc()">
+        <div class="fn">Months to reach target utilization after go-live</div>
+      </div>
+      <div class="f">
+        <label>GPU Unit Cost <span class="fv" id="v_gpu_cost">$50K</span></label>
+        <input type="range" id="gpu_cost" min="5" max="150" value="50" step="5" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>Land Cost ($/MW IT) <span class="fv" id="v_land">$600K</span></label>
+        <input type="range" id="land_pmw" min="100" max="5000" value="600" step="100" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>Utility Works <span class="fv" id="v_util_works">$20M</span></label>
+        <input type="range" id="util_works" min="0" max="200" value="20" step="5" oninput="calc()">
+        <div class="fn">Substation upgrades, transmission, grid connection</div>
+      </div>
+      <div class="f">
+        <label>Discount Rate (NPV) <span class="fv" id="v_dr">10%</span></label>
+        <input type="range" id="disc_rate" min="5" max="25" value="10" step="1" oninput="calc()">
+      </div>
+      <div class="f">
+        <label>EBITDA Multiple (asset value) <span class="fv" id="v_mult">20×</span></label>
+        <input type="range" id="mult" min="10" max="30" value="20" step="1" oninput="calc()">
+        <div class="fn">AI DCs trading 15–25× EBITDA in current market</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA ROOM -->
+  <div class="sb-block collapsed" id="blk_dr">
+    <div class="sb-hdr" onclick="toggle('blk_dr')">
+      <div class="sb-hdr-dot" style="background:var(--ok)"></div>
+      <span class="sb-hdr-title">Data Room</span>
+      <span class="sb-hdr-tag">click to toggle parsed</span>
+    </div>
+    <div class="sb-body">
+      <div class="fn" style="margin-bottom:8px">Documents parsed from the site data room. Each affects model accuracy.</div>
+      <div class="dr-doc ok" id="dr_interconnect" onclick="toggleDR('dr_interconnect')"><span style="font-size:12px">📄</span><div class="dr-name">Interconnection Study</div><span class="dr-stat">✓ PARSED</span></div>
+      <div class="dr-doc miss" id="dr_pq" onclick="toggleDR('dr_pq')"><span style="font-size:12px">📄</span><div class="dr-name">Power Quality Report</div><span class="dr-stat">✗ MISSING</span></div>
+      <div class="dr-doc ok" id="dr_zone" onclick="toggleDR('dr_zone')"><span style="font-size:12px">📄</span><div class="dr-name">Zoning Confirmation</div><span class="dr-stat">✓ PARSED</span></div>
+      <div class="dr-doc miss" id="dr_geo" onclick="toggleDR('dr_geo')"><span style="font-size:12px">📄</span><div class="dr-name">Geotechnical Report</div><span class="dr-stat">✗ MISSING</span></div>
+      <div class="dr-doc ok" id="dr_fiber" onclick="toggleDR('dr_fiber')"><span style="font-size:12px">📄</span><div class="dr-name">Fiber Survey</div><span class="dr-stat">✓ PARSED</span></div>
+      <div class="dr-doc miss" id="dr_env" onclick="toggleDR('dr_env')"><span style="font-size:12px">📄</span><div class="dr-name">Environmental Assessment</div><span class="dr-stat">✗ MISSING</span></div>
+      <div class="dr-doc miss" id="dr_title" onclick="toggleDR('dr_title')"><span style="font-size:12px">📄</span><div class="dr-name">Title / Ownership Report</div><span class="dr-stat">✗ MISSING</span></div>
+    </div>
+  </div>
+
+</div><!-- /sidebar -->
+
+<!-- ══════════════════════════════════════
+     MAIN OUTPUT
+══════════════════════════════════════ -->
+<div class="main">
+<div class="main-inner">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kv big" id="k_gpus">—</div><div class="kl">Total GPUs</div><div class="ks" id="k_chip">—</div></div>
+    <div class="kpi"><div class="kv" id="k_it_mw">—</div><div class="kl">IT Load (MW)</div><div class="ks" id="k_pue">PUE —</div></div>
+    <div class="kpi"><div class="kv" id="k_mfu">—</div><div class="kl">Est. MFU range</div><div class="ks" id="k_mfu_src">◐ from literature</div></div>
+    <div class="kpi"><div class="kv" id="k_rev1">—</div><div class="kl">Yr 1 Revenue</div><div class="ks">at target util</div></div>
+    <div class="kpi"><div class="kv" id="k_ebitda5">—</div><div class="kl">Yr 5 EBITDA</div><div class="ks" id="k_margin5">—% margin</div></div>
+    <div class="kpi"><div class="kv" id="k_npv">—</div><div class="kl">10-yr NPV</div><div class="ks" id="k_irr">IRR —%</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" onclick="sw('summary',this)">Summary</button>
+    <button class="tab" onclick="sw('model',this)">10-Year Model</button>
+    <button class="tab" onclick="sw('chip',this)">Chip & Power</button>
+    <button class="tab" onclick="sw('cooling',this)">Cooling</button>
+    <button class="tab" onclick="sw('capex',this)">Capex</button>
+    <button class="tab" onclick="sw('bom',this)">BOM</button>
+    <button class="tab" onclick="sw('gaps',this)">Data Gaps</button>
+  </div>
+
+  <!-- ── SUMMARY ── -->
+  <div id="tp_summary" class="tp on">
+    <!-- Deal Assessment — answers the 6 questions -->
+    <div class="card" style="margin-bottom:12px" id="s_deal_assessment"></div>
+    <div class="g2">
+      <div id="s_site_fit" class="card"></div>
+      <div id="s_phase_plan" class="card"></div>
+    </div>
+    <div class="g2" style="margin-top:12px">
+      <div id="s_risks" class="card"></div>
+      <div id="s_dr_status" class="card"></div>
+    </div>
+  </div>
+
+  <!-- ── 10-YEAR MODEL ── -->
+  <div id="tp_model" class="tp">
+    <div class="card" style="margin-bottom:12px" id="model_summary_card"></div>
+    <div class="card">
+      <div class="card-hdr">Year-by-Year P&L</div>
+      <div style="overflow-x:auto"><table class="tbl" id="model_table"></table></div>
+    </div>
+  </div>
+
+  <!-- ── CHIP & POWER ── -->
+  <div id="tp_chip" class="tp">
+    <div class="g2">
+      <div class="card" id="chip_specs_card"></div>
+      <div class="card" id="chip_power_card"></div>
+    </div>
+    <div class="card" style="margin-top:12px" id="chip_pq_card"></div>
+  </div>
+
+  <!-- ── COOLING ── -->
+  <div id="tp_cooling" class="tp">
+    <div class="g2">
+      <div class="card" id="cool_cdu_card"></div>
+      <div class="card" id="cool_fc_card"></div>
+    </div>
+    <div class="card" style="margin-top:12px" id="cool_vertiv_card"></div>
+  </div>
+
+  <!-- ── CAPEX ── -->
+  <div id="tp_capex" class="tp">
+    <div class="g2">
+      <div class="card" id="capex_dev_card"></div>
+      <div class="card" id="capex_it_card"></div>
+    </div>
+    <div class="card" style="margin-top:12px" id="capex_val_card"></div>
+  </div>
+
+  <!-- ── BOM ── -->
+  <div id="tp_bom" class="tp">
+    <div class="card-hdr" style="margin-bottom:10px" id="bom_hdr">Equipment BOM</div>
+    <div class="g3" id="bom_grid"></div>
+    <div class="fn" style="margin-top:10px">Lead times: Maddox (transformers, verified) · Vertiv/Motivair (CDUs, verified) · Cat/Cummins (generators, estimated). All subject to current market conditions.</div>
+  </div>
+
+  <!-- ── DATA GAPS ── -->
+  <div id="tp_gaps" class="tp">
+    <div style="padding:10px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:4px;margin-bottom:12px;font-size:10px;color:var(--text-b)">
+      Three teams need to provide calibration data. Until then, all outputs carry the uncertainty flags shown throughout. The tool is a structured estimate, not a stamped engineering analysis.
+    </div>
+    <div id="gaps_content"></div>
+  </div>
+
+</div></div></div><!-- /main, /app -->
+
+<script>
+// ══════════════════════════════════════════════════
+// WORKLOAD FACTORS
+// ══════════════════════════════════════════════════
+// How workload type affects power draw, PUE, and MFU benchmark
+const WL = {
+  train:{
+    power_pct:0.88,  // average power as % of max TDP (training is sustained near-peak)
+    pue_adj:0,       // no PUE adjustment (training is design basis for cooling sizing)
+    mfu_mkt:0.50,    // market MFU assumption embedded in GPU hour pricing (~50% for training clusters)
+    power_note:'Sustained near-peak load. Forward/backward pass cycles keep GPUs near TDP. All-reduce lulls ~60–75%.',
+  },
+  infer:{
+    power_pct:0.68,  // inference is bursty — high during prefill, lower during decode
+    pue_adj:-0.02,   // slightly better PUE (less sustained heat)
+    mfu_mkt:0.70,    // inference MFU is higher (less comm overhead, more predictable)
+    power_note:'Bursty profile. Prefill phase near TDP; decode phase lighter. Average ~68% of TDP.',
+  },
+  mix:{
+    power_pct:0.78,
+    pue_adj:-0.01,
+    mfu_mkt:0.58,
+    power_note:'Mixed training + inference. Average power between sustained training and bursty inference.',
+  },
+};
+
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+
+const CHIPS = {
+  GB300:  {n:'NVIDIA GB300 NVL72', g:72, kw:130, kw_max:142, cool:'CDU', p:3.00, mfu_t:[.38,.58], mfu_i:[.65,.82], ver:true,  status:'Shipping', src:'NVIDIA published specs + Helio HRD-001',
+            prange:'$2–4', pnote:'72 GPUs/rack — dense format. Revenue driven by GPU count. Market $2–4/GPU hr.', compat_box:false,
+            specs:[['TDP/rack (max)','142 kW','✓'],['TDP/rack (nom.)','130 kW','✓'],['GPUs/rack','72','✓'],['Cooling req.','CDU required','✓'],['Network/rack','800 Gbps IB','✓'],['Power smoothing','~65 J/GPU on-board','✓'],['Grid peak reduction','~30% (est.)','◐'],['Bus voltage','48V DC / 480V AC','◐']]},
+  B200:   {n:'NVIDIA B200 SXM', g:8, kw:90, kw_max:100, cool:'CDU', p:2.50, mfu_t:[.42,.62], mfu_i:[.68,.85], ver:true,  status:'Shipping H2 2024', src:'NVIDIA B200 SXM spec',
+            prange:'$2–4', pnote:'8 GPUs/rack. Similar compute to H100 lineage. $2–4/GPU hr market.', compat_box:true,
+            specs:[['TDP/rack (max)','100 kW','✓'],['TDP/rack (nom.)','90 kW','✓'],['GPUs/rack','8 (SXM)','✓'],['Cooling','CDU / Air OK','✓'],['Network/rack','400 Gbps IB','✓'],['Power smoothing','Not confirmed','◐'],['Bus voltage','48V DC','◐'],['Container OK','Yes (≤70 kW)','◐']]},
+  VERA:   {n:'NVIDIA Vera Rubin NVL72', g:72, kw:210, kw_max:227, cool:'CDU', p:6.00, mfu_t:[.40,.62], mfu_i:[.68,.88], ver:false, status:'2026 roadmap', src:'NVIDIA roadmap + Helio §15',
+            prange:'$5–9', pnote:'Same 72 GPUs/rack (NVL72 format). Higher rack power → fewer racks/MW. Higher $/GPU (more compute). Should beat GB300 on revenue/MW. Roadmap — not shipping.', compat_box:false,
+            specs:[['TDP/rack (est.)','~227 kW','◐'],['GPUs/rack','72 (NVL72 same)','◐'],['Racks/pod','~10 (vs 16 GB300)','✓'],['Cooling','CDU — headers upgrade','◐'],['Network/rack','~1600 Gbps','◐'],['Power smoothing','Not published','◐'],['Rubin Ultra (600kW)','NOT supported','✓'],['Container OK','No','◐']]},
+  MI355X: {n:'AMD MI355X Helios OAM', g:8, kw:230, kw_max:250, cool:'DLC', p:8.00, mfu_t:[.35,.52], mfu_i:[.58,.74], ver:false, status:'Shipping 2025', src:'Phanos/AMD contract Exhibit F',
+            prange:'$6–12', pnote:'8 GPUs/rack but each ~1.6× more compute than B200. AMD ~30% discount to equivalent NVIDIA compute. Offtaker acceptance varies — validate first.', compat_box:false,
+            specs:[['TDP/rack (max)','250 kW','◐'],['TDP/rack (nom.)','230 kW','◐'],['GPUs/rack','8 (OAM format)','✓'],['Rack weight','~7,500 lbs','◐'],['Cooling','DLC required','✓'],['NVIDIA MP2 cert','Via BEEHE','◐'],['Bus voltage','800V AC','◐'],['Container OK','No','◐']]},
+  GAUDI3: {n:'Intel Gaudi 3', g:8, kw:90, kw_max:110, cool:'CDU', p:1.50, mfu_t:[.35,.55], mfu_i:[.58,.72], ver:false, status:'Shipping 2024', src:'Intel product brief (estimates)',
+            prange:'$1–2.50', pnote:'8 GPUs/rack. Intel discounts heavily for adoption. Limited market liquidity — verify offtaker will accept.', compat_box:true,
+            specs:[['TDP/rack (est.)','~100 kW','◐'],['GPUs/rack','8 (HL-328)','◐'],['Cooling','CDU / Air','◐'],['Network/rack','~400 Gbps','◐'],['Market adoption','Limited vs NVIDIA','◐'],['Offtaker acceptance','Verify per customer','◐']]},
+};
+
+const CDUS = {
+  motivair_2300: {n:'Motivair 2.3 MW CDU', cap:2350, flow:1700, self_kw:18, t_min:10, t_max:65, lead:'12–16', ver:true,  src:'Motivair 2026 datasheet'},
+  vertiv_1350:   {n:'Vertiv Liebert XDU1350', cap:1350, flow:1800, self_kw:20.5, t_min:10, t_max:52, lead:'10–14', ver:true,  src:'Vertiv XDU1350 datasheet'},
+  vertiv_450:    {n:'Vertiv Liebert XDU450', cap:975,  flow:500,  self_kw:4.5, t_min:10, t_max:52, lead:'8–12',  ver:true,  src:'Vertiv XDU450 datasheet'},
+  coolit:        {n:'CoolIT CHx1500 (est.)', cap:1500, flow:1200, self_kw:16,  t_min:12, t_max:50, lead:'10–14', ver:false, src:'Estimated — verify with CoolIT'},
+  beehe_cdu:     {n:'BEEHE CDU (Asia supply chain)', cap:1200, flow:1000, self_kw:14, t_min:10, t_max:55, lead:'12–16', ver:false, src:'◐ Est. from BEEHE Bisnow conversation · NVIDIA MP2 certified · verify specs'},
+  delta_cdu:     {n:'Delta Electronics CDU (est.)', cap:1800, flow:1400, self_kw:20, t_min:10, t_max:55, lead:'12–18', ver:false, src:'◐ Estimated — Delta Electronics thermal management'},
+  stulz:         {n:'Stulz CyberCool CDU (est.)', cap:1000, flow:900,  self_kw:12, t_min:12, t_max:50, lead:'10–14', ver:false, src:'◐ Estimated — Stulz GmbH'},
+};
+
+// PUE model: varies by heat rejection × climate
+function getPUE(heat_rej, climate, ambient_db, deploy) {
+  const base = {trim:{cold_dry:1.09,temperate:1.14,hot_dry:1.19,hot_humid:1.24},
+                hybrid:{cold_dry:1.11,temperate:1.16,hot_dry:1.21,hot_humid:1.27},
+                chiller:{cold_dry:1.18,temperate:1.22,hot_dry:1.26,hot_humid:1.30},
+                evap:{cold_dry:1.12,temperate:1.15,hot_dry:1.13,hot_humid:1.22}};
+  let pue = (base[heat_rej]||base.trim)[climate] || 1.20;
+  if (deploy==='container') pue += 0.08; // container less efficient
+  if (ambient_db > 40) pue += 0.04; // extreme heat penalty
+  return pue;
+}
+
+// Free cooling fraction by climate
+const FC = {cold_dry:.88,temperate:.62,hot_dry:.42,hot_humid:.18};
+
+// Climate DB (mock NOAA)
+const CLIMATE = {
+  cold_dry:  [28,15,10,'cold_dry'],  // [peak_db, peak_wb, ann_wb, key]
+  temperate: [34,22,18,'temperate'],
+  hot_dry:   [42,24,22,'hot_dry'],
+  hot_humid: [36,29,27,'hot_humid'],
+};
+function detectClimate(a){
+  a=a.toLowerCase();
+  if(/alberta|canada|bc\b|washington|oregon|idaho|montana/.test(a)) return 'cold_dry';
+  if(/louisiana|mississippi|south carolina|georgia|florida|alabama|arkansas/.test(a)) return 'hot_humid';
+  if(/texas|nevada|arizona|new mexico|california|ca\b|tx\b/.test(a)) return 'hot_dry';
+  return 'temperate';
+}
+function detectGridOp(a){
+  a=a.toLowerCase();
+  if(/texas|tx\b/.test(a)) return ['ercot','ERCOT','1–3/yr','Medium'];
+  if(/california|ca\b/.test(a)) return ['caiso','CAISO','1–2/yr','High — solar ramps'];
+  if(/louisiana|mississippi|michigan|minnesota/.test(a)) return ['miso','MISO','2–3/yr','Low–Med'];
+  if(/oklahoma|kansas|nebraska/.test(a)) return ['spp','SPP','2–4/yr','Medium'];
+  if(/tennessee|georgia|alabama/.test(a)) return ['serc','SERC/TVA','1–3/yr','Low'];
+  if(/alberta|canada/.test(a)) return ['aeso','AESO','1–2/yr','Low–Med'];
+  return ['pjm','PJM','1–2/yr','Low–Med'];
+}
+
+// BOM by voltage (transformer spec changes)
+const VBOM = {
+  115:{tx:'HV cast-resin 115/MV · special procurement',tx_lead:'28–40 wks',sw:'GIS 115kV'},
+  69: {tx:'3.15 MVA cast-resin 69/0.4kV · IEC 60076-11',tx_lead:'12–18 wks',sw:'MV AIS 69kV'},
+  34.5:{tx:'3.15 MVA cast-resin 34.5/0.4kV',tx_lead:'8–14 wks',sw:'MV 36kV switchgear'},
+  13.2:{tx:'Distribution transformer 13.2/0.48kV',tx_lead:'6–10 wks',sw:'LV distribution'},
+};
+
+// State
+let climate_key = 'temperate', climate_data = CLIMATE.temperate;
+let grid_op = 'pjm', go_label = 'PJM', go_saidi = '1–2/yr', go_vol = 'Low–Med';
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+const fm = n=>{const a=Math.abs(n),s=n<0?'-':'';if(a>=1e9)return s+'$'+(a/1e9).toFixed(2)+'B';if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';if(a>=1e3)return s+'$'+(a/1e3).toFixed(0)+'K';return s+'$'+Math.round(a);};
+const fn = n=>{if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e3)return Math.round(n/1000).toLocaleString()+'K';return Math.round(n).toLocaleString();};
+const fc = n=>Math.round(n).toLocaleString(); // comma-formatted integer
+const pct = n=>((n||0)*100).toFixed(0)+'%';
+const rowHtml = (n,v,cl='')=>`<div class="row"><span class="rn">${n}</span><span class="rv ${cl}">${v}</span></div>`;
+
+function toggle(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('collapsed');
+}
+function sw(id,btn){
+  document.querySelectorAll('.tp').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tp_'+id).classList.add('on');
+  btn.classList.add('on');
+}
+function toggleDR(id){
+  const el=document.getElementById(id);
+  const ok=el.classList.toggle('ok');
+  el.classList.toggle('miss',!ok);
+  el.querySelector('.dr-stat').textContent=ok?'✓ PARSED':'✗ MISSING';
+  calc();
+}
+
+function fetchSite(){
+  const addr=document.getElementById('address').value;
+  const ck=detectClimate(addr);
+  const [go,gol,saidi,vol]=detectGridOp(addr);
+  climate_key=ck; climate_data=CLIMATE[ck];
+  grid_op=go; go_label=gol; go_saidi=saidi; go_vol=vol;
+  const [db,wb,awb,_]=climate_data;
+  const fc=FC[ck]||0.62;
+  document.getElementById('a_grid_op').textContent=gol;
+  document.getElementById('a_saidi').textContent=saidi;
+  document.getElementById('a_db').textContent=db+'°C';
+  document.getElementById('a_wb').textContent=wb+'°C';
+  document.getElementById('a_awb').textContent=awb+'°C';
+  document.getElementById('a_fc').textContent=pct(fc);
+  document.getElementById('site_status').textContent='✓ '+addr+' — NOAA design data loaded (mocked)';
+  calc();
+}
+
+function onWlChange(){
+  const wl = document.querySelector('input[name=wl]:checked')?.value;
+  const mixRow = document.getElementById('mix_split_row');
+  if(mixRow) mixRow.style.display = wl==='mix' ? 'block' : 'none';
+  calc();
+}
+
+function onChipChange(){
+  const chip=CHIPS[document.getElementById('chip').value];
+  document.getElementById('price').value=chip.p;
+  document.getElementById('price_note').textContent='Market range: '+chip.prange+' — '+chip.pnote;
+  calc();
+}
+
+// ══════════════════════════════════════════════════
+// MAIN CALCULATION
+// ══════════════════════════════════════════════════
+function calc(){
+  // ── Read inputs ──
+  const grid_mw=+document.getElementById('grid_mw').value||15;
+  const exp_mw=+document.getElementById('exp_mw').value||0;
+  const exp_months=+document.getElementById('exp_months').value||36;
+  const voltage=+document.getElementById('voltage').value||69;
+  const circuit=document.querySelector('input[name=circuit]:checked')?.value||'single';
+  const sub_mva=+document.getElementById('sub_mva').value||100;
+  const sc_mva=+document.getElementById('sc_mva').value||500;
+  const land_acres=+document.getElementById('land_acres').value||200;
+  const btm_on=document.getElementById('btm_on').checked;
+  const btm_mw=btm_on?+document.getElementById('btm_mw').value:0;
+  const btm_rate=btm_on?+document.getElementById('btm_rate').value:0;
+  const chipKey=document.getElementById('chip').value;
+  const chip=CHIPS[chipKey];
+  const wl=document.querySelector('input[name=wl]:checked')?.value||'train';
+  const cduKey=document.getElementById('cdu').value;
+  const cdu=CDUS[cduKey];
+  const heat_rej=document.getElementById('heat_rej').value;
+  const deploy=document.getElementById('deploy').value;
+  const p1_months=+document.getElementById('p1_months').value||18;
+  const price=+document.getElementById('price').value;
+  const erosion=+document.getElementById('erosion').value/100;
+  const pwr_rate=+document.getElementById('pwr_rate').value;
+  const target_util=+document.getElementById('util').value/100;
+  const ramp_mo=+document.getElementById('ramp_mo').value||15;
+  const gpu_cost_k=+document.getElementById('gpu_cost').value;
+  const land_pmw=+document.getElementById('land_pmw').value*1000;
+  const util_works_m=+document.getElementById('util_works').value*1e6;
+  const disc_rate=+document.getElementById('disc_rate').value/100;
+  const ebitda_mult=+document.getElementById('mult').value;
+  const site=document.getElementById('address').value;
+  const vbom=VBOM[voltage]||VBOM[69];
+
+  // ── Update display values ──
+  const upd=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  upd('v_sub',sub_mva+' MVA'); upd('v_sc',sc_mva+' MVA');
+  upd('v_btm',btm_mw+' MW'); upd('v_btm_rate','$'+btm_rate.toFixed(3)+'/kWh');
+  upd('v_price','$'+price.toFixed(2)); upd('v_erosion',+(erosion*100).toFixed(0)+'%');
+  upd('v_pwr','$'+pwr_rate.toFixed(3)+'/kWh'); upd('v_util',+(target_util*100).toFixed(0)+'%');
+  upd('v_ramp',ramp_mo); upd('v_gpu_cost','$'+gpu_cost_k+'K');
+  upd('v_land','$'+(land_pmw/1000).toFixed(0)+'K'); upd('v_util_works','$'+document.getElementById('util_works').value+'M');
+  upd('v_dr',disc_rate*100+'%'); upd('v_mult',ebitda_mult+'×');
+  upd('v_exp_flag',exp_mw>0?'→ '+exp_mw+'MW in '+exp_months+'mo':'(none)');
+  upd('voltage_note',vbom.tx+' · '+vbom.sw);
+  upd('h_site',site);
+  document.getElementById('btm_fields').style.display=btm_on?'block':'none';
+  document.getElementById('btm_note').textContent=btm_on?'BTM: additive to grid. Production: Enverus gas pipeline API for capacity.':'Enable to model on-site generation.';
+
+  // ── Phase 1 site calc ──
+  const pue1=getPUE(heat_rej,climate_key,climate_data[0],deploy);
+  const it_mw1=grid_mw/pue1;
+  const racks1=Math.floor(it_mw1*1000/chip.kw);
+  const gpus1=racks1*chip.g;
+  const pods1=Math.ceil(racks1/16);
+  // Phase 2
+  const it_mw2=exp_mw>0?(grid_mw+exp_mw)/pue1:0;
+  const racks2=exp_mw>0?Math.floor(it_mw2*1000/chip.kw):0;
+  const gpus2=racks2*chip.g;
+  const fc_frac=FC[climate_key]||0.62;
+
+  // ── MFU + Workload ──
+  const train_pct_val = +document.getElementById('train_pct')?.value || 70;
+  const infer_pct_val = 100 - train_pct_val;
+  const upd_mix = document.getElementById('v_train_pct');
+  const upd_mix2 = document.getElementById('v_infer_pct');
+  if(upd_mix) upd_mix.textContent = train_pct_val+'%';
+  if(upd_mix2) upd_mix2.textContent = infer_pct_val+'%';
+
+  // For mixed: weighted average of train+infer by user split
+  const t_frac = wl==='mix' ? train_pct_val/100 : wl==='train' ? 1 : 0;
+  const i_frac = 1 - t_frac;
+  const mfu_lo_w = chip.mfu_t[0]*t_frac + chip.mfu_i[0]*i_frac;
+  const mfu_hi_w = chip.mfu_t[1]*t_frac + chip.mfu_i[1]*i_frac;
+  const mfu_r = [mfu_lo_w, mfu_hi_w];
+  // Weighted workload data
+  const wl_base = wl==='mix' ? {
+    power_pct: WL.train.power_pct*t_frac + WL.infer.power_pct*i_frac,
+    pue_adj:   WL.train.pue_adj*t_frac + WL.infer.pue_adj*i_frac,
+    mfu_mkt:   WL.train.mfu_mkt*t_frac + WL.infer.mfu_mkt*i_frac,
+    power_note: `${train_pct_val}% training / ${infer_pct_val}% inference split. Weighted average power and MFU.`,
+  } : WL[wl] || WL.train;
+  const wl_data = wl_base;
+  const mfu_mid = (mfu_r[0]+mfu_r[1])/2;
+  // MFU revenue factor: your MFU vs market benchmark embedded in pricing
+  // Above market → premium; below → discount
+  const mfu_rev_factor = Math.min(1.25, Math.max(0.60, mfu_mid / wl_data.mfu_mkt));
+  // Workload-adjusted PUE (inference slightly better)
+  const pue1_adj = getPUE(heat_rej,climate_key,climate_data[0],deploy) + wl_data.pue_adj;
+  const it_mw1_adj = grid_mw / pue1_adj;
+  // Workload-adjusted average power (affects power cost)
+  const avg_power_pct = wl_data.power_pct;
+
+  // ── Capex ──
+  const fac_lo=it_mw1*9e6, fac_hi=it_mw1*13e6, fac_mid=(fac_lo+fac_hi)/2;
+  const land_cost=it_mw1*land_pmw;
+  // BTM capex — installed cost varies significantly by source
+  const BTM_CAPEX_PER_MW = {
+    'Natural gas (on-site peaker)': 1_200_000,  // ~$1.2M/MW installed
+    'Solar + Battery':              2_500_000,  // ~$2.5M/MW (solar + ~1hr storage)
+    'Hydro (utility-owned)':              0,   // typically existing, minimal add
+    'Wind + Battery':               2_800_000,  // ~$2.8M/MW
+  };
+  const btm_src_val = document.getElementById('btm_src')?.value || 'Natural gas (on-site peaker)';
+  const btm_capex_per_mw = BTM_CAPEX_PER_MW[btm_src_val] || 1_500_000;
+  const btm_capex = btm_on ? btm_mw * btm_capex_per_mw : 0;
+
+
+  // Acreage check — rough rules: ~12-20 acres per 10 MW IT for full build
+  // (data hall ~2 acres/10MW + cooling yard + generators + buffer + expansion)
+  const acres_needed_lo = it_mw1 * 1.2;  // 1.2 acres/MW IT (tight)
+  const acres_needed_hi = it_mw1 * 2.0;  // 2.0 acres/MW IT (with expansion buffer)
+  const acres_total = (grid_mw + (btm_on?btm_mw:0) + (exp_mw||0)) / it_mw1 * it_mw1 * 2.0; // full expansion
+  const land_cost_per_acre = land_acres > 0 ? land_cost / land_acres : 0;
+  const acres_ok = land_acres >= acres_needed_lo;
+  const acres_note_str = land_acres >= acres_needed_hi
+    ? `✓ ${land_acres} acres adequate — ${(land_acres/Math.max(1,it_mw1)).toFixed(1)} ac/MW IT (with expansion room)`
+    : land_acres >= acres_needed_lo
+    ? `⚠ ${land_acres} acres tight — ${(land_acres/Math.max(1,it_mw1)).toFixed(1)} ac/MW IT (minimal buffer)`
+    : `✗ ${land_acres} acres likely insufficient — need ~${acres_needed_lo.toFixed(0)}–${acres_needed_hi.toFixed(0)} ac for ${it_mw1.toFixed(0)}MW IT`;
+  const acres_color = land_acres >= acres_needed_hi ? 'var(--ok)' : land_acres >= acres_needed_lo ? 'var(--warn)' : 'var(--err)';
+  const acres_el = document.getElementById('acres_note');
+  if(acres_el){ acres_el.textContent = acres_note_str + (land_cost_per_acre>0?' · $'+(land_cost_per_acre/1000).toFixed(0)+'K/acre implied':''); acres_el.style.color = acres_color; }
+  const p1_total_lo=fac_lo+land_cost+util_works_m+btm_capex;
+  const p1_total_hi=fac_hi+land_cost+util_works_m+btm_capex;
+  // Phase 2 capex (no land re-buy, shared infra → ~20% cheaper per MW)
+  const p2_fac=exp_mw>0?(exp_mw/it_mw1)*fac_mid*0.80:0;
+
+  // IT hardware
+  const it_hw=gpus2>0?gpus2*gpu_cost_k*1e3:gpus1*gpu_cost_k*1e3;
+  const server_non_gpu=(racks2||racks1)*80000;
+  const net_fabric=(racks2||racks1)*12000;
+  const it_total=it_hw+server_non_gpu+net_fabric;
+
+  // ── Opex ──
+  const p_mw = grid_mw + (btm_on?btm_mw:0);
+  const grid_opex_yr = (grid_mw*1e3*8760*pwr_rate) + (btm_on?btm_mw*1e3*8760*btm_rate:0);
+  const staff_yr = 3e6 + (it_mw1>30?2e6:0); // ~$3-5M/yr
+  const maint_yr = fac_mid*0.015;
+  const insur_yr = fac_mid*0.005;
+  const total_opex_yr = grid_opex_yr + staff_yr + maint_yr + insur_yr;
+
+  // ── 10-year model ──
+  const rev_model = document.querySelector('input[name=rev_model]:checked')?.value || 'lease';
+  // Show/hide erosion row
+  const er = document.getElementById('erosion_row');
+  if(er) er.style.display = rev_model==='spot'?'block':'none';
+  const rev_note = document.getElementById('rev_model_note');
+  if(rev_note) rev_note.textContent = rev_model==='lease'
+    ? 'Fixed lease: revenue locked at signing — no erosion risk. Typical for DC developer (Play 2) or site originator.'
+    : 'Spot GPU hours: revenue declines as market prices erode. Higher upside early, lower later.';
+
+  // Opex components (annualized, when live)
+  // Power cost uses workload-adjusted average draw (training≠inference)
+  const opex_power = grid_mw*1e3*8760*pwr_rate*avg_power_pct + (btm_on?btm_mw*1e3*8760*btm_rate*avg_power_pct:0);
+  const opex_staff = 3e6 + (it_mw1>30?2e6:0);
+  const opex_maint = fac_mid*0.015;
+  const opex_insur = fac_mid*0.005;
+  const opex_network = 8e5; // ~$800K dark fiber + bandwidth
+  const opex_water = 2e5;   // ~$200K water treatment
+
+  // Build quarterly model (40 quarters = 10 years), then aggregate to annual
+  const quarters=[];
+  for(let q=0;q<=40;q++){
+    const mo=q*3;
+    const mo_p1=Math.max(0,mo-p1_months);
+    const mo_p2=Math.max(0,mo-(p1_months+exp_months));
+    const p1f=Math.min(1,mo_p1/ramp_mo);
+    const p2f=exp_mw>0?Math.min(1,mo_p2/ramp_mo):0;
+    const cap=gpus1*p1f+(gpus2-gpus1)*p2f;
+    const is_live=cap>0;
+    const yr_equiv=q/4; // for price erosion
+    const gp=rev_model==='lease'?price:price*Math.pow(1-erosion,yr_equiv);
+    const rev_q=is_live?cap*target_util*gp*(8760/4)*mfu_rev_factor:0;
+    const opex_q=is_live?(opex_power+opex_staff+opex_maint+opex_insur+opex_network+opex_water)*Math.max(0.25,cap/(gpus1||1))/4:0;
+    quarters.push({q,mo,cap,is_live,rev_q,opex_q,gp});
+  }
+
+  // Aggregate to annual
+  const model=[];
+  for(let y=0;y<=10;y++){
+    const yq=quarters.filter(q=>q.q>y*4&&q.q<=(y+1)*4);
+    const cap_gpus=Math.round(yq.reduce((s,q)=>s+q.cap,0)/Math.max(1,yq.length));
+    const is_live=yq.some(q=>q.is_live);
+    const gpu_price_y=yq.length>0?yq[yq.length-1].gp:price;
+    const rev=yq.reduce((s,q)=>s+q.rev_q,0);
+    const opex=yq.reduce((s,q)=>s+q.opex_q,0);
+    const ebitda=rev-opex;
+    let capex=0;
+    if(y===0) capex=p1_total_hi;
+    if(exp_mw>0&&y===Math.floor((p1_months+exp_months)/12)&&y>0) capex+=p2_fac;
+    const fcf=ebitda-capex;
+    model.push({y,cap_gpus,is_live,gpu_price_y,rev,opex,ebitda,capex,fcf,
+      opex_power:is_live?opex_power:0, opex_staff:is_live?opex_staff:0,
+      opex_other:is_live?(opex_maint+opex_insur+opex_network+opex_water):0});
+  }
+
+  // NPV
+  const npv=model.reduce((s,r)=>s+r.fcf/Math.pow(1+disc_rate,r.y),0);
+  // IRR (Newton)
+  let irr=0.15;
+  for(let i=0;i<50;i++){
+    const f=model.reduce((s,r)=>s+r.fcf/Math.pow(1+irr,r.y),0);
+    const df=model.reduce((s,r)=>s-r.y*r.fcf/Math.pow(1+irr,r.y+1),0);
+    if(Math.abs(df)<1) break;
+    irr-=f/df;
+    if(irr<-0.5||irr>5) break;
+  }
+  // Year 5 EBITDA
+  const y5=model[5]||model[model.length-1];
+  const asset_val=y5.ebitda*ebitda_mult;
+
+  // Power quality checks
+  const pq=[];
+  const stiff_ok=sc_mva>grid_mw*20;
+  const sub_ok=sub_mva>grid_mw*1.2;
+  if(!stiff_ok) pq.push({t:`Grid stiffness marginal — DC load is ${(grid_mw/sc_mva*100).toFixed(0)}% of SC MVA. Voltage sags likely during training checkpoint ramps.`,s:'warn'});
+  if(!sub_ok) pq.push({t:`Substation headroom tight — ${sub_mva}MVA rated vs ${grid_mw}MW load.`,s:'warn'});
+  if(circuit==='single') pq.push({t:'Single-circuit feed — no redundancy. Any fault interrupts training.',s:'warn'});
+  if(voltage<34.5) pq.push({t:'Distribution voltage insufficient for large AI cluster.',s:'err'});
+  if(deploy==='container'&&!chip.compat_box) pq.push({t:`Container incompatible with ${chip.kw_max}kW/rack — use factory-integrated.`,s:'err'});
+
+  // DR status
+  const dr_docs=['dr_interconnect','dr_pq','dr_zone','dr_geo','dr_fiber','dr_env','dr_title'];
+  const parsed=dr_docs.filter(d=>document.getElementById(d)?.classList.contains('ok')).length;
+
+  // ── UPDATE KPIs ──
+  upd('k_gpus',fc(gpus1)); upd('k_chip',chip.n);
+  upd('k_it_mw',it_mw1.toFixed(1)+' MW'); upd('k_pue','PUE '+pue1.toFixed(2));
+  const mfu_str=pct(mfu_r[0])+'–'+pct(mfu_r[1]);
+  const mfu_impact_pct = ((mfu_rev_factor-1)*100).toFixed(0);
+  const mfu_impact_str = mfu_rev_factor>=1 ? '+'+mfu_impact_pct+'% vs market' : mfu_impact_pct+'% vs market';
+  upd('k_mfu',mfu_str);
+  upd('k_mfu_src', (mfu_rev_factor>=1?'▲ ':'▼ ')+mfu_impact_str+' → '+((mfu_rev_factor>=1)?'revenue premium':'revenue discount'));
+  upd('k_rev1',model[1]?fm(model[1].rev):'$0');
+  upd('k_ebitda5',fm(y5.ebitda));
+  upd('k_margin5',y5.rev>0?((y5.ebitda/y5.rev)*100).toFixed(0)+'% margin':'—');
+  upd('k_npv',fm(npv));
+  upd('k_irr',irr>-0.5&&irr<5?'IRR '+(irr*100).toFixed(0)+'%':'IRR N/A');
+
+  // Header flags
+  const fl=[];
+  if(pq.filter(p=>p.s==='err').length) fl.push(`<span class="badge err">✗ ${pq.filter(p=>p.s==='err').length} critical</span>`);
+  else if(pq.length) fl.push(`<span class="badge warn">⚠ ${pq.length} warnings</span>`);
+  else fl.push(`<span class="badge ok">✓ No power flags</span>`);
+  if(!chip.ver) fl.push(`<span class="badge warn">◐ Chip unverified</span>`);
+  if(parsed<4) fl.push(`<span class="badge warn">${parsed}/7 data room docs</span>`);
+  document.getElementById('h_flags').innerHTML=fl.join('');
+
+  // ══════════ TAB: SUMMARY ══════════
+  // ══════════ DEAL ASSESSMENT ══════════
+  const voltai_role = document.getElementById('voltai_role')?.value || 'tech_pack';
+  const beehe_warn = document.getElementById('beehe_warn');
+  if(beehe_warn) {
+    if(cduKey==='beehe_cdu') { beehe_warn.style.display='block'; beehe_warn.textContent='⚠ BEEHE note: NVIDIA MP2 certified but offtakers (Equinix etc.) may resist Chinese equipment. Validate acceptance with your specific offtaker before specifying.'; }
+    else beehe_warn.style.display='none';
+  }
+  const role_labels = {tech_pack:'Tech Pack · Paid Diligence',owner_rep:'Owner Rep · Success Fee',developer:'Developer of Record · Equity'};
+
+  // Derive deal signals
+  const site_score = (acres_ok?1:0) + (pq.length===0?1:0) + (parsed>=5?1:0) + (circuit==='dual'?1:0) + (sub_mva>grid_mw*1.5?1:0);
+  const deal_verdict = site_score>=4?{label:'WORTH PURSUING',color:'var(--ok)',bg:'var(--ok-bg)',border:'var(--ok-b)'}
+    :site_score>=2?{label:'CONDITIONAL — VERIFY FIRST',color:'var(--warn)',bg:'var(--warn-bg)',border:'var(--warn-b)'}
+    :{label:'HIGH RISK — MORE DATA NEEDED',color:'var(--err)',bg:'var(--err-bg)',border:'var(--err-b)'};
+
+  // What chip fits
+  const chip_fit = chip.ver ? `${chip.n} — confirmed specs` : `${chip.n} — estimated specs (unverified)`;
+  const chip_risk = chip.cool==='DLC'&&!cduKey.includes('coolit')&&!cduKey.includes('motivair')&&!cduKey.includes('beehe')&&!cduKey.includes('delta')?'⚠ DLC required — verify CDU compatibility':'✓ Cooling type compatible';
+
+  // What kills it
+  const killers = [];
+  if(!acres_ok) killers.push(`Land too small (${land_acres} ac < ${acres_needed_lo.toFixed(0)} ac needed)`);
+  if(voltage<34.5) killers.push('Delivery voltage too low for large AI cluster');
+  if(circuit==='single'&&grid_mw>50) killers.push('Single-circuit feed insufficient for >50 MW');
+  pq.filter(p=>p.s==='err').forEach(p=>killers.push(p.t.slice(0,60)+'…'));
+  if(!chip.ver) killers.push('Chip specs unverified — MFU and power draw are estimates');
+
+  // What must be verified before LOI
+  const verify_items = [
+    !document.getElementById('dr_pq').classList.contains('ok') ? 'Power quality report (THD, voltage sag, fault ride-through)' : null,
+    !document.getElementById('dr_geo').classList.contains('ok') ? 'Geotechnical report (soil bearing, seismic zone)' : null,
+    !document.getElementById('dr_env').classList.contains('ok') ? 'Environmental assessment (contamination, flood zone)' : null,
+    exp_mw>0 ? `Expansion path confirmation: is ${exp_mw}MW in ${exp_months}mo realistic?` : null,
+    !chip.ver ? `Chip team calibration: ${chip.n} power curves` : null,
+  ].filter(Boolean);
+
+  // Voltai economics by role
+  // Stabilized annual revenue at 80% util (Phase 1, current price, MFU-adjusted)
+  const r80 = gpus1 * 0.80 * price * 8760 * mfu_rev_factor;
+  const lease_10yr = r80 * 10;
+  const voltai_econ = {
+    tech_pack: {earn:`$25–100K flat fee`, note:'Paid regardless of outcome. Output: go/no-go, risk register, BOM, basis-of-design inputs.'},
+    owner_rep: {earn:`${fm(lease_10yr*0.03)}–${fm(lease_10yr*0.05)} upfront`, note:`3–5% of 10-yr gross lease value ($${(r80/1e6).toFixed(0)}M/yr × 10yr = ${fm(lease_10yr)} total). Take upfront not annuity.`},
+    developer: {earn:`${fm(asset_val*0.10)}–${fm(asset_val*0.20)} equity`, note:`10–20% developer equity stake. Asset value at ${ebitda_mult}× Yr5 EBITDA = ${fm(asset_val)}.`},
+  }[voltai_role];
+
+  const da = document.getElementById('s_deal_assessment');
+  if(da) da.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--text-h)">Deal Assessment — ${site}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;color:var(--text-s)">${role_labels[voltai_role]}</span>
+        <span style="padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;color:${deal_verdict.color};background:${deal_verdict.bg};border:1px solid ${deal_verdict.border}">${deal_verdict.label}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div style="background:var(--page);border-radius:4px;padding:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--volt);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Chip / Workload Fit</div>
+        <div style="font-size:12px;color:var(--text-h);margin-bottom:4px">${chip.n}</div>
+        <div style="font-size:11px;color:var(--text-s);margin-bottom:4px">${wl==='train'?'LLM Training':wl==='infer'?'Inference':'Mixed'} · MFU ${pct(mfu_r[0])}–${pct(mfu_r[1])}</div>
+        <div style="font-size:11px;color:${chip_risk.startsWith('✓')?'var(--ok)':'var(--warn)'}">${chip_risk}</div>
+        <div style="font-size:11px;color:${mfu_rev_factor>=1?'var(--ok)':'var(--warn)'};margin-top:4px">${mfu_rev_factor>=1?'▲':'▼'} ${Math.abs((mfu_rev_factor-1)*100).toFixed(0)}% vs market MFU benchmark</div>
+      </div>
+      <div style="background:var(--page);border-radius:4px;padding:12px">
+        <div style="font-size:10px;font-weight:700;color:${killers.length?'var(--err)':'var(--ok)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${killers.length?`${killers.length} Deal Risk${killers.length>1?'s':''}` : 'No Deal Killers'}</div>
+        ${killers.length ? killers.map(k=>`<div style="display:flex;gap:6px;margin-bottom:5px"><span style="color:var(--err);flex-shrink:0">✗</span><span style="font-size:11px;color:var(--text-b)">${k}</span></div>`).join('') : '<div style="font-size:12px;color:var(--ok)">✓ No critical blockers identified</div>'}
+      </div>
+      <div style="background:var(--page);border-radius:4px;padding:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--volt);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Voltai Earns</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-h);margin-bottom:4px">${voltai_econ.earn}</div>
+        <div style="font-size:11px;color:var(--text-s)">${voltai_econ.note}</div>
+      </div>
+    </div>
+    ${verify_items.length ? `<div style="margin-top:12px;padding:10px 14px;background:var(--warn-bg);border:1px solid var(--warn-b);border-radius:4px">
+      <div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px">Must verify before LOI (${verify_items.length} items)</div>
+      ${verify_items.map(v=>`<div style="font-size:11px;color:var(--text-b);padding:2px 0">⚠ ${v}</div>`).join('')}
+    </div>` : ''}`;
+
+  document.getElementById('s_site_fit').innerHTML=`
+    <div class="card-hdr">Site × Chip Fit</div>
+    ${rowHtml('Chip',chip.n+(chip.ver?' ✓':' ◐'))}
+    ${rowHtml('GPUs (Phase 1)',fn(gpus1)+' ('+racks1+' racks)','')}
+    ${rowHtml('GPUs / MW IT',Math.round(gpus1/it_mw1)+'  · '+pct(chip.g*1/(chip.kw/1000)/10)+' GPUs/kW','')}
+    ${rowHtml('PUE (est.)',pue1.toFixed(2)+'  · '+heat_rej+' cooling','')}
+    ${rowHtml('Free cooling',pct(fc_frac)+' of year',fc_frac>.6?'ok':fc_frac>.3?'warn':'err')}
+    ${rowHtml('Container OK',chip.compat_box?'✓ Yes':'✗ No at '+chip.kw_max+'kW/rack',chip.compat_box?'ok':'err')}
+    ${rowHtml('Cooling req.',chip.cool+(chip.cool==='DLC'&&cduKey.includes('vertiv')?' ⚠ CDU selected':''),chip.cool==='DLC'&&cduKey.includes('vertiv')?'warn':'ok')}
+    ${rowHtml('BTM',btm_on?btm_mw+'MW ('+document.getElementById('btm_src').value+')':'Not configured','')}`;
+
+  const p2_str=exp_mw>0?`Phase 2 +${exp_mw}MW in ${exp_months}mo → ${fn(gpus2)} GPUs total`:'No expansion configured';
+  document.getElementById('s_phase_plan').innerHTML=`
+    <div class="card-hdr">Phase Plan</div>
+    <div class="phase-timeline">
+      <div class="ph-lbl">Phase 1</div>
+      <div class="ph-bar">
+        <div class="ph-seg" style="left:${Math.min(90,p1_months*1.5)}%;width:${Math.max(5,40)}%;background:var(--volt-mid)"></div>
+      </div>
+    </div>
+    ${exp_mw>0?`<div class="phase-timeline"><div class="ph-lbl">Phase 2</div><div class="ph-bar"><div class="ph-seg" style="left:${Math.min(90,(p1_months+exp_months)*1.2)}%;width:35%;background:var(--ok)"></div></div></div>`:''}
+    ${rowHtml('Go-live (P1)',p1_months+' months from today','')}
+    ${rowHtml('Phase 1',grid_mw+'MW · '+fn(gpus1)+' GPUs · '+racks1+' racks','')}
+    ${exp_mw>0?rowHtml('Phase 2 online',p1_months+'+'+exp_months+' months = '+(p1_months+exp_months)+' mo',''):rowHtml('Expansion','Not modeled','warn')}
+    ${exp_mw>0?rowHtml('Phase 2',grid_mw+'+'+exp_mw+'='+(grid_mw+exp_mw)+'MW · '+fn(gpus2)+' GPUs total',''):''}
+    ${rowHtml('10yr NPV',fm(npv),npv>0?'ok':'err')}
+    ${rowHtml('IRR',irr>0&&irr<5?(irr*100).toFixed(0)+'%':'N/A',irr>.15?'ok':irr>.08?'warn':'err')}
+    ${rowHtml('Asset value (Yr5)',fm(asset_val),'ok')}`;
+
+  document.getElementById('s_risks').innerHTML=`
+    <div class="card-hdr">Risk Flags</div>
+    ${pq.length===0?'<span class="flag ok">No critical power flags</span>':pq.map(p=>`<div style="display:flex;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)"><span class="flag ${p.s}">${p.s==='err'?'✗':'⚠'}</span><span style="font-size:12px;color:var(--text-b)">${p.t}</span></div>`).join('')}
+    ${parsed<5?`<div style="display:flex;gap:6px;padding:4px 0"><span class="flag warn">⚠</span><span style="font-size:12px;color:var(--text-b)">Data room incomplete — ${7-parsed} documents missing, model uncertainty elevated</span></div>`:''}
+    ${chip.cool==='DLC'&&cduKey.includes('vertiv')?`<div style="display:flex;gap:6px;padding:4px 0"><span class="flag warn">⚠</span><span style="font-size:12px;color:var(--text-b)">MI355X requires DLC but CDU selected — check product compatibility</span></div>`:''}
+    ${erosion>0.3?`<div style="display:flex;gap:6px;padding:4px 0"><span class="flag warn">⚠</span><span style="font-size:12px;color:var(--text-b)">High GPU price erosion (${pct(erosion)}/yr) — revenue in later years substantially lower</span></div>`:''}`;
+
+  document.getElementById('s_dr_status').innerHTML=`
+    <div class="card-hdr">Data Room — ${parsed}/7 parsed</div>
+    <div style="background:var(--main-bg);border-radius:3px;overflow:hidden;margin-bottom:10px"><div style="height:4px;background:var(--ok);width:${parsed/7*100}%"></div></div>
+    ${rowHtml('Missing docs',7-parsed>0?['Power Quality','Geotech','Environmental','Title'].slice(0,7-parsed).join(', '):'None',7-parsed>0?'warn':'ok')}
+    ${rowHtml('Model confidence',parsed>=6?'High':parsed>=4?'Medium':'Low — high uncertainty',parsed>=6?'ok':parsed>=4?'warn':'err')}
+    <div style="font-size:11px;color:var(--text-s);margin-top:8px">Power quality report is most critical for training workload reliability. Environmental + geotech needed before LOI.</div>`;
+
+  // ══════════ TAB: 10-YEAR MODEL ══════════
+  const yr5_ebitda=model[5]?.ebitda||0;
+  const total_proj_capex = p1_total_hi + it_total;
+  document.getElementById('model_summary_card').innerHTML=`
+    <div class="card-hdr">Financial Summary</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+      ${[
+        ['10-yr NPV',fm(npv),npv>0?'#16a34a':'#dc2626'],
+        ['IRR',irr>0&&irr<5?(irr*100).toFixed(0)+'%':'N/A',irr>.15?'#16a34a':irr>.08?'#d97706':'#dc2626'],
+        ['Yr5 EBITDA',fm(yr5_ebitda),'#2d86bd'],
+        ['Asset Value Yr5',fm(asset_val),'#2d86bd'],
+        ['Dev Capex',fm(p1_total_hi),'#334455'],
+        ['Full Project',fm(total_proj_capex),'#334455'],
+      ].map(([l,v,c])=>`<div style="background:var(--card-bg);border:1px solid var(--card-border);border-top:2px solid ${c};border-radius:4px;padding:8px 10px"><div style="font-family:var(--mono);font-size:16px;font-weight:600;color:${c};line-height:1;margin-bottom:2px">${v}</div><div style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-s)">${l}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:16px;font-size:11px;color:var(--text-s)">
+      <span>Go-live: <b>Y0+${p1_months}mo</b></span>
+      <span>Power: <b>$${pwr_rate.toFixed(3)}/kWh</b> = ${fm(opex_power)}/yr</span>
+      <span>Rev model: <b>${rev_model==='lease'?'Fixed lease (no erosion)':'Spot GPU ('+pct(erosion)+'/yr erosion)'}</b></span>
+      <span>Discount: <b>${pct(disc_rate)}</b></span>
+    </div>`;
+
+  document.getElementById('model_table').innerHTML=`
+    <tr><th>Year</th><th>GPUs</th><th>$/GPU hr</th><th>Revenue</th><th>Power Cost</th><th>Staff+Maint</th><th>EBITDA</th><th>Margin</th><th>Capex</th><th>FCF</th></tr>
+    ${model.map(r=>{
+      const pre=!r.is_live&&r.capex===0;
+      const under=!r.is_live&&r.capex>0;
+      return `<tr class="${r.y===5?'total':pre?'pre':''}">
+      <td>Y${r.y}${under?' 🔨':pre?' ⏳':''}</td>
+      <td>${r.cap_gpus>0?fc(r.cap_gpus):'—'}</td>
+      <td>${r.is_live?'$'+r.gpu_price_y.toFixed(2):'—'}</td>
+      <td class="${r.rev>0?'hi':''}">${r.rev>0?fm(r.rev):'—'}</td>
+      <td>${r.opex_power>0?fm(r.opex_power):'—'}</td>
+      <td>${r.opex_other>0?fm(r.opex_staff+r.opex_other):'—'}</td>
+      <td class="${r.ebitda>0?'hi':r.ebitda<0?'neg':''}">${r.rev>0?fm(r.ebitda):'—'}</td>
+      <td>${r.rev>0?(r.ebitda/r.rev*100).toFixed(0)+'%':'—'}</td>
+      <td class="${r.capex>0?'neg':''}">${r.capex>0?fm(-r.capex):'—'}</td>
+      <td class="${r.fcf>0?'hi':r.fcf<0?'neg':''}">${fm(r.fcf)}</td>
+    </tr>`;}).join('')}`;
+
+  // ══════════ TAB: CHIP & POWER ══════════
+  document.getElementById('chip_specs_card').innerHTML=`
+    <div class="card-hdr">${chip.n} <span class="flag ${chip.ver?'ok':'warn'}">${chip.ver?'● VERIFIED':'◐ ESTIMATED'}</span></div>
+    <div style="margin-bottom:8px;font-size:11px;color:var(--text-s)">${chip.status} · ${chip.src}</div>
+    ${chip.specs.map(([n,v,ver])=>`<div class="row"><span class="rn">${n}</span><div style="display:flex;gap:6px;align-items:center"><span class="rv">${v}</span><span class="flag ${ver==='✓'?'ok':'warn'}" style="font-size:7px">${ver}</span></div></div>`).join('')}`;
+
+  document.getElementById('chip_power_card').innerHTML=`
+    <div class="card-hdr">Workload Impact <span class="flag ${mfu_rev_factor>=1?'ok':'warn'}">${mfu_rev_factor>=1?'▲':'▼'} ${Math.abs((mfu_rev_factor-1)*100).toFixed(0)}% vs market MFU</span></div>
+    <div style="display:grid;gap:4px;margin-bottom:12px;padding:10px;background:var(--volt-light);border-radius:4px;border:1px solid #bfdbfe">
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-b)">Workload</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-h)">${wl==='train'?'LLM Training':wl==='infer'?'Inference':'Mixed'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-b)">Est. MFU range</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-h)">${pct(mfu_r[0])} – ${pct(mfu_r[1])}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-b)">Market MFU benchmark (in pricing)</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--text-s)">${pct(wl_data.mfu_mkt)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-b)">Revenue factor vs market</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:${mfu_rev_factor>=1?'var(--ok)':'var(--warn)'}">${(mfu_rev_factor*100).toFixed(0)}% (${mfu_rev_factor>=1?'+':''}${((mfu_rev_factor-1)*100).toFixed(0)}%)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-b)">Avg power draw vs TDP</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--text-h)">${pct(avg_power_pct)} → $${fm(opex_power).replace('$','')}/yr power cost</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-s);margin-bottom:10px">${wl_data.power_note}</div>
+    <div style="font-size:11px;color:var(--text-s);padding:8px;background:#fafafa;border:1px solid var(--card-border);border-radius:3px">
+      <b>Why MFU affects revenue:</b> GPU hour pricing is calibrated to ~${pct(wl_data.mfu_mkt)} real MFU. Infrastructure that achieves higher MFU delivers more compute per GPU hour — offtakers either pay a premium or renew more readily. Poor MFU (bad cooling, wrong chip for workload) forces price concessions. This is the core of what Voltai's workload simulation layer would formally validate.
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:9px;font-family:var(--mono);color:var(--text-s);margin-bottom:6px;letter-spacing:.04em">TRAINING POWER PHASES ◐ estimated</div>
+      ${[['Forward pass','~95–100%',100],['Backward pass','~100%',100],['All-reduce comm','~60–75%',67],['Checkpoint','~50–65%',57],['Optimizer step','~85–95%',90]].map(([p,pct_,w])=>`
+      <div style="margin-bottom:5px;display:grid;grid-template-columns:110px 1fr 60px;gap:6px;align-items:center">
+        <span style="font-size:11px;color:var(--text-s)">${p}</span>
+        <div style="height:5px;background:#f1f5f9;border-radius:3px"><div style="height:100%;background:var(--volt);border-radius:3px;width:${w}%;opacity:.7"></div></div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-b);text-align:right">${pct_}</span>
+      </div>`).join('')}
+    </div>`;
+
+  document.getElementById('chip_pq_card').innerHTML=`
+    <div class="card-hdr">Power Delivery Assessment — ${go_label} · ${go_vol} volatility · ${go_saidi} outages/yr</div>
+    <div class="g2">
+      <div>
+        ${rowHtml('Delivery voltage',voltage+'kV',voltage>=69?'ok':'warn')}
+        ${rowHtml('Circuit',circuit==='dual'?'✓ Dual (N+1)':'⚠ Single',circuit==='dual'?'ok':'warn')}
+        ${rowHtml('Substation rating',sub_mva+'MVA ('+((sub_mva-grid_mw)>0?'+'+(sub_mva-grid_mw).toFixed(0):sub_mva-grid_mw)+'MW headroom)',sub_mva>grid_mw*1.3?'ok':'warn')}
+        ${rowHtml('Grid stiffness',sc_mva+'MVA SC · '+((grid_mw/sc_mva)*100).toFixed(0)+'% load/SC',stiff_ok?'ok':'warn')}
+      </div>
+      <div>
+        ${rowHtml('Power quality report',document.getElementById('dr_pq').classList.contains('ok')?'✓ From data room':'✗ Missing',document.getElementById('dr_pq').classList.contains('ok')?'ok':'err')}
+        ${rowHtml('GPU checkpoint spike','~+30% TDP · 15sec (est.)','unk')}
+        ${rowHtml('Voltage sag tolerance','◯ Not published for '+chipKey,'unk')}
+        ${rowHtml('On-board smoothing',chipKey==='GB300'?'✓ ~65J/GPU':'◐ Unknown','GB300'===chipKey?'ok':'warn')}
+      </div>
+    </div>`;
+
+  // ══════════ TAB: COOLING ══════════
+  document.getElementById('cool_cdu_card').innerHTML=`
+    <div class="card-hdr">${cdu.n} <span class="flag ${cdu.ver?'ok':'warn'}">${cdu.ver?'● VERIFIED':'◐ ESTIMATED'}</span></div>
+    <div style="font-size:11px;color:var(--text-s);margin-bottom:8px">${cdu.src}</div>
+    ${rowHtml('Cooling capacity',cdu.cap.toLocaleString()+' kW','')}
+    ${rowHtml('Max secondary flow',cdu.flow.toLocaleString()+' L/min','')}
+    ${rowHtml('Self power draw',cdu.self_kw+' kW','')}
+    ${rowHtml('Secondary temp range',cdu.t_min+'–'+cdu.t_max+'°C','')}
+    ${rowHtml('Lead time',cdu.lead+' weeks','')}
+    ${rowHtml('CDUs needed (1/pod)',pods1+'','')}
+    ${rowHtml('Per-CDU load',((it_mw1*1000)/Math.max(1,pods1)).toFixed(0)+'kW vs '+cdu.cap+'kW cap',(it_mw1*1000)/Math.max(1,pods1)<cdu.cap?'ok':'err')}`;
+
+  document.getElementById('cool_fc_card').innerHTML=`
+    <div class="card-hdr">Free Cooling & Climate</div>
+    ${rowHtml('Climate zone',climate_key.replace('_',' ')+'','')}
+    ${rowHtml('Peak dry bulb',climate_data[0]+'°C','')}
+    ${rowHtml('Peak wet bulb',climate_data[1]+'°C','')}
+    ${rowHtml('Annual avg wet bulb',climate_data[2]+'°C','')}
+    ${rowHtml('Free cooling availability',pct(fc_frac)+' of year',fc_frac>.6?'ok':fc_frac>.3?'warn':'err')}
+    ${rowHtml('Trim cooler',heat_rej==='trim'||heat_rej==='hybrid'?'Vertiv CoolLoop · up to 3MW':'Not used','')}
+    ${rowHtml('Chiller needed',heat_rej==='chiller'?'Full plant required':heat_rej==='hybrid'?'Assist only (hot periods)':'No',heat_rej==='chiller'?'warn':'ok')}
+    <div style="margin-top:10px;padding:8px;background:var(--main-bg);border:1px solid var(--purple)30;border-radius:3px">
+      <div style="font-size:8px;font-family:var(--mono);color:var(--purple);margin-bottom:4px">◯ VERTIV TECHNICAL TEAM NEEDED</div>
+      <div style="font-size:11px;color:var(--text-b)">CDU performance under transient AI training loads · Trim cooler capacity at 25/30/35/40°C ambient · Thermal storage sizing for checkpoint events. Giordano Albertazzi (Vertiv CEO) agreed to connect technical teams — July 2026.</div>
+    </div>`;
+
+  document.getElementById('cool_vertiv_card').innerHTML=`
+    <div class="card-hdr">DSX Context</div>
+    <div class="g3">
+      <div style="padding:10px;background:var(--bg1);border:1px solid var(--border);border-radius:3px">
+        <div style="font-size:12px;font-weight:600;color:var(--volt);margin-bottom:4px">NVIDIA DSX</div>
+        <div style="font-size:11px;color:var(--text-b);line-height:1.5">DGX SuperPOD Experience — NVIDIA's full AI factory reference stack. Defines compute + networking + physical infrastructure together. Vertiv implements the thermal/power layer.</div>
+      </div>
+      <div style="padding:10px;background:var(--bg1);border:1px solid var(--border);border-radius:3px">
+        <div style="font-size:12px;font-weight:600;color:var(--warn);margin-bottom:4px">The Gap</div>
+        <div style="font-size:11px;color:var(--text-b);line-height:1.5">DSX defines what the infrastructure should look like. It doesn't tell you whether a specific site can support it, or whether the system will run workloads at expected MFU.</div>
+      </div>
+      <div style="padding:10px;background:var(--volt-light)20;border:1px solid var(--volt-mid);border-radius:3px">
+        <div style="font-size:12px;font-weight:600;color:var(--volt4);margin-bottom:4px">Voltai Layer</div>
+        <div style="font-size:11px;color:var(--text-b);line-height:1.5">DSX validation — formally verify that a site meets DSX infrastructure requirements and the system will perform as specified. The "pre-build correctness" layer.</div>
+      </div>
+    </div>`;
+
+  // ══════════ TAB: CAPEX ══════════
+  document.getElementById('capex_dev_card').innerHTML=`
+    <div class="card-hdr">Developer Capex (facility + land + utility)</div>
+    ${rowHtml('Electrical (transformers, UPS, gen, busway)',fm(fac_mid*.38),'',)}
+    ${rowHtml('Mechanical (CDUs, trim coolers, piping)',fm(fac_mid*.28),'')}
+    ${rowHtml('Civil / shell / structure',fm(fac_mid*.22),'')}
+    ${rowHtml('Soft costs (engineering, permitting)',fm(fac_mid*.12),'')}
+    <div style="border-top:1px solid var(--border2);margin:6px 0"></div>
+    ${rowHtml('Facility subtotal',fm(fac_lo)+'–'+fm(fac_hi),'warn')}
+    ${rowHtml('Land',fm(land_cost)+'  ($'+Math.round(land_pmw/1000)+'K/MW IT)','')}
+    ${rowHtml('Utility / interconnect works',fm(util_works_m),'warn')}
+    ${rowHtml('Phase 2 facility',exp_mw>0?fm(p2_fac):'—','')}
+    <div style="border-top:1px solid var(--volt-light);margin:6px 0"></div>
+    ${rowHtml('Dev Capex Total',fm(p1_total_lo)+'–'+fm(p1_total_hi),'ok')}
+    <div style="font-size:11px;color:var(--text-s);margin-top:8px">$9–13M/MW IT facility range: Helio Appendix B "industry-reported all-in" — needs bottom-up costing. Factory-integrated: schedule compression reduces financing cost. Tiered UPS: −25–35% electrical capex.</div>`;
+
+  document.getElementById('capex_it_card').innerHTML=`
+    <div class="card-hdr">IT Hardware Capex (offtaker's cost)</div>
+    <div style="font-size:11px;color:var(--text-b);margin-bottom:8px">Offtakers finance their own IT hardware separately. Shown for context — affects deal size and offtaker creditworthiness.</div>
+    ${rowHtml('GPU hardware',fn(it_hw/1e6>1?it_hw:it_hw)+' · '+fn(gpus1)+' GPUs × $'+gpu_cost_k+'K','')}
+    ${rowHtml('Server / rack (non-GPU)',fm(server_non_gpu)+' · '+racks1+' racks × ~$80K','')}
+    ${rowHtml('Network fabric',fm(net_fabric)+' · ~$12K/rack','')}
+    <div style="border-top:1px solid var(--border2);margin:6px 0"></div>
+    ${rowHtml('IT Hardware Total',fm(it_total),'warn')}
+    ${rowHtml('IT as % of full project',((it_total/(it_total+p1_total_hi))*100).toFixed(0)+'%','')}
+    ${rowHtml('Full project (dev + IT)',fm(p1_total_hi+it_total),'err')}
+    <div style="font-size:11px;color:var(--text-s);margin-top:8px">GPU cost est. $${gpu_cost_k}K/unit · H100 was $25–35K. GB300 estimated higher. Price is volatile — adjust slider. IT hardware is typically 60–75% of total project cost.</div>`;
+
+  document.getElementById('capex_val_card').innerHTML=`
+    <div class="card-hdr">Asset Valuation</div>
+    <div class="g3">
+      ${[['Yr 5 EBITDA',fm(y5.ebitda)],['EBITDA Multiple',ebitda_mult+'×'],['Implied Asset Value',fm(asset_val)]].map(([l,v])=>`<div class="kpi"><div class="kv" style="font-size:16px">${v}</div><div class="kl">${l}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:10px;display:grid;gap:4px">
+      ${rowHtml('10-yr NPV ('+pct(disc_rate)+' discount)',fm(npv),npv>0?'ok':'err')}
+      ${rowHtml('IRR',irr>0&&irr<5?(irr*100).toFixed(1)+'%':'N/A',irr>.15?'ok':irr>.08?'warn':'err')}
+      ${rowHtml('Payback (dev capex)',y5.rev>0?(p1_total_hi/y5.rev).toFixed(1)+'yr':'—','')}
+    </div>
+    <div style="font-size:11px;color:var(--text-s);margin-top:8px">AI DCs currently trading 15–25× EBITDA. ${ebitda_mult}× used. Power cost is ${((grid_opex_yr/y5.rev)*100).toFixed(0)}% of revenue — major sensitivity. Cheap power (Vidalia hydro $0.03/kWh) vs national avg ($0.07/kWh) = significant EBITDA difference.</div>`;
+
+  // ══════════ TAB: BOM ══════════
+  upd('bom_hdr','Equipment BOM — '+site+' · '+it_mw1.toFixed(1)+' MW IT');
+  const bom_items=[
+    {qty:Math.max(1,Math.round(pods1*1.5)), name:'Transformers', spec:vbom.tx, lead:vbom.tx_lead, src:'Maddox / Schneider Trihal', ver:true},
+    {qty:pods1, name:chip.cool==='DLC'?'DLC Skids':'CDUs', spec:cdu.n+' · '+cdu.cap+'kW', lead:cdu.lead+' wks', src:cdu.ver?'Vertiv / Motivair':'Estimate', ver:cdu.ver},
+    {qty:Math.max(1,Math.round(it_mw1/5)), name:'MV Switchgear', spec:vbom.sw+' · SF6-free', lead:'18–30 wks', src:'Schneider SM AirSeT / ABB UniGear', ver:false},
+    {qty:Math.max(1,Math.round(pods1*.75)), name:'UPS Modules', spec:'2.5–3.0 MW · Li-ion VFI', lead:'16–24 wks', src:'Vertiv Trinergy / Schneider VXL', ver:false},
+    {qty:Math.max(1,Math.round(it_mw1/5)), name:'Standby Generators', spec:'~3 MW · ISO 8528', lead:'20–28 wks', src:'Cat 3516C / Cummins QSK95', ver:false},
+    {qty:Math.max(1,Math.round(pods1*.5)), name:'Trim Coolers', spec:'Vertiv CoolLoop · up to 3MW ea', lead:'16–22 wks', src:'Vertiv (range verified)', ver:true},
+    {qty:racks1, name:'Racks / NVL72 Systems', spec:chip.kw_max+'kW max · '+chip.g+' GPUs', lead:'Per NVIDIA/OEM alloc.', src:'NVIDIA allocated', ver:false},
+    {qty:Math.max(1,Math.ceil(racks1/32)), name:'IB/Ethernet Spine Switches', spec:'400G/800G · InfiniBand NDR or Spectrum-X', lead:'12–20 wks', src:'NVIDIA Quantum-X800 / Spectrum-X', ver:false},
+    {qty:racks1, name:'Rack PDUs (per rack)', spec:'3-phase · 48V DC or 400V AC', lead:'6–10 wks', src:'Vertiv / Raritan / APC', ver:false},
+    {qty:Math.max(1,Math.round(pods1*0.5)), name:'Thermal Storage Tanks', spec:'~100–120 m³/wing · stratified buffer', lead:'8–14 wks', src:'Standard fabricators (Helio §6.2)', ver:false},
+    {qty:Math.max(1,Math.round(it_mw1/20)), name:'HV/MV Transformers (grid intake)', spec:vbom.sw+' · '+vbom.tx, lead:vbom.tx_lead, src:'Schneider / ABB / Siemens', ver:false},
+  ];
+  document.getElementById('bom_grid').innerHTML=bom_items.map(b=>`
+    <div class="bom-item">
+      <div class="bom-qty">${b.qty}</div>
+      <div class="bom-name">${b.name}</div>
+      <div class="bom-spec">${b.spec}</div>
+      <div class="bom-lead">⏱ ${b.lead}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <div class="bom-src">${b.src}</div>
+        <div class="${b.ver?'bom-ver':'bom-spec'}">${b.ver?'✓ verified':'◐ est.'}</div>
+      </div>
+    </div>`).join('');
+
+  // ══════════ TAB: GAPS ══════════
+  document.getElementById('gaps_content').innerHTML=`
+    <div class="gap" style="border:1px solid #4acd8d30;background:#4acd8d06">
+      <div class="gap-hdr"><div class="gap-dot" style="background:var(--ok)"></div><span class="gap-team" style="color:var(--ok)">EE / Chip Team — Highest Priority</span><span class="flag ok" style="margin-left:auto">UNLOCKS CORE PRODUCT</span></div>
+      <ul class="gap-list">
+        <li>Actual rack power draw curves at 70/80/90% MFU — training vs inference — for GB300, MI355X, B200. Currently using nameplate TDP.</li>
+        <li>Checkpoint power spike: peak magnitude (~+30% est.), ramp rate, duration (~15 sec est.) — needs direct measurement</li>
+        <li>All-reduce communication phase power draw (GPU compute-idle, network-active state)</li>
+        <li>On-board power smoothing spec for MI355X and Vera Rubin (only confirmed for GB300 at ~65J/GPU)</li>
+        <li>Fault ride-through: does a training job survive a 200ms voltage sag? Checkpoint restart or full restart?</li>
+        <li>MFU calibration by cluster size: communication overhead grows, MFU drops as cluster scales</li>
+      </ul>
+      <div class="gap-cur">Currently: NVIDIA published TDP + MLPerf MFU ranges + academic literature</div>
+    </div>
+    <div class="gap" style="border:1px solid #e0a84a30;background:#e0a84a06;margin-top:8px">
+      <div class="gap-hdr"><div class="gap-dot" style="background:var(--warn)"></div><span class="gap-team" style="color:var(--warn)">Site / Data Room</span></div>
+      <ul class="gap-list">
+        <li>Confirmed power delivery: utility interconnect study with exact MW, queue position, energization date</li>
+        <li>Power quality report: THD, voltage sag frequency/magnitude, fault ride-through capability at this substation</li>
+        <li>Expansion path verification: is "path to ${exp_mw||50}MW" a $2M transformer or $50M substation rebuild?</li>
+        <li>Fiber: confirmed providers, distance to POP, redundant path availability</li>
+        <li>Geotechnical: soil bearing capacity, seismic zone (drives foundation cost significantly)</li>
+        <li>Environmental: Phase I contamination screen, FEMA flood zone map, wetlands delineation</li>
+        <li>Water: availability for cooling make-up, wastewater discharge permit</li>
+      </ul>
+      <div class="gap-cur">Currently: user-entered headline MW. Future: Enverus power flow API + automated PDF data room parser</div>
+    </div>
+    <div class="gap" style="border:1px solid var(--volt-mid)50;background:var(--volt-light)08;margin-top:8px">
+      <div class="gap-hdr"><div class="gap-dot" style="background:var(--info)"></div><span class="gap-team" style="color:var(--info)">Cooling → Vertiv Technical Team</span><span class="flag info" style="margin-left:auto">PARTNERSHIP PROPOSED · JULY 2026</span></div>
+      <ul class="gap-list">
+        <li>XDU1350 thermal performance under transient AI training loads — checkpoint spikes and all-reduce lulls create thermal events steady-state specs don't capture</li>
+        <li>Trim cooler (CoolLoop) capacity curves at 20/25/30/35/40°C ambient wet-bulb — for climate-specific PUE accuracy</li>
+        <li>Thermal storage sizing: how much stratified buffer (m³) for a 142kW/rack checkpoint event at full hall?</li>
+        <li>Free cooling threshold: exact wet-bulb temperature at which chiller assist becomes necessary</li>
+        <li>Modular skid specs: connection planes and interface standards for factory-integrated MEP blocks</li>
+      </ul>
+      <div class="gap-cur">Currently: published datasheet steady-state specs + Helio HRD-001 design assumptions (colleague-built, not PE-stamped)</div>
+    </div>
+    <div class="gap" style="border:1px solid #a97ae830;background:#a97ae808;margin-top:8px">
+      <div class="gap-hdr"><div class="gap-dot" style="background:var(--purple)"></div><span class="gap-team" style="color:var(--purple)">Financial Model — Calibration Needed</span></div>
+      <ul class="gap-list">
+        <li>GPU hour pricing: volatile market. Spot vs. reserved pricing. Eroded H100 pricing is not a reliable proxy for GB300.</li>
+        <li>Facility capex $9–13M/MW: Helio Appendix B "industry range" placeholder. Bottom-up BOM costing exercise needed per site.</li>
+        <li>Opex: staff, maintenance, insurance estimates are industry rules-of-thumb — not site-specific quotes</li>
+        <li>GPU cost: no public pricing for GB300. H100 analog ($25–35K) used as proxy. AMD MI355X pricing varies by agreement.</li>
+        <li>Phase 2 capex reduction (20%): rough estimate. Actual depends on shared infrastructure scope.</li>
+      </ul>
+      <div class="gap-cur">Currently: market estimates + Helio Appendix B + public pricing proxies</div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+fetchSite();
+</script>
+</body>
+</html>

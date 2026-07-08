@@ -1,0 +1,12 @@
+/* ============================================================
+   Voltai Design System — global entry point
+   Consumers link THIS one file. It is a manifest of @imports
+   only; every token + @font-face lives in the files below.
+   ============================================================ */
+
+@import "./tokens/fonts.css";
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
+@import "./tokens/elevation.css";
+@import "./tokens/base.css";

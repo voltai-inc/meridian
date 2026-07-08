@@ -1,0 +1,147 @@
+/* ============================================================
+   Voltai — Color Tokens
+   ------------------------------------------------------------
+   Futuristic, cool, cinematic. The palette is built on:
+     · INK / VOID  — near-black blues, the foundation
+     · VOLT        — Voltai's electric steel-blue accent
+                     (sampled from the wafer-diffraction imagery)
+     · NEUTRAL     — cool gray ramp for structure
+     · ICE         — luminous near-white blues for highlights/glow
+   Spectral diffraction accents are reserved for data viz.
+   ============================================================ */
+
+:root {
+  /* ---- Ink (cool near-black foundation) ---- */
+  --ink-900: #060a0e; /* deepest ink */
+  --ink-800: #0c131a;
+  --ink-700: #141d26;
+  --ink-600: #26323d;
+
+  /* ---- Surface (cool light register) ---- */
+  --paper-000: #ffffff;
+  --paper-050: #f6f8fb; /* canvas — cool off-white */
+  --paper-100: #eef2f6; /* raised surface */
+  --paper-200: #e2e8ee; /* sunken / fill */
+  --paper-300: #d2dae2; /* hairline border */
+
+  /* ---- Volt (Voltai electric steel-blue) ---- */
+  --volt-900: #02121d; /* sampled — deepest blue shadow */
+  --volt-800: #0a2433;
+  --volt-700: #143a52;
+  --volt-600: #1f5e85; /* BRAND mid */
+  --volt-500: #2d86bd; /* vivid */
+  --volt-400: #4fb0e6; /* electric accent — on dark */
+  --volt-300: #86cdf0;
+  --volt-200: #b9e1f6; /* tint / ring */
+  --volt-100: #dceefb;
+  --volt-050: #eff7fd; /* faintest wash */
+
+  /* ---- Ice (luminous highlights / glow) ---- */
+  --ice-100: #fafcfe; /* sampled bright highlight */
+  --ice-300: #cfe2ee;
+  --ice-500: #9dbbd4; /* sampled steel highlight */
+
+  /* ---- Neutral (cool gray ramp) ---- */
+  --neutral-950: #080b0e;
+  --neutral-900: #11151a;
+  --neutral-800: #1a1f26;
+  --neutral-700: #29313a;
+  --neutral-600: #424c57;
+  --neutral-500: #68727d;
+  --neutral-400: #949da7;
+  --neutral-300: #bfc6ce;
+  --neutral-200: #dbe0e6;
+  --neutral-100: #ebeef2;
+  --neutral-050: #f4f6f9;
+
+  /* ---- Void (cinematic dark surfaces) ---- */
+  --void-000: #04080c; /* deepest background */
+  --void-100: #080d13;
+  --void-200: #0e151c; /* card on void */
+  --void-300: #16202a; /* raised */
+  --void-400: #1f2c38; /* fill / input */
+
+  /* ---- Spectral (diffraction data accents — use sparingly) ---- */
+  --spectral-cyan: #46c6e0;
+  --spectral-blue: #4f8fe6;
+  --spectral-violet: #7b76e0;
+  --spectral-teal: #3fb8a6;
+  --spectral-amber: #e0a64b;
+
+  /* ---- Status ---- */
+  --status-success: #2fa37a;
+  --status-warning: #d8a93a;
+  --status-danger: #d05a47;
+  --status-info: var(--volt-500);
+
+  /* ============================================================
+     SEMANTIC ALIASES — default (LIGHT / cool) theme
+     Components reference THESE, not the primitives above.
+     ============================================================ */
+
+  /* surfaces */
+  --bg: var(--paper-050);
+  --surface: var(--paper-000);
+  --surface-raised: var(--paper-000);
+  --surface-sunken: var(--paper-100);
+  --surface-fill: var(--paper-200);
+
+  /* text */
+  --text-strong: var(--ink-900);
+  --text-body: var(--ink-700);
+  --text-muted: var(--neutral-500);
+  --text-faint: var(--neutral-400);
+  --text-on-accent: var(--ice-100);
+  --text-inverse: var(--paper-050);
+
+  /* borders */
+  --border: var(--paper-300);
+  --border-strong: var(--neutral-300);
+  --hairline: rgba(6, 10, 14, 0.08);
+
+  /* brand / interactive */
+  --accent: var(--volt-600);
+  --accent-hover: var(--volt-500);
+  --accent-press: var(--volt-700);
+  --accent-tint: var(--volt-050);
+  --accent-ring: var(--volt-200);
+  --focus-ring: var(--volt-500);
+
+  /* selection */
+  --selection-bg: var(--volt-200);
+  --selection-fg: var(--ink-900);
+}
+
+/* ============================================================
+   DARK / VOID theme — apply `data-theme="dark"` on any element.
+   The primary, futuristic register: cinematic black-blue +
+   electric volt accent + icy glow.
+   ============================================================ */
+[data-theme="dark"] {
+  --bg: var(--void-000);
+  --surface: var(--void-200);
+  --surface-raised: var(--void-300);
+  --surface-sunken: var(--void-100);
+  --surface-fill: var(--void-400);
+
+  --text-strong: #eef4f9;
+  --text-body: #b8c4ce;
+  --text-muted: #76828d;
+  --text-faint: #4e5a64;
+  --text-on-accent: #04080c;
+  --text-inverse: var(--ink-900);
+
+  --border: rgba(120, 170, 210, 0.14);
+  --border-strong: rgba(120, 170, 210, 0.26);
+  --hairline: rgba(120, 170, 210, 0.09);
+
+  --accent: var(--volt-400);
+  --accent-hover: var(--volt-300);
+  --accent-press: var(--volt-500);
+  --accent-tint: rgba(79, 176, 230, 0.16);
+  --accent-ring: rgba(79, 176, 230, 0.45);
+  --focus-ring: var(--volt-400);
+
+  --selection-bg: rgba(79, 176, 230, 0.32);
+  --selection-fg: #eef4f9;
+}

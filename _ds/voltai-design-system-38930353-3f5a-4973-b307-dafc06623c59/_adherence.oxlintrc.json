@@ -1,0 +1,278 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "assets/**",
+              "components/core/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Space Grotesk|IBM Plex Mono))/i]",
+        "message": "Font not provided by the design system. Available: Space Grotesk, IBM Plex Mono."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|variant|size|accent|full|disabled|as|key|ref|className|style|children)$/]",
+        "message": "<Button> doesn't accept that prop. Declared props: children, variant, size, accent, full, disabled, as."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|secondary|ghost|inverse)$/]",
+        "message": "<Button> variant must be one of 'primary' | 'secondary' | 'ghost' | 'inverse'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md|lg)$/]",
+        "message": "<Button> size must be one of 'sm' | 'md' | 'lg'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Callout'] > JSXAttribute > JSXIdentifier[name!=/^(?:code|children|align|onVoid|rule|key|ref|className|style|children)$/]",
+        "message": "<Callout> doesn't accept that prop. Declared props: code, children, align, onVoid, rule."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Callout'] > JSXAttribute[name.name='align'] > Literal[value!=/^(?:left|right)$/]",
+        "message": "<Callout> align must be one of 'left' | 'right'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Tag'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|variant|accent|onVoid|key|ref|className|style|children)$/]",
+        "message": "<Tag> doesn't accept that prop. Declared props: children, variant, accent, onVoid."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Tag'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:outline|solid|signal)$/]",
+        "message": "<Tag> variant must be one of 'outline' | 'solid' | 'signal'."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "Button": {
+        "replaces": []
+      },
+      "Callout": {
+        "replaces": []
+      },
+      "Tag": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--accent-green",
+      "--accent-green-dim",
+      "--accent-green-ink",
+      "--bg-card",
+      "--bg-page",
+      "--bg-panel",
+      "--bg-void",
+      "--body-l",
+      "--body-m",
+      "--body-s",
+      "--border-soft",
+      "--border-thin",
+      "--border-void",
+      "--connector",
+      "--control-loop",
+      "--dash",
+      "--display-l",
+      "--display-m",
+      "--display-s",
+      "--display-xl",
+      "--dur-base",
+      "--dur-fast",
+      "--ease-mech",
+      "--font-body",
+      "--font-display",
+      "--font-mono",
+      "--frame-inset",
+      "--frame-line",
+      "--hair",
+      "--ink-100",
+      "--ink-200",
+      "--ink-300",
+      "--ink-500",
+      "--ink-700",
+      "--ink-900",
+      "--mono-l",
+      "--mono-m",
+      "--mono-s",
+      "--mono-xs",
+      "--node-size",
+      "--on-void",
+      "--on-void-muted",
+      "--paper-0",
+      "--paper-1",
+      "--paper-2",
+      "--paper-edge",
+      "--radius",
+      "--rule-soft",
+      "--rule-strong",
+      "--rule-void",
+      "--signal",
+      "--signal-on-void",
+      "--signal-text",
+      "--space-1",
+      "--space-10",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--space-9",
+      "--text-faint",
+      "--text-muted",
+      "--text-on-void",
+      "--text-on-void-muted",
+      "--text-primary",
+      "--text-secondary",
+      "--track-display",
+      "--track-mono",
+      "--track-mono-sm",
+      "--type-body",
+      "--type-caption",
+      "--type-fig",
+      "--type-heading",
+      "--type-hero",
+      "--type-label",
+      "--type-lead",
+      "--type-subhead",
+      "--type-tag",
+      "--type-title",
+      "--void-700",
+      "--void-800",
+      "--void-900",
+      "--void-line",
+      "--z-frame",
+      "--z-overlay"
+    ],
+    "tokenKinds": {
+      "--ink-900": "color",
+      "--ink-700": "color",
+      "--ink-500": "color",
+      "--ink-300": "color",
+      "--ink-200": "color",
+      "--ink-100": "color",
+      "--paper-0": "color",
+      "--paper-1": "color",
+      "--paper-2": "color",
+      "--paper-edge": "color",
+      "--void-900": "color",
+      "--void-800": "color",
+      "--void-700": "color",
+      "--void-line": "color",
+      "--on-void": "color",
+      "--on-void-muted": "color",
+      "--accent-green": "color",
+      "--accent-green-ink": "color",
+      "--accent-green-dim": "color",
+      "--bg-page": "color",
+      "--bg-panel": "color",
+      "--bg-card": "color",
+      "--bg-void": "color",
+      "--text-primary": "font",
+      "--text-secondary": "font",
+      "--text-muted": "font",
+      "--text-faint": "font",
+      "--text-on-void": "font",
+      "--text-on-void-muted": "font",
+      "--rule-strong": "color",
+      "--rule-soft": "color",
+      "--rule-void": "color",
+      "--signal": "color",
+      "--signal-text": "font",
+      "--signal-on-void": "color",
+      "--font-display": "font",
+      "--font-body": "font",
+      "--font-mono": "font",
+      "--display-xl": "color",
+      "--display-l": "color",
+      "--display-m": "color",
+      "--display-s": "color",
+      "--track-display": "spacing",
+      "--body-l": "color",
+      "--body-m": "color",
+      "--body-s": "color",
+      "--mono-l": "color",
+      "--mono-m": "color",
+      "--mono-s": "color",
+      "--mono-xs": "color",
+      "--track-mono": "spacing",
+      "--track-mono-sm": "spacing",
+      "--type-hero": "font",
+      "--type-title": "font",
+      "--type-heading": "font",
+      "--type-subhead": "font",
+      "--type-body": "font",
+      "--type-lead": "font",
+      "--type-caption": "font",
+      "--type-label": "font",
+      "--type-tag": "font",
+      "--type-fig": "font",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--space-9": "spacing",
+      "--space-10": "spacing",
+      "--hair": "spacing",
+      "--border-thin": "color",
+      "--border-soft": "color",
+      "--border-void": "color",
+      "--radius": "radius",
+      "--frame-inset": "spacing",
+      "--frame-line": "spacing",
+      "--node-size": "spacing",
+      "--connector": "spacing",
+      "--control-loop": "spacing",
+      "--dash": "other",
+      "--ease-mech": "other",
+      "--dur-fast": "other",
+      "--dur-base": "other",
+      "--z-frame": "other",
+      "--z-overlay": "other"
+    },
+    "fontFamilies": [
+      "IBM Plex Mono",
+      "Space Grotesk"
+    ]
+  }
+}

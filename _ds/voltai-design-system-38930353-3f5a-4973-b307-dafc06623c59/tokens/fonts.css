@@ -1,0 +1,5 @@
+/* Voltai typefaces — Space Grotesk (display) + IBM Plex Mono (labels/data).
+   Sourced from Google Fonts. If self-hosting is required, swap these
+   @import lines for local @font-face rules pointing at copied binaries. */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');

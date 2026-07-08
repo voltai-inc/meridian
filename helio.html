@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0b1016">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0b1016"/>
+    <g fill="none" stroke="#5793c0" stroke-width="6">
+      <rect x="360" y="250" width="220" height="300" rx="14"/>
+      <rect x="620" y="250" width="220" height="300" rx="14"/>
+      <line x1="600" y1="270" x2="600" y2="530"/>
+    </g>
+    <g fill="#5793c0" opacity="0.55">
+      <rect x="392" y="300" width="70" height="90" rx="6"/>
+      <rect x="478" y="300" width="70" height="90" rx="6"/>
+      <rect x="392" y="410" width="70" height="90" rx="6"/>
+      <rect x="478" y="410" width="70" height="90" rx="6"/>
+      <rect x="652" y="300" width="70" height="90" rx="6"/>
+      <rect x="738" y="300" width="70" height="90" rx="6"/>
+      <rect x="652" y="410" width="70" height="90" rx="6"/>
+      <rect x="738" y="410" width="70" height="90" rx="6"/>
+    </g>
+    <text x="600" y="640" text-anchor="middle" fill="#e1e8ef" font-family="monospace" font-size="34" letter-spacing="6">VOLTAI</text>
+    <text x="600" y="685" text-anchor="middle" fill="#76828d" font-family="monospace" font-size="18" letter-spacing="4">AI DATA CENTER · REFERENCE MODEL</text>
+  </svg>
+</template>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/colors.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/typography.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/tokens/base.css">
+<link rel="stylesheet" href="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/styles.css">
+<script src="_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/_ds_bundle.js"></script>
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:#0b1016; }
+  @keyframes flowdash { to { stroke-dashoffset:-24; } }
+  @keyframes pulseGlow { 0%,100%{ opacity:.5 } 50%{ opacity:1 } }
+  @keyframes hallIn { from { opacity:0; transform:translateY(12px) scale(.95);} to { opacity:1; transform:none; } }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  ::-webkit-scrollbar{ width:9px; height:9px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(155,168,182,.18); border-radius:6px; }
+  ::-webkit-scrollbar-thumb:hover{ background:rgba(155,168,182,.32); }
+  ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</helmet>
+<div data-theme="dark" style="height:100vh; min-height:640px; overflow:hidden; display:flex; flex-direction:column; background:#0b1016; color:#b8c4ce; font-family:var(--font-sans); letter-spacing:.005em;">
+
+  <header style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:11px 26px; border-bottom:1px solid rgba(155,168,182,.14);">
+    <div style="display:flex; align-items:center; gap:13px;">
+      <svg viewBox="0 0 449 51" style="height:18px; width:auto; display:block;" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Voltai" role="img" preserveAspectRatio="xMidYMid meet">
+        <path d="M197.522 40.0712H240.43L229.119 51H195.552C189.021 51 183.727 46.1069 183.727 40.0712V0H197.522V40.0712Z" fill="#e1e8ef"></path>
+        <path d="M13.7952 41.1922L55.1799 0H72.9163L26.8819 45.8203C23.5635 49.1232 18.9068 51 14.0301 51C6.28157 50.9999 0.000182415 45.1944 0 38.0329V0H13.7952V41.1922Z" fill="#e1e8ef"></path>
+        <path d="M448.342 51H434.547V0H448.342V51Z" fill="#e1e8ef"></path>
+        <path d="M383.072 0C390.82 0.000116656 397.102 5.80559 397.102 12.9671V51H383.307V9.80781L341.922 51H324.185L370.22 5.17969C373.538 1.87678 378.195 -3.94039e-07 383.072 0Z" fill="#e1e8ef"></path>
+        <path d="M321.947 10.9288H294.358V51H280.562V10.9288H252.972L263.754 0H321.947V10.9288Z" fill="#e1e8ef"></path>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M130.83 0C143.891 6.38176e-05 154.478 9.78565 154.479 21.8568V29.1432C154.478 41.2144 143.891 50.9999 130.83 51H110.675C97.6143 51 87.0261 41.2144 87.0259 29.1432V21.8568C87.0261 9.78561 97.6143 3.22701e-07 110.675 0H130.83ZM110.675 10.9288C104.145 10.9288 98.8506 15.8213 98.8504 21.8568V29.1432C98.8506 35.1787 104.145 40.0712 110.675 40.0712H130.83C137.36 40.0712 142.655 35.1787 142.655 29.1432V21.8568C142.655 15.8213 137.36 10.9288 130.83 10.9288H110.675Z" fill="#e1e8ef"></path>
+      </svg><span style="font-family:var(--font-mono); font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:#76828d; border-left:1px solid rgba(155,168,182,.18); padding-left:13px;">AI Data Center · Reference Model</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-family:var(--font-mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#4e5a64;">Standard</span>{{ editionToggle }}</div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-family:var(--font-mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#4e5a64;">Platform</span>{{ platformToggle }}</div>
+      </div>
+      <span style="font-family:var(--font-mono); font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:#4e5a64;">{{ platformLabel }}</span>
+    </div>
+  </header>
+
+  <section style="display:flex; align-items:stretch; border-bottom:1px solid rgba(155,168,182,.14); background:rgba(8,13,19,.55);">
+    <div style="display:flex; align-items:center; gap:11px; padding:7px 18px 7px 26px; border-right:1px solid rgba(155,168,182,.12); flex:none;">
+      <span style="font-family:var(--font-mono); font-size:8.5px; line-height:1.25; letter-spacing:.16em; text-transform:uppercase; color:#76828d;">Capacity<br>Tier</span>
+      {{ tierSelector }}
+    </div>
+    <div style="flex:1; display:grid; grid-template-columns:repeat(8, 1fr); min-width:0;">
+      <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="8">
+        <div style="padding:7px 13px; display:flex; flex-direction:column; gap:3px; justify-content:center; border-left:1px solid rgba(155,168,182,.07); min-width:0;">
+          <div style="font-family:var(--font-mono); font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:#76828d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ m.label }}</div>
+          <div style="font-family:var(--font-display); font-weight:500; font-size:19px; letter-spacing:-.02em; color:#e1e8ef; line-height:1; white-space:nowrap;">{{ m.value }}<sc-if value="{{ m.hasUnit }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px; color:#9bb0c0; margin-left:2px;">{{ m.unit }}</span></sc-if></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <main style="flex:1; display:grid; grid-template-columns:148px minmax(0,1fr) 312px; min-height:0;">
+    <nav style="border-right:1px solid rgba(155,168,182,.14); padding:14px 10px; display:flex; flex-direction:column; gap:5px;">
+      {{ viewRail }}
+    </nav>
+
+    <section style="display:flex; flex-direction:column; min-width:0; min-height:0; border-right:1px solid rgba(155,168,182,.14);">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:11px 22px 9px;">
+        <div style="display:flex; flex-direction:column; gap:4px; min-width:0;">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <span style="font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; color:#9bb0c0;">| {{ viewIndex }}</span>
+            <h2 style="margin:0; font-family:var(--font-display); font-weight:500; font-size:19px; letter-spacing:-.02em; color:#e1e8ef; line-height:1.1;">{{ viewTitle }}</h2>
+          </div>
+          <p style="margin:0; font-size:11.5px; line-height:1.45; color:#8b97a2; max-width:96ch; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ viewDesc }}</p>
+        </div>
+        <div style="flex:none;">{{ zoomControls }}</div>
+      </div>
+      <div style="flex:1; min-height:0; position:relative;">
+        {{ canvasOverlay }}
+        {{ canvas }}
+      </div>
+    </section>
+
+    <aside style="padding:20px 20px; overflow:auto; display:flex; flex-direction:column; gap:18px;">
+      {{ detailPanel }}
+    </aside>
+  </main>
+
+  <footer style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 30px; border-top:1px solid rgba(155,168,182,.14); font-family:var(--font-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:#4e5a64;">
+    <span>© Voltai Inc. 2026 · Standardized · Industrialization-ready</span>
+    <span>Liquid-cooled · Tier III · 10–100 MW · Basis of design — not for construction</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;animateFlows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;startTier&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;20&quot;,&quot;options&quot;:[&quot;10&quot;,&quot;20&quot;,&quot;40&quot;,&quot;60&quot;,&quot;80&quot;,&quot;100&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Defaults&quot;}}">
+class Component extends DCLogic {
+  state = { tier: 1, view: 'scale', variant: '2n', climate: 1, hover: null, hoverPod: null, edition: 'iec', platform: 'gb300', coolMode: 'dry', netLayer: 'all' };
+
+  platforms = {
+    gb300: {
+      name:'Blackwell · 415 VAC', toggle:'Blackwell 415 VAC', mode:'ac', dist:'415 VAC', rackKW:142, kwLabel:'120–142 kW', racksPerPod:16, gpr:72, flow:'~90 LPM',
+      covers:'GB200 & GB300 NVL72', label:'Blackwell · GB200 / GB300 · 120–142 kW · 415 VAC',
+      fabric:'Quantum-X800 IB · Spectrum-X', nic:'ConnectX-8 · 800 Gb/s / GPU', scaleUp:'NVLink copper · 72-GPU scale-up domain', gpuBw:'800 Gb/s',
+      note:'Same MGX rack envelope across the NVL72 generation — GB200 NVL72 (120–132 kW) runs below the 142 kW GB300 design point with no infrastructure change. Metrics use the 142 kW design point.',
+    },
+    rubin: {
+      name:'Vera Rubin · 800 VDC', toggle:'Rubin 800 VDC', mode:'dc', dist:'800 VDC', rackKW:227, kwLabel:'190–600 kW', racksPerPod:10, gpr:72, flow:'~145 LPM',
+      covers:'VR200 NVL72 → Rubin Ultra (Kyber)', label:'Vera Rubin · NVL72 → Ultra · 800 VDC',
+      fabric:'Quantum-X1600 IB · Spectrum-X', nic:'ConnectX-9 · 1.6 Tb/s / GPU', scaleUp:'NVLink · 72 → 144-GPU scale-up (Ultra / Kyber)', gpuBw:'1.6 Tb/s',
+      note:'Voltage-agnostic backbone, sized in MW/amps: carries Vera Rubin NVL72 (~227 kW) today through Rubin Ultra / Kyber (~600 kW). Representative metrics use VR200 NVL72 density.',
+    },
+  };
+  plat() { return this.platforms[this.state.platform]; }
+
+  editions = {
+    iec: {
+      doc:'HRD-001', regime:'IEC', editionLabel:'IEC EDITION',
+      lv:'400 / 230 V', lvStd:'IEC 60364', swbd:'IEC 61439', rack:'415 V · 50 Hz', rackShort:'415 V',
+      mvFeeds:'11 / 20 / 33 kV', hv:'66–132 kV', txStd:'cast-resin · IEC 60076',
+      mvSwgr:'IEC 62271', upsStd:'IEC 62040-3', genStd:'ISO 8528', arc:'IEC 61482 / 70E',
+      pueBoundary:'EN 50600-4-2 / ISO 30134-2', ceiling:'EnEfG 1.20 annual-average ceiling',
+      regLabel:'EnEfG ≤1.2', bandPrefix:'EnEfG ≤1.2', floorLoad:'≥21 kN/m²', struct:'Eurocode · EN 1990/91/98',
+      regNote:'Germany’s EnEfG requires an annual-average PUE ≤1.2 for data centers from July 2026, plus a phased energy-reuse factor and 100% renewable electricity from 2027.',
+    },
+    ansi: {
+      doc:'HRD-002', regime:'ANSI / NEC', editionLabel:'ANSI / NEC EDITION',
+      lv:'480Y / 277 V', lvStd:'NFPA 70 · NEC', swbd:'UL 891', rack:'415Y/240 V · 60 Hz', rackShort:'415Y/240 V',
+      mvFeeds:'12.47 / 13.8 / 34.5 kV', hv:'69–138 kV', txStd:'VPI dry · IEEE C57.12',
+      mvSwgr:'IEEE C37 · ANSI C37.20', upsStd:'UL 1778', genStd:'NFPA 110 · UL 2200', arc:'NFPA 70E / IEEE 1584',
+      pueBoundary:'ISO 30134-2 / The Green Grid', ceiling:'PUE 1.20 reference · no federal mandate',
+      regLabel:'ASHRAE 90.4', bandPrefix:'PUE 1.20 ref', floorLoad:'≥21 kN/m² · ≈440 psf', struct:'ASCE 7 / IBC',
+      regNote:'North America sets no single federal PUE mandate; efficiency is governed by ASHRAE 90.4 (loss-component limits), the IECC / state energy codes (e.g., Title 24) and ENERGY STAR.',
+    },
+  };
+  ed() { return this.editions[this.state.edition]; }
+  intakeLabel(t) { const e=this.ed(); return t.mw<=20 ? '2× MV · '+e.mvFeeds : 'HV '+e.hv; }
+
+  componentDidMount() {
+    const map = { '10':0, '20':1, '40':2, '60':3, '80':4, '100':5 };
+    const s = this.props.startTier;
+    if (s != null && map[s] != null && map[s] !== this.state.tier) this.setState({ tier: map[s] });
+    requestAnimationFrame(() => this.forceUpdate());
+  }
+
+  // Element-valued holes render one cycle behind; a second setState flushes them current.
+  set(patch) {
+    this.setState(patch, () => this.setState(s => ({ _bump: (s._bump || 0) + 1 })));
+  }
+
+  // ---- data ----
+  tiers = [
+    { mw:10,  gpus:4608,  racks:64,  pods:4,  halls:1,  sp:0.5, fac:11.5, podTx:8,  ups:8,  gen:5,  cdu:5,  trim:5,  liquid:8.2,  air:1.8,  area:4599,  intake:'2× MV feeds (11/20/33 kV)' },
+    { mw:20,  gpus:9216,  racks:128, pods:8,  halls:2,  sp:1,   fac:23,   podTx:16, ups:16, gen:9,  cdu:10, trim:10, liquid:16.4, air:3.6,  area:9197,  intake:'2× MV feeds (11/20/33 kV)' },
+    { mw:40,  gpus:18432, racks:256, pods:16, halls:4,  sp:2,   fac:46,   podTx:32, ups:32, gen:17, cdu:20, trim:20, liquid:32.8, air:7.2,  area:18394, intake:'HV intake 66–132 kV' },
+    { mw:60,  gpus:27648, racks:384, pods:24, halls:6,  sp:3,   fac:69,   podTx:48, ups:48, gen:24, cdu:30, trim:30, liquid:49.2, air:10.8, area:27591, intake:'HV intake 66–132 kV' },
+    { mw:80,  gpus:36864, racks:512, pods:32, halls:8,  sp:4,   fac:92,   podTx:64, ups:64, gen:32, cdu:40, trim:40, liquid:65.6, air:14.4, area:36788, intake:'HV intake 66–132 kV' },
+    { mw:100, gpus:46080, racks:640, pods:40, halls:10, sp:5,   fac:115,  podTx:80, ups:80, gen:40, cdu:50, trim:50, liquid:82.0, air:18.0, area:45985, intake:'HV intake 66–132 kV' },
+  ];
+
+  climates = [
+    { name:'Cool / temperate',        ex:'Nordics · Ireland · Pacific NW', base:[1.10,1.15], evap:null,        wue:0,   enefg:'Yes — with margin',     tone:'#2fa37a' },
+    { name:'Continental temperate',   ex:'Frankfurt · Ashburn — baseline', base:[1.12,1.18], evap:[1.10,1.15], wue:0.4, enefg:'Yes — base or evap',    tone:'#2fa37a' },
+    { name:'Warm / dry',              ex:'Iberia · Texas',                 base:[1.18,1.25], evap:[1.13,1.18], wue:0.9, enefg:'Evaporative variant only', tone:'#d8a93a' },
+    { name:'Hot / humid',             ex:'Gulf · Singapore',               base:[1.25,1.35], evap:[1.18,1.25], wue:1.4, enefg:'No — exceeds ceiling',  tone:'#d05a47' },
+  ];
+
+  views = [
+    { id:'scale',       label:'Scale',       n:'01' },
+    { id:'electrical',  label:'Electrical',  n:'02' },
+    { id:'cooling',     label:'Cooling',     n:'03' },
+    { id:'network',     label:'Network',     n:'04' },
+    { id:'facility',    label:'Facility',    n:'05' },
+    { id:'performance', label:'Performance', n:'06' },
+  ];
+
+  meta = {
+    scale:       { title:'Linear Scaling by Repetition', desc:'One standardized building block — the Pod — repeats from a single 10 MW hall to a 100 MW campus. Two halls pair around a shared electrical/mechanical spine to form a wing; growth adds halls without touching the ones already running.' },
+    electrical:  { title:'Electrical Architecture (IEC)', desc:'A repeated per-hall chain from medium-voltage intake to a 415 V rack interface — Tier III with 2N paths to every IT load. The compute platform’s on-board power smoothing is credited when sizing the chain.' },
+    cooling:     { title:'Two-Loop Liquid Cooling', desc:'Direct-to-chip cold plates capture ~90% of rack heat to liquid. Liquid-to-liquid CDUs isolate a Technology Cooling loop from a high-temperature Facility Water loop, enabling extensive dry / free cooling.' },
+    network:     { title:'Network Fabric', desc:'Scale-up over the NVLink copper backplane inside the rack; rail-optimized scale-out leaf/spine per SuperPOD; a core tier joins SuperPODs on the largest campuses. Frontend and out-of-band networks stay physically segregated.' },
+    facility:    { title:'Data Hall & Site', desc:'The 10 MW hall — 64 racks in 4 pods, hot-aisle contained, slab-on-grade with no raised floor. Power busway, coolant piping and fiber run in three segregated overhead layers.' },
+    performance: { title:'Efficiency & KPIs', desc:'Annualized PUE by climate band against the EnEfG ≤1.2 ceiling, the mechanical power budget behind that envelope, and the closed-loop water position. All figures are annualized projections at design load.' },
+  };
+
+  pal() {
+    const a = '#5793c0';
+    return {
+      bg:'#0b1016', void2:'#0e151c', void3:'#16202a', void4:'#1f2c38',
+      accent:a, accent3:'#8fbfe0', accent6:'#3c6a8c', tint:'rgba(87,147,192,.13)',
+      steel:'#9bb0c0', steelB:'rgba(155,176,192,.45)', steelT:'rgba(155,176,192,.18)',
+      strong:'#e1e8ef', body:'#b8c4ce', muted:'#8b97a2', faint:'#4e5a64',
+      border:'rgba(155,168,182,.16)', borderS:'rgba(155,168,182,.30)',
+      cyan:'#46c6e0', blue:'#4f8fe6', violet:'#7b76e0', teal:'#3fb8a6', amber:'#e0a64b', warm:'#d8836a',
+      ok:'#2fa37a', warn:'#d8a93a', danger:'#d05a47',
+    };
+  }
+  anim() { return this.props.animateFlows !== false; }
+  fmt(n) { return n.toLocaleString('en-US'); }
+  setTier(i){ this.set({ tier:i }); }
+  setView(v){ this._zoom=1; this.set({ view:v }); }
+
+  // ---- pan / zoom on the diagram canvas ----
+  fitSvg = (el)=>{ const vp = el.parentElement; if(!vp) return; const svg = el.querySelector(':scope > svg'); if(!svg) return; const set=()=>{ const w = vp.clientWidth; if(w){ svg.style.width = w+'px'; svg.style.maxWidth='none'; } }; set(); requestAnimationFrame(set); };
+  applyZoom = ()=>{ if(this._zoomEl) this._zoomEl.style.zoom = (this._zoom||1); };
+  zoomBy = (f)=>{ this._zoom = Math.min(3, Math.max(0.5, (this._zoom||1)*f)); this.applyZoom(); this.pctBump(); };
+  zoomReset = ()=>{ this._zoom=1; if(this._vp){ this._vp.scrollTop=0; this._vp.scrollLeft=0; } this.applyZoom(); this.pctBump(); };
+  pctBump = ()=>{ this.setState(s=>({_bump:(s._bump||0)+1})); };
+  onPanStart = (e)=>{ if(e.button!==0) return; const vp=this._vp; if(!vp) return; e.preventDefault();
+    const sx=e.clientX, sy=e.clientY, sl=vp.scrollLeft, st=vp.scrollTop; vp.style.cursor='grabbing';
+    const mv=(ev)=>{ vp.scrollLeft = sl-(ev.clientX-sx); vp.scrollTop = st-(ev.clientY-sy); };
+    const up=()=>{ vp.style.cursor='grab'; document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+    document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up); };
+  canvasEl(sig, content){ const h=React.createElement;
+    if (this.state.view==='performance')
+      return h('div',{ key:'cv-'+sig, style:{ position:'absolute', inset:'8px 16px 14px', overflow:'auto', display:'flex', justifyContent:'center', alignItems:'flex-start' } }, content);
+    return h('div',{ key:'cv-'+sig, ref:(el)=>{ this._vp=el; }, onMouseDown:this.onPanStart,
+        style:{ position:'absolute', inset:'8px 16px 14px', overflow:'auto', cursor:'grab' } },
+      h('div',{ ref:(el)=>{ this._zoomEl=el; if(el){ this.fitSvg(el); el.style.zoom=(this._zoom||1); } }, style:{ width:'max-content', margin:'0 auto' } }, content));
+  }
+  zoomControls(){ if(this.state.view==='performance') return React.createElement('span'); const h=React.createElement, C=this.pal(); const z=Math.round((this._zoom||1)*100);
+    const sq=(label,on,title)=>h('button',{key:label,onClick:on,title,style:{cursor:'pointer',width:27,height:27,display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid '+C.border,background:'#0b1118',color:C.muted,borderRadius:6,fontFamily:'var(--font-mono)',fontSize:15,lineHeight:1}},label);
+    return h('div',{key:'zc-'+z,style:{display:'flex',alignItems:'center',gap:5}},
+      sq('−',()=>this.zoomBy(0.833),'Zoom out'),
+      h('span',{style:{fontFamily:'var(--font-mono)',fontSize:10,letterSpacing:'.06em',color:C.faint,width:40,textAlign:'center'}}, z+'%'),
+      sq('+',()=>this.zoomBy(1.2),'Zoom in'),
+      h('button',{key:'rst',onClick:this.zoomReset,title:'Reset view',style:{cursor:'pointer',height:27,padding:'0 10px',display:'flex',alignItems:'center',border:'1px solid '+C.border,background:'#0b1118',color:C.muted,borderRadius:6,fontFamily:'var(--font-mono)',fontSize:9,letterSpacing:'.1em',textTransform:'uppercase'}},'Reset'));
+  }
+
+  // ---- small builders ----
+  hover(key, base, hov) { return this.state.hover === key ? { ...base, ...hov } : base; }
+
+  // ---- tier selector ----
+  tierSelector() {
+    const h = React.createElement, C = this.pal();
+    return h('div', { key:'ts-'+this.state.tier+'-'+(this.state.hover||''), style:{ display:'flex', gap:6 } },
+      this.tiers.map((t,i) => {
+        const active = i === this.state.tier;
+        const key = 'tier'+i;
+        const hovd = this.state.hover === key;
+        return h('button', {
+          key:i, onClick:()=>this.setTier(i),
+          onMouseEnter:()=>this.set({hover:key}), onMouseLeave:()=>this.set({hover:null}),
+          style:{
+            cursor:'pointer', border:'1px solid '+(active?C.steelB:hovd?C.borderS:C.border),
+            background:active?'rgba(155,176,192,.16)':hovd?'rgba(155,176,192,.07)':'#0e151c',
+            borderRadius:6, padding:'6px 11px', display:'flex', flexDirection:'column', alignItems:'center', gap:1,
+            transition:'all .16s cubic-bezier(.2,0,0,1)',
+            boxShadow:'none',
+          }
+        },
+          h('span',{style:{ fontFamily:'var(--font-display)', fontWeight:500, fontSize:15, lineHeight:1, letterSpacing:'-.02em', color:active?C.strong:hovd?C.body:'#9aa6b1' }}, t.mw),
+          h('span',{style:{ fontFamily:'var(--font-mono)', fontSize:7.5, letterSpacing:'.14em', color:active?C.steel:C.faint }}, 'MW')
+        );
+      })
+    );
+  }
+
+  // ---- view rail ----
+  viewRail() {
+    const h = React.createElement, C = this.pal();
+    const icons = {
+      scale:'M3 17l9 4 9-4M3 12l9 4 9-4M3 7l9 4 9-4',
+      electrical:'M13 2L4 14h7l-1 8 9-12h-7z',
+      cooling:'M12 3s6 6 6 11a6 6 0 0 1-12 0c0-5 6-11 6-11z',
+      facility:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+      performance:'M3 12a9 9 0 0 1 18 0M12 12l4-3',
+    };
+    return h('div', { key:'vr-'+this.state.view+'-'+(this.state.hover||''), style:{ display:'flex', flexDirection:'column', gap:5 } }, this.views.map((v, vi) => {
+      const active = v.id === this.state.view;
+      const key = 'view'+v.id;
+      const hovd = this.state.hover === key;
+      const col = active?C.steel:hovd?C.body:'#76828d';
+      const isNet = v.id === 'network';
+      return h('button', {
+        key:vi, onClick:()=>this.setView(v.id),
+        onMouseEnter:()=>this.set({hover:key}), onMouseLeave:()=>this.set({hover:null}),
+        style:{
+          cursor:'pointer', textAlign:'left', border:'none', borderLeft:'2px solid '+(active?C.steel:'transparent'),
+          background:active?'rgba(155,176,192,.10)':hovd?'rgba(155,168,182,.05)':'transparent',
+          borderRadius:'0 6px 6px 0', padding:'10px 11px', display:'flex', alignItems:'center', gap:9,
+          transition:'all .15s cubic-bezier(.2,0,0,1)',
+        }
+      },
+        isNet
+          ? h('svg',{viewBox:'0 0 24 24',width:17,height:17,fill:'none',stroke:col,strokeWidth:1.6,strokeLinecap:'round',strokeLinejoin:'round'},
+              h('circle',{cx:6,cy:9,r:2.4}), h('circle',{cx:18,cy:5,r:2.4}), h('circle',{cx:18,cy:17,r:2.4}),
+              h('path',{d:'M8.2 8l7.6-2.4M8.2 10l7.6 5.4'}))
+          : h('svg',{viewBox:'0 0 24 24',width:17,height:17,fill:'none',stroke:col,strokeWidth:1.6,strokeLinecap:'round',strokeLinejoin:'round'}, h('path',{d:icons[v.id]})),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:2}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.14em',color:active?C.steel:C.faint}}, v.n),
+          h('span',{style:{fontFamily:'var(--font-sans)',fontWeight:active?600:500,fontSize:12.5,color:active?C.strong:col}}, v.label)
+        )
+      );
+    }));
+  }
+
+  // ---- edition toggle (IEC / ANSI) ----
+  editionToggle() {
+    const h = React.createElement, C = this.pal();
+    const opt = (id,label)=>{ const a=this.state.edition===id; const hv=this.state.hover==='ed'+id;
+      return h('button',{ key:id+(a?'-a':'')+(hv?'-h':''), onClick:()=>this.set({edition:id}),
+        onMouseEnter:()=>this.set({hover:'ed'+id}), onMouseLeave:()=>this.set({hover:null}),
+        style:{ cursor:'pointer', border:'none', background:a?'rgba(155,176,192,.18)':'transparent', color:a?C.strong:hv?C.body:C.muted,
+          padding:'5px 13px', borderRadius:5, fontFamily:'var(--font-mono)', fontSize:10, letterSpacing:'.14em', textTransform:'uppercase',
+          boxShadow:'none', transition:'all .15s cubic-bezier(.2,0,0,1)' } }, label); };
+    return h('div',{ key:'edt-'+this.state.edition+'-'+(this.state.hover||''), style:{ display:'inline-flex', gap:3, padding:3, borderRadius:7, border:'1px solid '+C.border, background:'#0b1118' } },
+      opt('iec','IEC'), opt('ansi','ANSI / NEC'));
+  }
+
+  platformToggle() {
+    const h = React.createElement, C = this.pal();
+    const opt = (id,label)=>{ const a=this.state.platform===id; const hv=this.state.hover==='pf'+id;
+      return h('button',{ key:id+(a?'-a':'')+(hv?'-h':''), onClick:()=>this.set({platform:id}),
+        onMouseEnter:()=>this.set({hover:'pf'+id}), onMouseLeave:()=>this.set({hover:null}),
+        style:{ cursor:'pointer', border:'none', background:a?'rgba(155,176,192,.18)':'transparent', color:a?C.strong:hv?C.body:C.muted,
+          padding:'5px 12px', borderRadius:5, fontFamily:'var(--font-mono)', fontSize:10, letterSpacing:'.12em', textTransform:'uppercase',
+          boxShadow:'none', transition:'all .15s cubic-bezier(.2,0,0,1)' } }, label); };
+    return h('div',{ key:'pft-'+this.state.platform+'-'+(this.state.hover||''), style:{ display:'inline-flex', gap:3, padding:3, borderRadius:7, border:'1px solid '+C.border, background:'#0b1118' } },
+      opt('gb300', this.platforms.gb300.toggle), opt('rubin', this.platforms.rubin.toggle));
+  }
+
+  // ============ SVG helpers ============
+  flowStyle(active, rev) {
+    if (!active || !this.anim()) return {};
+    return { strokeDasharray:'5 7', animation:'flowdash 1.1s linear infinite'+(rev?' reverse':'') };
+  }
+  line(x1,y1,x2,y2,o={}) {
+    const h = React.createElement, C = this.pal();
+    return h('line',{ x1,y1,x2,y2, stroke:o.color||C.borderS, strokeWidth:o.w||1.6, strokeLinecap:'round', style:this.flowStyle(o.active,o.rev), opacity:o.opacity??1 });
+  }
+  poly(pts,o={}) {
+    const h = React.createElement, C = this.pal();
+    const d = 'M'+pts.map(p=>p.join(' ')).join('L');
+    return h('path',{ d, fill:'none', stroke:o.color||C.borderS, strokeWidth:o.w||1.6, strokeLinecap:'round', strokeLinejoin:'round', style:this.flowStyle(o.active,o.rev), opacity:o.opacity??1 });
+  }
+  node(cx,cy,w,hh,title,sub,o={}) {
+    const h = React.createElement, C = this.pal();
+    const ac = o.color || C.accent;
+    const fill = o.fill || C.void3;
+    const dim = o.dim ? .4 : 1;
+    const rectStyle = {};
+    const kids = [
+      h('rect',{ x:cx-w/2, y:cy-hh/2, width:w, height:hh, rx:7, fill, stroke:o.accentBar?C.border:(o.active?ac:C.border), strokeWidth:o.accentBar?1:(o.active?1.6:1), style:rectStyle }),
+    ];
+    if (o.accentBar) kids.push(h('rect',{ x:cx-w/2+1, y:cy-hh/2+1, width:3.5, height:hh-2, rx:1.5, fill:ac }));
+    const subs = sub ? (Array.isArray(sub)?sub:[sub]) : [];
+    if (o.vcenter) {
+      // evenly center title + sublines on cy
+      const L = 11.5, top = cy - ((1+subs.length)-1)*L/2;
+      kids.push(h('text',{ x:cx, y:top, textAnchor:'middle', dominantBaseline:'middle', fontFamily:'var(--font-display)', fontWeight:500, fontSize:o.fs||12, fill:o.active?C.strong:'#cdd7df', letterSpacing:'-.01em' }, title));
+      subs.forEach((s,i)=> kids.push(h('text',{ x:cx, y:top+(i+1)*L, textAnchor:'middle', dominantBaseline:'middle', fontFamily:'var(--font-mono)', fontSize:8.5, letterSpacing:'.04em', fill:C.muted }, s)));
+      return h('g',{ opacity:dim }, kids);
+    }
+    kids.push(h('text',{ x:cx, y:cy-(sub?5:0), textAnchor:'middle', dominantBaseline:'middle', fontFamily:'var(--font-display)', fontWeight:500, fontSize:o.fs||12, fill:o.active?C.strong:'#cdd7df', letterSpacing:'-.01em' }, title));
+    if (sub) subs.forEach((s,i)=> kids.push(h('text',{ x:cx, y:cy+9+i*11, textAnchor:'middle', dominantBaseline:'middle', fontFamily:'var(--font-mono)', fontSize:8.5, letterSpacing:'.04em', fill:C.muted }, s)));
+    return h('g',{ opacity:dim }, kids);
+  }
+  monoTxt(x,y,t,o={}) {
+    const h = React.createElement, C = this.pal();
+    return h('text',{ x,y, textAnchor:o.anchor||'start', fontFamily:'var(--font-mono)', fontSize:o.fs||9, letterSpacing:'.12em', fill:o.color||C.faint, style:o.upper!==false?{textTransform:'uppercase'}:{} }, t);
+  }
+  // directional flow arrowhead at (x,y) pointing dir: 'l' 'r' 'u' 'd'
+  farrow(x,y,dir,color,s=5) {
+    const h = React.createElement;
+    const pts = {
+      l:[[x+s,y-s],[x+s,y+s],[x-s,y]],
+      r:[[x-s,y-s],[x-s,y+s],[x+s,y]],
+      u:[[x-s,y+s],[x+s,y+s],[x,y-s]],
+      d:[[x-s,y-s],[x+s,y-s],[x,y+s]],
+    }[dir];
+    return h('polygon',{ points:pts.map(p=>p.join(',')).join(' '), fill:color });
+  }
+  pill(x,y,t,color) {
+    const h = React.createElement, C=this.pal();
+    const w = t.length*6.0+14;
+    return h('g',{},
+      h('rect',{x:x-w/2,y:y-9,width:w,height:18,rx:9,fill:'#0b1118',stroke:color,strokeWidth:1}),
+      h('text',{x,y:y+1,textAnchor:'middle',dominantBaseline:'middle',fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.06em',fill:color},t)
+    );
+  }
+  svg(vb, kids, maxH) {
+    const h = React.createElement;
+    return h('svg',{ viewBox:vb, width:'100%', style:{ display:'block', width:'100%', height:'auto' }, preserveAspectRatio:'xMidYMid meet' }, kids);
+  }
+
+  // ============ SCALE ============
+  renderScale() {
+    const h = React.createElement, C = this.pal(), t = this.tiers[this.state.tier], pf = this.plat();
+    const rpp = pf.racksPerPod, rcols = rpp/2;
+    const podTints = ['rgba(87,147,192,.13)','rgba(70,198,224,.12)','rgba(123,118,224,.12)','rgba(63,184,166,.12)'];
+    const podCols  = ['#5793c0','#46c6e0','#7b76e0','#3fb8a6'];
+
+    const rackCell = (k)=> h('div',{ key:k, style:{ width:'100%', aspectRatio:'1', background:'rgba(155,168,182,.22)', borderRadius:1 } });
+    const pod = (pi)=> h('div',{ key:pi, style:{ background:podTints[pi], border:'1px solid '+podCols[pi]+'55', borderRadius:3, padding:'4px 5px', display:'flex', flexDirection:'column', gap:3 } },
+      h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:7,letterSpacing:'.08em',color:podCols[pi]}},'POD'),
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:6.5,color:C.faint}},'2.5MW')),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat('+rcols+',1fr)',gap:1.5}}, Array.from({length:rpp},(_,i)=>rackCell(i)))
+    );
+    const hall = (hi, big)=> h('div',{ key:hi, style:{
+        background:'#0b1118', border:'1px solid rgba(155,176,192,.28)', borderRadius:7, padding:big?'10px 11px':'7px 8px',
+        display:'flex', flexDirection:'column', gap:big?6:4, width:big?260:128,
+        boxShadow:'0 0 0 1px rgba(155,176,192,.05), ',
+        animation:'hallIn .5s cubic-bezier(.16,1,.3,1) both', animationDelay:(hi*0.05)+'s',
+      } },
+      h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:big?10:8,letterSpacing:'.14em',color:C.accent}},'HALL '+String(hi+1).padStart(2,'0')),
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:big?9:7,color:C.faint}},'10 MW · '+(rpp*4)+'R')),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:big?5:3}}, [0,1,2,3].map(pi=>pod(pi)))
+    );
+
+    // wings
+    const single = t.halls === 1;
+    if (single) {
+      return h('div',{ style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, width:'100%' } },
+        h('div',{style:{display:'flex',alignItems:'center',gap:18}}, hall(0,true)),
+        h('div',{style:{fontFamily:'var(--font-mono)',fontSize:10,letterSpacing:'.1em',color:C.muted,textAlign:'center',maxWidth:'52ch',lineHeight:1.7}},
+          'SINGLE-HALL STANDALONE — THE MINIMUM DEPLOYABLE UNIT · 4 PODS · '+this.fmt(4*rpp*pf.gpr)+' GPUS · ≈½ SUPERPOD')
+      );
+    }
+    const wings = [];
+    for (let i=0;i<t.halls;i+=2) wings.push([i, i+1 < t.halls ? i+1 : null]);
+    const spine = (k)=> h('div',{ key:'sp'+k, style:{ alignSelf:'stretch', width:4, borderRadius:2, background:'linear-gradient(#5a6e80,#9bb0c0,#5a6e80)', margin:'14px 0', boxShadow:'none', position:'relative' } });
+
+    return h('div',{ style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:16, width:'100%' } },
+      h('div',{ style:{ display:'flex', flexWrap:'wrap', gap:26, justifyContent:'center', alignItems:'flex-start' } },
+        wings.map((w,wi)=> h('div',{ key:wi, style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 } },
+          h('div',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.16em',color:C.faint}},'WING '+String(wi+1).padStart(2,'0')),
+          h('div',{ style:{ display:'flex', alignItems:'stretch', gap:8 } },
+            hall(w[0]), spine(wi), w[1]!=null ? hall(w[1]) : h('div',{style:{width:128,border:'1px dashed rgba(155,168,182,.18)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center'}}, h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8,color:C.faint,letterSpacing:'.1em',textAlign:'center',padding:8}},'NEXT HALL'))
+          )
+        ))
+      ),
+      h('div',{style:{fontFamily:'var(--font-mono)',fontSize:10,letterSpacing:'.1em',color:C.muted,textAlign:'center',maxWidth:'66ch',lineHeight:1.7}},
+        t.halls+' IDENTICAL HALLS · '+wings.length+' WING'+(wings.length>1?'S':'')+' · '+t.sp+' SUPERPOD'+(t.sp>1?'S':'')+' — EXPANSION ADDS HALLS, EXISTING HALLS UNTOUCHED')
+    );
+  }
+
+  // ============ ELECTRICAL ============
+  renderElectrical() {
+    if (this.plat().mode==='dc') return this.renderElectricalDC();
+    const h = React.createElement, C = this.pal(), v = this.state.variant, e = this.ed(), t = this.tiers[this.state.tier];
+    const tiered = v==='tiered', dist = v==='distributed';
+    const utilV = t.mw<=20 ? e.mvFeeds : 'HV '+e.hv;
+    const Lx=160, Rx=840, Cx=500;
+    const aOn = !dist, bOn = !dist;
+    const k = [];
+    // sources
+    k.push(this.node(Lx,52,138,40,'UTILITY A',utilV,{}));
+    k.push(this.node(Rx,52,138,40,'UTILITY B',utilV,{}));
+    k.push(this.node(Cx,52,150,40,'GENERATOR PLANT', tiered?'reduced ~20%':'N+1 · 3 MW sets',{dim:tiered,color:C.amber,glowCol:'rgba(224,166,75,.35)'}));
+    // lines to bus
+    [Lx,Rx,Cx].forEach(x=>k.push(this.line(x,72,x,142,{active:this.anim(),color:C.accent6,opacity:.9})));
+    // MV bus
+    k.push(h('rect',{x:120,y:144,width:760,height:7,rx:3.5,fill:C.accent,style:this.anim()?{filter:'none'}:{}}));
+    k.push(this.monoTxt(120,136,'MV GENERATION BUS · '+e.mvSwgr,{color:C.muted,fs:9}));
+    // transformers
+    k.push(this.line(Lx,151,Lx,196,{active:aOn&&this.anim(),color:C.accent}));
+    k.push(this.line(Rx,151,Rx,196,{active:bOn&&this.anim(),color:C.accent,rev:true}));
+    k.push(this.line(Cx,151,Cx,196,{active:this.anim(),color:C.teal}));
+    k.push(this.node(Lx,216,150,42,'POD TX A','3.15 MVA '+e.txStd.split(' · ')[0],{active:aOn,accentBar:true}));
+    k.push(this.node(Rx,216,150,42,'POD TX B','3.15 MVA '+e.txStd.split(' · ')[0],{active:bOn,accentBar:true}));
+    k.push(this.node(Cx,216,160,42,'MECH TX A/B','N+1 per hall',{color:C.teal}));
+    // LV
+    k.push(this.line(Lx,237,Lx,286,{active:aOn&&this.anim(),color:C.accent}));
+    k.push(this.line(Rx,237,Rx,286,{active:bOn&&this.anim(),color:C.accent,rev:true}));
+    k.push(this.line(Cx,237,Cx,286,{active:this.anim(),color:C.teal}));
+    k.push(this.node(Lx,306,150,42,'LV BOARD A',e.lv,{active:aOn}));
+    k.push(this.node(Rx,306,150,42,'LV BOARD B',e.lv,{active:bOn}));
+    k.push(this.node(Cx,306,160,42,'MECH BOARDS','CDU · trim · AHU',{color:C.teal}));
+    // mech branch down
+    k.push(this.line(Cx,327,Cx,372,{active:this.anim(),color:C.teal}));
+    k.push(this.node(Cx,392,176,40,'MECH UPS · 2×625 kW','pumps · controls · fans',{color:C.teal,fs:11}));
+    // UPS
+    k.push(this.line(Lx,327,Lx,378,{active:aOn&&this.anim(),color:C.accent}));
+    k.push(this.line(Rx,327,Rx,378,{active:bOn&&this.anim(),color:C.accent,rev:true}));
+    if (dist) {
+      // distributed-redundant block of 4 modules feeding 3 pods
+      k.push(this.node(Lx,400,150,46,'4N/3 UPS BLOCK','4 × 2.5 MW · ~75%',{active:true,glow:true,accentBar:true,fs:11}));
+      k.push(this.node(Rx,400,150,46,'4N/3 UPS BLOCK','serves 3 pods',{active:true,glow:true,accentBar:true,fs:11}));
+    } else {
+      k.push(this.node(Lx,400,150,46, tiered?'UPS A · CRITICAL':'UPS A','2.5 MW · Li-ion 5 min',{active:true,glow:true,accentBar:true}));
+      k.push(this.node(Rx,400,150,46, tiered?'UPS B · CRITICAL':'UPS B','2.5 MW · Li-ion 5 min',{active:true,glow:true,accentBar:true}));
+    }
+    // busways
+    k.push(this.line(Lx,423,Lx,470,{active:this.anim(),color:C.accent}));
+    k.push(this.line(Rx,423,Rx,470,{active:this.anim(),color:C.accent,rev:true}));
+    const compCol = tiered ? C.amber : C.accent;
+    k.push(h('rect',{x:150,y:472,width:520,height:6,rx:3,fill:compCol,opacity:.92,style:{}}));
+    k.push(h('rect',{x:330,y:486,width:520,height:6,rx:3,fill:compCol,opacity:.92}));
+    k.push(this.monoTxt(150,466,'BUSWAY A',{color:C.muted,fs:8.5}));
+    k.push(this.monoTxt(850,500,'BUSWAY B',{color:C.muted,fs:8.5,anchor:'end'}));
+    // pods
+    const podX=[300,440,580,720];
+    podX.forEach((x,i)=>{
+      k.push(this.poly([[x,479],[x,560]],{active:this.anim(),color:compCol,w:1.4}));
+      k.push(this.poly([[x+14,492],[x+14,560]],{active:this.anim(),color:compCol,w:1.4,rev:true}));
+      k.push(this.node(x+7,584,118,40,'POD '+(i+1),'16 racks · '+e.rackShort,{color:compCol,active:tiered}));
+    });
+    // labels
+    if (tiered) k.push(this.pill(420,632,'GPU COMPUTE — BATTERY RIDE-THROUGH ONLY', C.amber));
+    else k.push(this.pill(420,632, dist?'BLOCK-REDUNDANT — TIER III CONCURRENT MAINTAINABILITY':'2N — DUAL INDEPENDENT PATHS TO EVERY RACK', C.accent));
+
+    return this.svg('0 0 1000 660', k, 560);
+  }
+
+  // ============ ELECTRICAL — 800 VDC ============
+  renderElectricalDC() {
+    const h = React.createElement, C = this.pal(), e = this.ed(), t = this.tiers[this.state.tier];
+    const V = C.violet, utilV = t.mw<=20 ? e.mvFeeds : 'HV '+e.hv;
+    const Lx=180, Rx=820, Cx=500;
+    const k = [];
+    // sources
+    k.push(this.node(Lx,50,150,40,'UTILITY A',utilV,{}));
+    k.push(this.node(Rx,50,150,40,'UTILITY B',utilV,{}));
+    k.push(this.node(Cx,50,150,40,'GENERATOR PLANT','N+1 · 3 MW · BESS',{color:C.amber,glowCol:'rgba(224,166,75,.35)'}));
+    [Lx,Rx,Cx].forEach(x=>k.push(this.line(x,70,x,140,{active:this.anim(),color:C.accent6,opacity:.9})));
+    // MV bus (AC)
+    k.push(h('rect',{x:130,y:142,width:740,height:7,rx:3.5,fill:C.accent,style:this.anim()?{filter:'none'}:{}}));
+    k.push(this.monoTxt(130,134,'MV GENERATION BUS · '+e.mvSwgr+' · '+(t.mw<=20?e.mvFeeds:'HV')+' AC',{color:C.muted,fs:9}));
+    // perimeter AC/DC rectifier / SST  (the single conversion step)
+    k.push(this.line(Lx,149,Lx,190,{active:this.anim(),color:C.accent}));
+    k.push(this.line(Rx,149,Rx,190,{active:this.anim(),color:C.accent,rev:true}));
+    k.push(this.node(Lx,212,170,46,'AC/DC RECTIFIER A',['MV → 800 VDC','rectifier or SST'],{active:true,color:V,glow:true,glowCol:'rgba(123,118,224,.4)',accentBar:true,fs:11}));
+    k.push(this.node(Rx,212,170,46,'AC/DC RECTIFIER B',['MV → 800 VDC','rectifier or SST'],{active:true,color:V,glow:true,glowCol:'rgba(123,118,224,.4)',accentBar:true,fs:11}));
+    k.push(this.pill(Cx,170,'SINGLE PERIMETER CONVERSION — NO UPS / PSU SHELVES',V));
+    // 800 VDC 2N bus bars
+    k.push(this.line(Lx,235,Lx,272,{active:this.anim(),color:V}));
+    k.push(this.line(Rx,235,Rx,272,{active:this.anim(),color:V,rev:true}));
+    k.push(h('rect',{x:150,y:276,width:300,height:7,rx:3.5,fill:V,style:this.anim()?{filter:'none'}:{}}));
+    k.push(h('rect',{x:550,y:276,width:300,height:7,rx:3.5,fill:V,style:this.anim()?{filter:'none'}:{}}));
+    k.push(this.monoTxt(150,268,'800 VDC BUS A · 2N',{color:V,fs:9}));
+    k.push(this.monoTxt(850,268,'800 VDC BUS B · 2N',{color:V,fs:9,anchor:'end'}));
+    // centralized DC energy store between buses
+    k.push(this.line(450,279,470,279,{color:C.amber,w:2}));
+    k.push(this.line(530,279,550,279,{color:C.amber,w:2}));
+    k.push(this.node(Cx,279,150,38,'DC ENERGY STORE','sub-second + ride-through',{color:C.amber,fs:11}));
+    // SSCB markers + DC busway
+    k.push(this.line(Lx,279,Lx,330,{active:this.anim(),color:V}));
+    k.push(this.line(Rx,279,Rx,330,{active:this.anim(),color:V,rev:true}));
+    k.push(this.pill(Lx,355,'SSCB',V)); k.push(this.pill(Rx,355,'SSCB',V));
+    k.push(h('rect',{x:150,y:386,width:520,height:6,rx:3,fill:V,opacity:.92,style:this.anim()?{filter:'none'+')'}:{}}));
+    k.push(h('rect',{x:330,y:400,width:520,height:6,rx:3,fill:V,opacity:.92}));
+    k.push(this.monoTxt(150,380,'800 VDC BUSWAY A · +85% POWER · −45% COPPER',{color:C.muted,fs:8.5}));
+    // sidecar power racks
+    const podX=[300,440,580,720];
+    podX.forEach((x)=>{ k.push(this.poly([[x+7,406],[x+7,438]],{active:this.anim(),color:V,w:1.5})); });
+    k.push(this.node(Cx,460,520,38,'SIDECAR POWER RACKS · OCP DIABLO','DC/DC + BBU / capacitor bank per compute rack',{color:V,fs:11}));
+    // DC compute racks
+    podX.forEach((x,i)=>{
+      k.push(this.poly([[x+7,479],[x+7,520]],{active:this.anim(),color:V,w:1.5}));
+      k.push(this.node(x+7,548,118,44,'POD '+(i+1),this.plat().racksPerPod+' racks · ~'+this.plat().rackKW+' kW',{color:V,active:true}));
+    });
+    // mechanical branch — stays AC (note)
+    k.push(this.pill(Cx,620,'MECHANICAL PLANT STAYS AC · ±400 VDC RACK OPTION (EV SUPPLY CHAIN)',C.teal));
+    return this.svg('0 0 1000 660', k, 560);
+  }
+
+  // ============ COOLING ============
+  renderCooling() {
+    const h = React.createElement, C = this.pal(), pf = this.plat();
+    const t = this.tiers[this.state.tier], a = this.anim();
+    const cool = C.cyan, warm = C.warm;
+    const evap = (this.state.coolMode === 'evap');
+    const reuseNote = this.state.edition==='iec' ? 'EnEfG reuse mandate' : 'offtaker-optional';
+    const halls = t.halls, hs = halls>1?'S':'';
+    const perAir = (t.air/halls).toFixed(1);
+    const k = [];
+
+    // ---- geometry: stacked equipment bands wrapped by supply (L) / return (R) spines ----
+    const cxL=230, cxR=770, cw=cxR-cxL;        // band container
+    const oL=90, iL=160, iR=840, oR=910;       // spine x: outer/inner · left/right
+    const yT=157, yC=327, yP=497, yA=646;      // band vertical centers (trim/cdu/pod/ahu)
+
+    // glyph helpers (push to k)
+    const box=(x,y,w,hh,o={})=>k.push(h('rect',{x:x-w/2,y,width:w,height:hh,rx:o.rx??7,fill:o.fill||C.void3,stroke:o.stroke||C.borderS,strokeWidth:o.sw||1,strokeDasharray:o.dash||undefined}));
+    const gCDU=(cx,cy,sb)=>{const col=sb?C.faint:C.accent3;k.push(h('rect',{x:cx-15,y:cy-12,width:30,height:24,rx:3,fill:'none',stroke:col,strokeWidth:1,opacity:.55}));for(let i=0;i<4;i++)k.push(h('rect',{x:cx-11,y:cy-8+i*5,width:22,height:2.2,rx:1,fill:col,opacity:.9}));};
+    const gTrim=(cx,cy,sb)=>{const col=sb?C.faint:C.teal;k.push(h('rect',{x:cx-16,y:cy-12,width:32,height:24,rx:3,fill:'none',stroke:col,strokeWidth:1,opacity:.55}));for(let i=0;i<6;i++)k.push(h('line',{x1:cx-12+i*4.8,y1:cy-9,x2:cx-12+i*4.8,y2:cy+9,stroke:col,strokeWidth:1.4,opacity:.85}));};
+    const gPod=(cx,cy)=>{const col=C.accent;k.push(h('rect',{x:cx-9,y:cy-13,width:18,height:26,rx:2,fill:'none',stroke:col,strokeWidth:1.2}));for(let i=0;i<4;i++)k.push(h('rect',{x:cx-6,y:cy-10+i*6,width:12,height:3,rx:1,fill:col,opacity:.85}));};
+    const gFan=(cx,cy)=>{k.push(h('circle',{cx,cy,r:10,fill:'none',stroke:C.violet,strokeWidth:1.3}));k.push(h('circle',{cx,cy,r:2.2,fill:C.violet}));for(let i=0;i<3;i++){const ang=i*2.094+0.5;k.push(h('line',{x1:cx,y1:cy,x2:cx+Math.cos(ang)*8.5,y2:cy+Math.sin(ang)*8.5,stroke:C.violet,strokeWidth:1.2}));}};
+
+    const band=(top,hgt,title,sub)=>{
+      k.push(h('rect',{x:cxL,y:top,width:cw,height:hgt,rx:11,fill:'rgba(18,28,38,.5)',stroke:C.border,strokeWidth:1}));
+      k.push(this.monoTxt(cxL+cw/2,top+21,title,{color:C.strong,fs:10,anchor:'middle'}));
+      if(sub)k.push(this.monoTxt(cxL+cw/2,top+35,sub,{color:C.muted,fs:8,anchor:'middle',upper:false}));
+    };
+    const unit=(cx,cyTop,glyph,name,role,sb)=>{
+      box(cx,cyTop,86,72,{fill:sb?'rgba(224,166,75,.05)':C.void3,stroke:sb?'rgba(224,166,75,.5)':C.borderS,dash:sb?'4 3':undefined});
+      glyph(cx,cyTop+24,sb);
+      k.push(h('text',{x:cx,y:cyTop+52,textAnchor:'middle',fontFamily:'var(--font-display)',fontSize:11,fontWeight:500,fill:C.strong},name));
+      k.push(h('text',{x:cx,y:cyTop+64,textAnchor:'middle',fontFamily:'var(--font-mono)',fontSize:7,letterSpacing:'.12em',fill:sb?C.amber:C.muted},role));
+    };
+    const cellsX=(n)=>{const w=86,g=22,total=n*w+(n-1)*g,start=cxL+(cw-total)/2+w/2;return Array.from({length:n},(_,i)=>start+i*(w+g));};
+
+    // ---- header ----
+    k.push(this.monoTxt(500,24, t.mw+' MW IT  ·  '+halls+' × 10 MW HALL'+hs, {color:C.strong,fs:11,anchor:'middle'}));
+    k.push(this.monoTxt(500,38, 'DIAGRAM = ONE HALL  ·  TIER TOTAL '+t.liquid+' MW LIQUID + '+t.air+' MW AIR-SIDE', {color:C.muted,fs:8,anchor:'middle',upper:false}));
+
+    // ---- ambient heat rejection (above trim) ----
+    [440,500,560].forEach(x=>{k.push(this.poly([[x,86],[x,56]],{active:a,color:C.teal,w:1.6}));k.push(this.farrow(x,58,'u',C.teal,4));});
+    k.push(this.monoTxt(500,48, evap?'HEAT REJECT → AMBIENT (EVAPORATIVE)':'HEAT REJECT → AMBIENT (DRY / FREE)', {color:C.teal,fs:8,anchor:'middle'}));
+
+    // ============ BANDS ============
+    band(88,138, evap?'TRIM + EVAP TOWER ARRAY':'TRIM COOLER ARRAY', (evap?'2.6 MW · adiabatic-assisted':'2.6 MW class · dry / free cooling')+' · 4 duty + 1 standby (N+1)');
+    cellsX(5).forEach((x,i)=>unit(x,138,gTrim,'TRIM '+(i<4?(i+1):'R'),i<4?'DUTY':'STANDBY',i===4));
+    band(258,138,'CDU ARRAY','2.3 MW liquid-to-liquid · pumps + controls on mech UPS · 4 duty + 1 standby (N+1)');
+    cellsX(5).forEach((x,i)=>unit(x,308,gCDU,'CDU '+(i<4?(i+1):'R'),i<4?'DUTY':'STANDBY',i===4));
+    band(428,138,'COMPUTE PODS — NVL72', pf.racksPerPod+' × NVL72 per pod · ~'+pf.rackKW+' kW/rack · '+pf.flow);
+    cellsX(4).forEach((x,i)=>unit(x,478,gPod,'POD '+(i+1),pf.racksPerPod+' RACKS',false));
+    band(582,80,'FAN-WALL AIR HANDLERS','N+2 · FWS-fed · ~'+perAir+' MW residual air-side (~18% of hall IT)');
+    [-2,-1,0,1,2].forEach(m=>gFan(500+m*54,638));
+
+    // ============ FWS LOOP — outer spines (TRIM ↔ CDU ↔ AHU) ============
+    // supply (cool): trim → down → CDU + AHU
+    k.push(this.poly([[cxL,185],[oL,185]],{active:a,color:cool,w:2,rev:true})); k.push(this.farrow(oL+26,185,'l',cool,5));
+    k.push(this.poly([[oL,185],[oL,622]],{active:a,color:cool,w:2})); [300,470,560].forEach(y=>k.push(this.farrow(oL,y,'d',cool,5)));
+    k.push(this.poly([[oL,300],[cxL,300]],{active:a,color:cool,w:2})); k.push(this.farrow(cxL-16,300,'r',cool,5));
+    k.push(this.poly([[oL,622],[cxL,622]],{active:a,color:cool,w:2})); k.push(this.farrow(cxL-16,622,'r',cool,5));
+    k.push(this.monoTxt(oL-8,248,'FWS SUPPLY',{color:cool,fs:8,anchor:'end'})); k.push(this.monoTxt(oL-8,260,'32 °C',{color:cool,fs:8,anchor:'end'}));
+    k.push(this.monoTxt(cxL-20,610,'FWS-FED',{color:cool,fs:7,anchor:'end'}));
+    // return (warm): CDU + AHU → up → trim
+    k.push(this.poly([[cxR,300],[oR,300]],{active:a,color:warm,w:2})); k.push(this.farrow(oR-26,300,'r',warm,5));
+    k.push(this.poly([[cxR,622],[oR,622]],{active:a,color:warm,w:2})); k.push(this.farrow(oR-26,622,'r',warm,5));
+    k.push(this.poly([[oR,622],[oR,130]],{active:a,color:warm,w:2,rev:true})); [540,400,240].forEach(y=>k.push(this.farrow(oR,y,'u',warm,5)));
+    k.push(this.poly([[oR,130],[cxR,130]],{active:a,color:warm,w:2,rev:true})); k.push(this.farrow(cxR+16,130,'l',warm,5));
+    k.push(this.monoTxt(oR+8,248,'FWS RETURN',{color:warm,fs:8,anchor:'start'})); k.push(this.monoTxt(oR+8,260,'42 °C',{color:warm,fs:8,anchor:'start'}));
+
+    // ============ TCS LOOP — inner spines (CDU ↔ PODS) ============
+    // supply (cool): CDU → down → pods
+    k.push(this.poly([[cxL,355],[iL,355]],{active:a,color:cool,w:2,rev:true})); k.push(this.farrow(iL+24,355,'l',cool,5));
+    k.push(this.poly([[iL,355],[iL,497]],{active:a,color:cool,w:2})); k.push(this.farrow(iL,432,'d',cool,5));
+    k.push(this.poly([[iL,497],[cxL,497]],{active:a,color:cool,w:2})); k.push(this.farrow(cxL-16,497,'r',cool,5));
+    k.push(this.monoTxt(iL-8,418,'TCS SUPPLY',{color:cool,fs:8,anchor:'end'})); k.push(this.monoTxt(iL-8,430,'36 °C',{color:cool,fs:8,anchor:'end'}));
+    // return (warm): pods → up → CDU
+    k.push(this.poly([[cxR,497],[iR,497]],{active:a,color:warm,w:2})); k.push(this.farrow(iR-24,497,'r',warm,5));
+    k.push(this.poly([[iR,497],[iR,355]],{active:a,color:warm,w:2,rev:true})); k.push(this.farrow(iR,432,'u',warm,5));
+    k.push(this.poly([[iR,355],[cxR,355]],{active:a,color:warm,w:2,rev:true})); k.push(this.farrow(cxR+16,355,'l',warm,5));
+    k.push(this.monoTxt(iR+8,418,'TCS RETURN',{color:warm,fs:8,anchor:'start'})); k.push(this.monoTxt(iR+8,430,'47 °C',{color:warm,fs:8,anchor:'start'}));
+
+    // ---- CDU isolation note ----
+    k.push(this.monoTxt(500,250,'↑ FACILITY WATER  ·  L2L ISOLATION  ·  TECHNOLOGY COOLING ↓',{color:C.faint,fs:7,anchor:'middle'}));
+
+    // ---- make-up water (evaporative variant only) ----
+    if (evap) {
+      k.push(this.poly([[805,200],[cxR,200]],{active:a,color:cool,w:1.4,rev:true})); k.push(this.farrow(cxR-14,200,'l',cool,4));
+      k.push(this.monoTxt(810,201,'MAKE-UP H₂O',{color:cool,fs:7,anchor:'start',upper:false}));
+    }
+
+    // ---- heat reuse off FWS return ----
+    k.push(this.poly([[oR,622],[oR,676],[652,676]],{active:a,color:C.amber,w:1.5})); k.push(this.farrow(656,676,'l',C.amber,5));
+    k.push(this.node(470,690,360,42,'HEAT REUSE','42 °C direct · heat-pump 70–85 °C · '+reuseNote,{color:C.amber,fs:11,vcenter:true}));
+
+    // ---- closed-loop water position ----
+    k.push(this.pill(810,690, evap?'EVAP-ASSISTED · WUE 0.4–1.4':'CLOSED LOOP · WUE ≈ 0', evap?cool:C.accent));
+
+    return this.svg('0 0 1000 716', k, 700);
+  }
+
+  // ============ NETWORK ============
+  renderNetwork() {
+    const h = React.createElement, C = this.pal(), t = this.tiers[this.state.tier], pf = this.plat(), a = this.anim();
+    const hasCore = t.mw >= 40;
+    const spods = t.sp < 1 ? '½' : String(t.sp);
+    const layer = this.state.netLayer || 'all';
+    const iso = layer!=='all';
+    const op = id => (layer==='all' || layer===id) ? 1 : 0.32;   // isolated fabric stays bright
+    const LX = 300;
+
+    // cable-media reach colors (Improvement A)
+    const COP = '#cf9b5e';                         // copper / ACC  ≤5 m  (bronze)
+    const MMF = '#46c6e0';                         // multimode optic ≤50 m (aqua)
+    const SMF = '#8f86ee';                         // single-mode trunk ≤500 m (periwinkle)
+
+    // scaling counts (Improvement B) — SU=8 racks, pod=2 SU, SuperPOD=16 SU
+    const sus = t.pods * 2;
+    const optics = t.gpus * 2;
+
+    // geometry (tightened so the caption band clears every node)
+    const spineX=[228,372], spineY=196;
+    const leafX=[170,300,430], leafY=296;
+    const rackY=406;
+    // which compute layer a segregated fabric physically attaches to
+    const anchorIsLeaf = (layer==='frontend' || layer==='storage');
+    const anchorIsRack = (layer==='oob');
+
+    // ---- backend group (dims to 0.32 when another fabric is isolated) ----
+    const be = [];
+    be.push(this.monoTxt(56,24,'BACKEND FABRIC',{color:C.strong,fs:10.5}));
+    be.push(this.monoTxt(56,38,pf.fabric,{color:C.muted,fs:8.5,upper:false}));
+    be.push(this.monoTxt(56,50,pf.nic.split(' · ')[0]+' · rail-optimized leaf/spine',{color:C.faint,fs:8,upper:false}));
+
+    // CORE / SUPER-SPINE
+    if (hasCore) {
+      be.push(this.node(LX,90,256,48,'CORE / SUPER-SPINE',['joins '+t.sp+' SuperPODs · ≤4:1 default','≤2:1 single-tenant frontier'],{color:C.violet,active:true,fs:12,vcenter:true}));
+    } else {
+      be.push(this.node(LX,90,266,48,'SINGLE SUPERPOD',[ spods+' SuperPOD at '+t.mw+' MW','core / super-spine added at ≥40 MW'],{color:C.muted,fs:11,vcenter:true}));
+    }
+
+    // SPINE (per SuperPOD) — fed from core over SMF trunk (≤500 m)
+    spineX.forEach((x,i)=>{
+      if (hasCore) be.push(this.poly([[x,spineY-21],[LX,114]],{active:a,color:SMF,w:1.6,rev:true}));
+      be.push(this.node(x,spineY,116,42,'SPINE '+(i+1),'per SuperPOD',{color:C.accent3,active:true}));
+    });
+    if (hasCore) be.push(this.monoTxt(470,140,'≤500 m SMF',{color:SMF,fs:8.5}));
+
+    // LEAF (rail-optimized, per SU) — leaf↔spine over MMF (≤50 m); drawn dim, re-drawn bright below if it's the anchor
+    leafX.forEach((x,i)=>{
+      spineX.forEach(sx=> be.push(this.poly([[x,leafY-20],[sx,spineY+21]],{active:a,color:MMF,w:1.1,opacity:.8})));
+      be.push(this.node(x,leafY,98,40,'LEAF '+(i+1),'',{color:C.accent}));
+    });
+    be.push(this.monoTxt(478,250,'≤50 m MMF',{color:MMF,fs:8.5}));
+    be.push(this.monoTxt(478,262,'1:1 NON-BLOCKING',{color:C.muted,fs:8}));
+
+    // NVL72 RACK (scale-up domain) — rack↔leaf over copper/ACC (≤5 m)
+    leafX.forEach(x=> be.push(this.poly([[LX,rackY-27],[x,leafY+20]],{active:a,color:COP,w:1.5})));
+    be.push(this.monoTxt(478,360,'≤5 m COPPER / ACC',{color:COP,fs:8.5}));
+    be.push(this.node(LX,rackY,318,54,'NVL72 RACK · '+pf.gpr+' GPU', pf.scaleUp,{color:C.accent,active:true,accentBar:true,fs:13}));
+    be.push(this.monoTxt(LX,446,'SCALE-UP · NVLINK COPPER BACKPLANE — NO FACILITY CABLING',{color:C.faint,fs:7.5,anchor:'middle'}));
+
+    // ---- segregated fabrics (right) — each its own isolatable layer ----
+    const segBox = h('rect',{key:'seg',x:632,y:62,width:330,height:386,rx:10,fill:'rgba(63,184,166,.035)',stroke:'rgba(63,184,166,.2)',strokeWidth:1,strokeDasharray:'4 4'});
+    const segTitle = this.monoTxt(797,82,'PHYSICALLY SEGREGATED FABRICS',{color:C.teal,fs:9,anchor:'middle'});
+    const fe = h('g',{key:'fe',opacity:op('frontend')}, this.node(797,142,250,52,'FRONTEND NETWORK',['storage access · users · services','non-blocking in pod · ≤2:1 to core'],{color:C.teal,fs:12,vcenter:true}));
+    const st = h('g',{key:'st',opacity:op('storage')}, [
+      this.node(797,244,250,52,'STORAGE FABRIC',['≥1 GB/s sustained read / GPU','≈'+(pf.gpuBw==='1.6 Tb/s'?'18':'9')+' TB/s aggregate / SuperPOD'],{color:C.teal,fs:12,vcenter:true}),
+      this.monoTxt(797,286,'≥2 FAULT DOMAINS / SUPERPOD',{color:C.faint,fs:7.5,anchor:'middle'}) ]);
+    const ob = h('g',{key:'ob',opacity:op('oob')}, [
+      this.node(797,352,250,52,'OUT-OF-BAND (OOB)',['BMC · PDU · CDU / cooling control','independent switches · diverse paths'],{color:C.teal,fs:12,vcenter:true}),
+      this.monoTxt(797,428,'STAYS UP DURING COMPUTE-FABRIC EVENTS',{color:C.faint,fs:7.5,anchor:'middle'}) ]);
+
+    // ---- when isolated: bright attachment connector + re-draw the anchor compute layer at full strength ----
+    const attach = [];
+    if (iso) {
+      const route = {
+        frontend: { pts:[[672,142],[560,142],[560,296],[479,296]], col:MMF, lbl:'DUAL-HOMED LEAF PAIRS · MMF' },
+        storage:  { pts:[[672,244],[540,244],[540,312],[479,312]], col:MMF, lbl:'VIA FRONTEND LEAF · MMF' },
+        oob:      { pts:[[672,352],[520,352],[520,406],[459,406]], col:COP, lbl:'INDEPENDENT SWITCHES · LOW-SPEED COPPER' },
+      }[layer];
+      if (route) {
+        attach.push(this.poly(route.pts,{active:a,color:route.col,w:1.8}));
+        attach.push(this.monoTxt(route.pts[1][0]-6, route.pts[0][1]-9, route.lbl, {color:route.col,fs:7.5,anchor:'end'}));
+      }
+      // re-draw the relevant compute anchor at full opacity + highlight ring (so it never reads as dimmed)
+      if (anchorIsLeaf) {
+        leafX.forEach((x,i)=>{
+          attach.push(h('rect',{key:'lh'+i,x:x-53,y:leafY-25,width:106,height:50,rx:9,fill:'none',stroke:MMF,strokeWidth:1.4,strokeDasharray:'3 3',opacity:.9}));
+          attach.push(this.node(x,leafY,98,40,'LEAF '+(i+1),'',{color:C.accent,active:true}));
+        });
+        attach.push(this.monoTxt(LX,leafY+38,'ATTACHES AT THE LEAF LAYER',{color:MMF,fs:7.5,anchor:'middle'}));
+      } else if (anchorIsRack) {
+        attach.push(h('rect',{key:'rh',x:LX-162,y:rackY-29,width:324,height:58,rx:10,fill:'none',stroke:COP,strokeWidth:1.4,strokeDasharray:'3 3',opacity:.9}));
+        attach.push(this.node(LX,rackY,318,54,'NVL72 RACK · '+pf.gpr+' GPU', pf.scaleUp,{color:C.accent,active:true,accentBar:true,fs:13}));
+        attach.push(this.monoTxt(LX,446,'OOB REACHES EVERY RACK · PDU · CDU',{color:COP,fs:7.5,anchor:'middle'}));
+      }
+      const note = {
+        backend:'COMPUTE FABRIC — RAIL-OPTIMIZED LEAF / SPINE, 1:1 NON-BLOCKING WITHIN EACH SUPERPOD. THE DESIGN-DRIVING NETWORK; NEVER OVERSUBSCRIBED.',
+        frontend:'FRONTEND — STORAGE ACCESS, USERS & CLUSTER SERVICES ON A SEPARATE ETHERNET FABRIC. NON-BLOCKING IN POD, ≤2:1 TO CORE, DUAL-HOMED LEAF PAIRS.',
+        storage:'STORAGE — CERTIFIED PARALLEL FILESYSTEM, ≥1 GB/s SUSTAINED READ / GPU ('+(pf.gpuBw==='1.6 Tb/s'?'≈18':'≈9')+' TB/s / SUPERPOD), DEPLOYED ACROSS ≥2 FAULT DOMAINS.',
+        oob:'OUT-OF-BAND — BMC, PDU & CDU / COOLING CONTROL ON INDEPENDENT SWITCHES AND DIVERSE PATHS; ENGINEERED TO STAY UP DURING COMPUTE-FABRIC EVENTS.',
+      }[layer];
+      const accm = layer==='oob'?COP:(layer==='backend'?C.violet:MMF);
+      attach.push(h('rect',{key:'capbg',x:56,y:486,width:906,height:28,rx:6,fill:'rgba(120,150,200,.07)',stroke:C.border,strokeWidth:1}));
+      attach.push(h('rect',{key:'capac',x:56,y:486,width:3.5,height:28,rx:2,fill:accm}));
+      attach.push(this.monoTxt(70,504,note,{color:C.body,fs:8,upper:false}));
+    }
+    const attachG = h('g',{key:'att'}, attach);
+
+    // ---- counts strip (Improvement B) — always visible ----
+    const counts = h('g',{key:'cnt'},[
+      h('line',{x1:56,y1:534,x2:962,y2:534,stroke:C.border,strokeWidth:1}),
+      this.monoTxt(56,555, sus+' SCALABLE UNITS · '+spods+' SUPERPOD'+(t.sp===1?'':'S')+' · '+this.fmt(t.gpus)+' GPU @ '+t.mw+' MW',{color:C.body,fs:9}),
+      this.monoTxt(56,569, '≈'+this.fmt(optics)+' BACKEND OPTICAL TRANSCEIVERS (INDICATIVE) · HUNDREDS OF FIBERS / SU · DUAL DIVERSE INTER-HALL ROUTES',{color:C.faint,fs:8,upper:false}) ]);
+
+    // ---- reach legend (Improvement A) ----
+    const sw=(x,col,lbl)=>[ h('rect',{key:'sw'+x,x,y:592,width:18,height:4,rx:2,fill:col}), this.monoTxt(x+24,597,lbl,{color:C.muted,fs:8}) ];
+    const legend = h('g',{key:'lg'},[ this.monoTxt(56,597,'REACH',{color:C.faint,fs:8}),
+      ...sw(110,COP,'COPPER/ACC ≤5 m'), ...sw(320,MMF,'MMF ≤50 m'), ...sw(500,SMF,'SMF ≤500 m TRUNK') ]);
+
+    const k = [
+      h('g',{key:'be',opacity:op('backend')}, be),
+      segBox, segTitle, fe, st, ob, attachG, counts, legend
+    ];
+    return this.svg('0 0 1000 612', k, 600);
+  }
+
+  // ============ FACILITY ============
+  renderFacility() {
+    const h = React.createElement, C = this.pal(), t = this.tiers[this.state.tier], pf = this.plat();
+    const rpp = pf.racksPerPod, rcols = rpp/2;
+    const podCols=['#5793c0','#46c6e0','#7b76e0','#3fb8a6'];
+    const podTints=['rgba(87,147,192,.10)','rgba(70,198,224,.09)','rgba(123,118,224,.09)','rgba(63,184,166,.09)'];
+    const band = (label,extra)=> h('div',{ style:{ background:'rgba(155,168,182,.05)', border:'1px solid '+C.border, borderRadius:5, padding:'8px 10px', display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', ...extra } },
+      h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.12em',color:C.muted,textTransform:'uppercase'}}, label));
+    const rack=(k)=> h('div',{key:k,style:{width:'100%',aspectRatio:'.78',background:'rgba(155,168,182,.20)',borderRadius:1}});
+    const podRow=(pi)=> {
+      const active = this.state.hoverPod===pi;
+      return h('div',{ key:pi,
+        onMouseEnter:()=>this.set({hoverPod:pi}), onMouseLeave:()=>this.set({hoverPod:null}),
+        style:{ background:active?podTints[pi].replace(/[\d.]+\)$/,'.22)'):podTints[pi], border:'1px solid '+podCols[pi]+(active?'aa':'44'), borderRadius:4, padding:'5px 7px', display:'flex', flexDirection:'column', gap:4, cursor:'default', transition:'all .15s', boxShadow:'none' } },
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8,letterSpacing:'.12em',color:podCols[pi]}},'POD '+(pi+1)+' · 2 ROWS'),
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:7.5,color:C.faint}},rpp+' racks · 2.5 MW · '+pf.rackKW+' kW · 1 CDU')),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat('+rcols+',1fr)',gap:2}}, Array.from({length:rpp},(_,i)=>rack(i)))
+      );
+    };
+    // tier-responsive site context: this hall is 1 of N identical halls
+    const siteStrip = h('div',{ style:{ width:'100%', maxWidth:760, display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' } },
+      h('div',{style:{display:'flex',flexDirection:'column',gap:3}},
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.14em',color:C.accent,textTransform:'uppercase'}},'DETAILED HALL · 1 OF '+t.halls+' @ '+t.mw+' MW'),
+        h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.06em',color:C.faint}}, this.fmt(t.area)+' m² facility · '+t.pods/t.halls+' pods × '+t.halls+' halls')),
+      h('div',{style:{display:'flex',gap:4,alignItems:'center',flexWrap:'wrap',maxWidth:320,justifyContent:'flex-end'}},
+        Array.from({length:t.halls},(_,i)=>h('div',{key:i, title:'Hall '+(i+1), style:{ width:i===0?15:11, height:11, borderRadius:2, background:i===0?C.accent:'rgba(155,168,182,.20)', border:i===0?'none':'1px solid '+C.border, boxShadow:'none' } }))));
+
+    const grid = h('div',{ style:{ width:'100%', maxWidth:760, display:'grid', gridTemplateColumns:'76px 1fr 76px', gridTemplateRows:'auto 1fr auto', gap:8 } },
+      h('div',{style:{gridColumn:'1 / 4'}}, band('Fan-wall air handlers (N+2)  ·  network / meet-me rooms')),
+      h('div',{}, band('Electrical rooms · TX · LV · UPS (A/B)',{height:'100%',writingMode:'vertical-rl'})),
+      h('div',{ style:{ background:'#0b1118', border:'1px solid rgba(155,176,192,.22)', borderRadius:6, padding:9, display:'flex', flexDirection:'column', gap:6 } },
+        h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:1}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.12em',color:C.accent}},'WHITE SPACE · '+(rpp*4)+' RACKS · '+pf.dist),
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8,color:C.faint}},'HOT-AISLE CONTAINED')),
+        [0,1,2,3].map(pi=>podRow(pi))
+      ),
+      h('div',{}, band('CDU gallery (4+1) · FWS headers',{height:'100%',writingMode:'vertical-rl'})),
+      h('div',{style:{gridColumn:'1 / 4'}}, band('Logistics / rigging corridor — 2 t rolling loads · slab ≥21 kN/m²'))
+    );
+
+    return h('div',{ style:{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', gap:13 } }, siteStrip, grid);
+  }
+
+  // ============ PERFORMANCE ============
+  puePos(v){ const lo=1.0, hi=1.4; return Math.max(0,Math.min(100,((v-lo)/(hi-lo))*100)); }
+  renderPerformance() {
+    const h = React.createElement, C = this.pal(), e = this.ed();
+    const sel = this.state.climate;
+    const mode = this.state.coolMode || 'dry';
+    const wueEvap = mode==='evap' && !!this.climates[sel].evap;
+    const pueOf = (cl)=> (mode==='evap' && cl.evap) ? cl.evap : cl.base;
+    const recMode = (i)=> i>=2 ? 'evap' : 'dry';
+    const rec = recMode(sel), evapOk = !!this.climates[sel].evap;
+    // climate-sensitive mechanical scaling (indicative): rejection + AHU fans rise with ambient; pumps ~fixed
+    const cf = [0.7,1.0,1.4,1.9][sel];
+    let rej = 45*cf, ahu = 35*(1+(cf-1)*0.35); const cduP=40, fwsP=25; let evapAux=0;
+    if (wueEvap){ rej *= 0.55; evapAux = 14; }  // towers: lower fan power, add pump + treatment
+    const budget = [ {k:'Heat-rejection / chiller',v:Math.round(rej),c:C.teal}, {k:'CDU pumps',v:cduP,c:C.accent}, {k:'Air-handler fans',v:Math.round(ahu),c:C.violet}, {k:'FWS pumping',v:fwsP,c:C.cyan} ];
+    if (evapAux) budget.push({k:'Evap pumps + treatment',v:evapAux,c:C.amber});
+    const total = budget.reduce((a,b)=>a+b.v,0);
+    const mechPct = (total/2500*100).toFixed(1);
+
+    const bandRow = (cl,i)=> {
+      const active=i===sel;
+      const [b0,b1]=pueOf(cl);
+      const evapApplied = mode==='evap' && !!cl.evap;
+      return h('div',{ key:i+(active?'-a':'')+(this.state.hover==='cl'+i?'-h':''), onClick:()=>this.set({climate:i, coolMode:recMode(i)}), onMouseEnter:()=>this.set({hover:'cl'+i}), onMouseLeave:()=>this.set({hover:null}),
+        style:{ cursor:'pointer', background:active?'rgba(155,176,192,.08)':this.state.hover==='cl'+i?'rgba(155,168,182,.04)':'transparent', border:'1px solid '+(active?C.steelB:C.border), borderRadius:7, padding:'11px 13px', display:'flex', flexDirection:'column', gap:8, transition:'all .15s' } },
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:10}},
+          h('div',{style:{display:'flex',flexDirection:'column',gap:3}},
+            h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:15,color:active?C.strong:C.body}},cl.name),
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.08em',color:C.faint,textTransform:'uppercase'}},cl.ex)),
+          h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:20,color:active?C.accent:C.body,letterSpacing:'-.02em'}}, b0.toFixed(2)+'–'+b1.toFixed(2))),
+        h('div',{style:{position:'relative',height:7,background:'rgba(155,168,182,.10)',borderRadius:4}},
+          h('div',{style:{position:'absolute',top:'50%',transform:'translateX(-1px) translateY(-50%)',left:'calc('+this.puePos(1.2)+'% )',width:2,height:13,background:C.warn,opacity:.7}}),
+          h('div',{style:{position:'absolute',top:0,height:7,borderRadius:4,left:this.puePos(b0)+'%',width:(this.puePos(b1)-this.puePos(b0))+'%',background:cl.tone,boxShadow:'none',transition:'left .25s,width .25s'}})),
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8,color:evapApplied?C.cyan:C.faint}}, evapApplied?('EVAP · WUE '+cl.wue.toFixed(1)+' L/kWh'):(mode==='evap'?'EVAP — NOT WARRANTED':'DRY · WUE ≈ 0')),
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.06em',color:cl.tone}},e.bandPrefix+' · '+cl.enefg))
+      );
+    };
+    const coolBtn=(id,label)=>{ const a=mode===id; const dis=(id==='evap'&&!evapOk);
+      return h('button',{key:id+(a?'-a':'')+(dis?'-d':''),onClick:dis?undefined:()=>this.set({coolMode:id}),title:dis?'Evaporative not warranted in this climate':(id===rec?'Recommended for this climate':''),
+      style:{cursor:dis?'not-allowed':'pointer',opacity:dis?0.38:1,border:'1px solid '+(a?C.steelB:C.border),background:a?C.steelT:'transparent',color:a?C.strong:C.muted,borderRadius:6,padding:'5px 11px',fontFamily:'var(--font-mono)',fontSize:9,letterSpacing:'.08em',textTransform:'uppercase',transition:'all .15s'}},
+        label, id===rec?h('span',{style:{marginLeft:5,color:C.steel,fontSize:8}},'✓'):null); };
+
+    return h('div',{ style:{ width:'100%', maxWidth:780, display:'grid', gridTemplateColumns:'1.35fr 1fr', gap:18, alignItems:'start' } },
+      h('div',{style:{display:'flex',flexDirection:'column',gap:9}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:2,gap:10}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.16em',color:C.muted}},'ANNUALIZED PUE BY CLIMATE BAND'),
+          h('div',{style:{display:'inline-flex',gap:4}}, coolBtn('dry','Dry'), coolBtn('evap','Evaporative'))),
+        this.climates.map((cl,i)=>bandRow(cl,i)),
+        h('div',{style:{fontFamily:'var(--font-mono)',fontSize:8,color:C.faint,letterSpacing:'.04em'}},'│ marker = '+e.ceiling+'  ·  MODE: '+(mode==='evap'?'EVAPORATIVE':'DRY')+(mode===rec?' — recommended for '+this.climates[sel].name.toLowerCase():' — manual override'))
+      ),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:16}},
+        h('div',{style:{background:'#0b1118',border:'1px solid '+C.border,borderRadius:9,padding:'15px 15px',display:'flex',flexDirection:'column',gap:11}},
+          h('div',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.14em',color:C.muted}},'MECHANICAL POWER · PER 2.5 MW POD · INDICATIVE'),
+          h('div',{style:{display:'flex',height:12,borderRadius:6,overflow:'hidden'}}, budget.map((b,i)=>h('div',{key:i,style:{width:(b.v/total*100)+'%',background:b.c}}))),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:6,marginTop:2}}, budget.map((b,i)=>h('div',{key:i,style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
+            h('span',{style:{display:'flex',alignItems:'center',gap:7,fontSize:11.5,color:C.body}}, h('span',{style:{width:9,height:9,borderRadius:2,background:b.c}}), b.k),
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:C.strong}}, b.v+' kW')))),
+          h('div',{style:{display:'flex',justifyContent:'space-between',borderTop:'1px solid '+C.border,paddingTop:8,marginTop:2}},
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:10,letterSpacing:'.1em',color:C.muted}},'TOTAL'),
+            h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:15,color:C.accent}}, '≈'+total+' kW · ~'+mechPct+'% IT'))
+        ),
+        h('div',{style:{background:'#0b1118',border:'1px solid '+C.border,borderRadius:9,padding:'15px 15px',display:'flex',flexDirection:'column',gap:9}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.14em',color:C.muted}},'WATER · WUE'),
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.08em',color:wueEvap?C.cyan:C.faint}}, wueEvap?'EVAPORATIVE':'DRY CLOSED LOOP')),
+          h('div',{style:{display:'flex',alignItems:'baseline',gap:8}},
+            h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:30,color:wueEvap?C.cyan:C.strong,letterSpacing:'-.02em'}}, wueEvap?this.climates[sel].wue.toFixed(1):'≈ 0'),
+            h('span',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:wueEvap?C.cyan:C.accent}},'L/kWh')),
+          h('div',{style:{fontSize:11.5,lineHeight:1.5,color:C.muted}}, wueEvap
+            ? ('Evaporative-assisted in '+this.climates[sel].name.toLowerCase()+' — trades on-site water for the lower PUE shown at left. Viable only where water is contractually secure.')
+            : (mode==='evap' ? ('Evaporative not warranted in '+this.climates[sel].name.toLowerCase()+' — free cooling already meets the target, so WUE stays at zero.') : 'No on-site evaporation in the base design — sealed loops, make-up water only for service. The evaporative variant trades water for a lower hot-climate PUE.'))
+        )
+      )
+    );
+  }
+
+  // ---- detail panels ----
+  dRow(label,val,color){ const h=React.createElement,C=this.pal();
+    return h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:10,padding:'7px 0',borderBottom:'1px solid '+C.border}},
+      h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.06em',color:C.muted,textTransform:'uppercase'}},label),
+      h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:14,color:color||C.strong,textAlign:'right'}},val)); }
+  dCard(title,kids,o={}){ const h=React.createElement,C=this.pal();
+    return h('div',{style:{background:'#0b1118',border:'1px solid '+(o.border||C.border),borderRadius:10,padding:'14px 15px',display:'flex',flexDirection:'column',gap:o.gap??4}},
+      h('div',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.16em',color:C.steel,textTransform:'uppercase',marginBottom:4}},title), ...kids); }
+  dText(t){ const h=React.createElement,C=this.pal(); return h('p',{style:{margin:'2px 0 0',fontSize:12,lineHeight:1.55,color:C.muted}},t); }
+
+  renderDetail() {
+    const h = React.createElement, C = this.pal(), t = this.tiers[this.state.tier], view=this.state.view, e = this.ed(), pf = this.plat(), dc = pf.mode==='dc';
+    if (view==='scale') {
+      const ladder=[['72','GPUs / NVL72 rack'],[pf.racksPerPod,'racks / Pod (2.5 MW · '+pf.rackKW+' kW)'],['4','pods / Hall (10 MW)'],['2','halls / Wing (20 MW)'],[t.halls,'halls @ '+t.mw+' MW']];
+      return [
+        this.dCard('Building Block', ladder.map((r,i)=>h('div',{key:i,style:{display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:i<ladder.length-1?'1px solid '+C.border:'none'}},
+          h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:18,color:C.strong,minWidth:34,letterSpacing:'-.02em'}},r[0]),
+          h('span',{style:{fontSize:12,color:C.body}},r[1])))),
+        this.dCard('At this tier',[ this.dRow('Utility intake', this.intakeLabel(t)), this.dRow('SuperPOD equivalents', t.sp), this.dRow('Facility area', this.fmt(t.area)+' m²'), this.dRow('Facility load', t.fac+' MW') ]),
+        this.dText('Indicative area ≈460 m²/MW IT for the complete facility. The 20 MW tier is the first full SuperPOD and the smallest dual-hall wing. '+pf.note)
+      ];
+    }
+    if (view==='electrical' && dc) {
+      const bens=[['Copper usage','−45%'],['Power · same busway','+85%'],['End-to-end efficiency','+5%'],['Conversion stages','−4'],['Maintenance cost','−70%'],['TCO','−30%']];
+      return [
+        this.dCard('800 VDC Chain',[ this.dRow('Distribution','800 VDC · 2N'), this.dRow('Conversion','perimeter AC/DC'), this.dRow('Rack feed','2-wire 800 V'), this.dRow('Alt. rack feed','±400 V (OCP)'), this.dRow('In-rack','DC/DC only'), this.dRow('Energy store','centralized DC'), this.dRow('Protection','solid-state breakers') ],{tcol:C.violet}),
+        this.dCard('Benefits vs 415 VAC', bens.map((r,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'6px 0',borderBottom:i<bens.length-1?'1px solid '+C.border:'none'}},
+          h('span',{style:{fontFamily:'var(--font-mono)',fontSize:9.5,letterSpacing:'.04em',color:C.muted,textTransform:'uppercase'}},r[0]),
+          h('span',{style:{fontFamily:'var(--font-display)',fontWeight:500,fontSize:16,color:C.violet}},r[1]))),{tcol:C.violet}),
+        this.dCard('Platform',[ this.dRow('Covers', pf.covers), this.dRow('Rack power', pf.kwLabel), this.dRow('Racks / pod','~'+pf.racksPerPod), this.dRow('Kyber rack','~600 kW') ]),
+        this.dText(pf.note+' NVIDIA-stated targets are directional, to validate in Helio modeling. Open items before any DC build: DC arc-flash & earthing study, solid-state-breaker maturity (≥2 vendors), and 800 VDC workforce certification per jurisdiction.')
+      ];
+    }
+    if (view==='electrical') {
+      const vmeta={ '2n':{u:'≈50%',cap:'Baseline',ups:t.ups,gen:t.gen,note:'Two independent paths, each rated for the full pod load. The most fault-tolerant arrangement and the default for mixed and inference workloads.'},
+        'tiered':{u:'—',cap:'−25–35% electrical',ups:Math.round(t.ups/2),gen:Math.max(1,Math.round(t.gen*0.2)),note:'Cooling, network, storage & management keep full 2N + generator. GPU compute rides on battery only; lost work is bounded by checkpoint cadence. Firm-grid, training-dominant sites only.'},
+        'distributed':{u:'≈75%',cap:'−~25% UPS capacity',ups:Math.round(t.ups*0.75),gen:t.gen,note:'Block-redundant “4-to-make-3” meets Tier III concurrent maintainability at higher utilization, with less fault-tolerance margin than 2N.'} };
+      const vm=vmeta[this.state.variant];
+      const vbtn=(id,label)=>{ const a=this.state.variant===id; return h('button',{key:id+(a?'-a':''),onClick:()=>this.set({variant:id}),
+        style:{flex:1,cursor:'pointer',border:'1px solid '+(a?C.steelB:C.border),background:a?C.steelT:'transparent',color:a?C.strong:C.muted,borderRadius:6,padding:'8px 4px',fontFamily:'var(--font-mono)',fontSize:9,letterSpacing:'.06em',textTransform:'uppercase',transition:'all .15s'}},label); };
+      return [
+        this.dCard('Redundancy Variant',[ h('div',{style:{display:'flex',gap:6,marginTop:2}}, vbtn('2n','2N'), vbtn('tiered','Tiered'), vbtn('distributed','Dist-R')), this.dText(vm.note) ],{gap:8}),
+        this.dCard('Plant at this tier',[ this.dRow('Pod transformers', t.podTx+' × 3.15 MVA'), this.dRow('IT UPS modules', vm.ups+' × 2.5 MW'), this.dRow('Gensets (3 MW)', vm.gen+' · N+1'), this.dRow('UPS utilization', vm.u), this.dRow('Capex vs 2N', vm.cap, this.state.variant==='2n'?C.body:C.accent) ]),
+        this.dCard(this.ed().regime+' Standards',[ this.dRow('LV install', e.lvStd), this.dRow('LV voltage', e.lv), this.dRow('MV switchgear', e.mvSwgr), this.dRow('Transformers', e.txStd), this.dRow('UPS', e.upsStd), this.dRow('Gensets', e.genStd), this.dRow('Arc-flash', e.arc) ],{tcol:C.accent}),
+        this.dCard('Tier III',[ this.dRow('Topology','Concurrent maint.'), this.dRow('Ref. availability','99.982%'), this.dRow('Expected downtime','~1.6 h / yr') ],{tcol:C.teal}),
+        this.dText('Covers '+pf.covers+'. '+pf.note)
+      ];
+    }
+    if (view==='cooling') {
+      return [
+        this.dCard('Loops & temperatures',[ this.dRow('TCS supply','36 °C'), this.dRow('TCS / W45 ceiling','45 °C'), this.dRow('FWS','32 / 42 °C'), this.dRow('Heat to liquid','~90%'), this.dRow('Rack flow', pf.flow) ]),
+        this.dCard('Plant at this tier',[ this.dRow('Liquid load', t.liquid+' MW'), this.dRow('CDUs (2.3 MW)', t.cdu+' · incl. N+1'), this.dRow('Trim coolers (2.6 MW)', t.trim+' · incl. N+1'), this.dRow('Air-side budget', t.air+' MW') ],{tcol:C.teal}),
+        this.dText('Coolant circulation rides on mechanical UPS; stratified chilled-water buffer tanks extend full-load thermal ride-through to ≥5 minutes through a power event.')
+      ];
+    }
+    if (view==='network') {
+      return [
+        this.dCard('Fabric',[ this.dRow('Scale-up', pf.gpr+' GPU · NVLink'), this.dRow('SuperNIC', pf.nic.split(' · ')[0]), this.dRow('Per-GPU', pf.gpuBw), this.dRow('Backend','1:1 non-blocking'), this.dRow('Core oversub.', t.mw>=40?'≤4:1 default':'n/a (single SP)') ],{tcol:C.violet}),
+        this.dCard('Storage',[ this.dRow('Per GPU','≥1 GB/s read'), this.dRow('Per SuperPOD', pf.gpuBw==='1.6 Tb/s'?'≈18 TB/s':'≈9 TB/s'), this.dRow('Fault domains','≥2 per SuperPOD') ],{tcol:C.teal}),
+        this.dCard('Power & siting',[ this.dRow('Per pod aux','≈230 kW'), this.dRow('Switch racks','air-cooled'), this.dRow('Rack class','15–30 kW'), this.dRow('Overhead','busway / TCS / fiber') ],{tcol:C.amber}),
+        this.dText('Switch racks sit in dedicated air-cooled network rows (the GPU racks are direct-to-chip liquid-cooled). Reach — not floor area — is the binding geometric constraint: a SuperPOD maps to exactly two adjacent halls.')
+      ];
+    }
+    if (view==='facility') {
+      return [
+        this.dCard('Data hall',[ this.dRow('Racks', (pf.racksPerPod*4)+' · '+pf.racksPerPod+'/pod'), this.dRow('Rack power', pf.kwLabel), this.dRow('Distribution',pf.dist), this.dRow('Floor loading',e.floorLoad), this.dRow('Structural code',e.struct), this.dRow('Clear height','≥6 m') ]),
+        this.dCard('Overhead layers',[
+          h('div',{style:{display:'flex',flexDirection:'column',gap:7,marginTop:2}},
+            ...[['Power busway','#9bb0c0'],['TCS coolant piping','#6fa4b8'],['Network cable tray','#cba968']].map((r,i)=>h('div',{key:i,style:{display:'flex',alignItems:'center',gap:9}},
+              h('span',{style:{width:18,height:4,borderRadius:2,background:r[1]}}), h('span',{style:{fontSize:12,color:C.body}},r[0])))),
+          this.dText('Three segregated layers above the rows, with independent maintenance access.')
+        ]),
+        this.dCard('Footprint',[ this.dRow('Facility area', this.fmt(t.area)+' m²'), this.dRow('Acoustic (rack rear)','~92 dBA'), this.dRow('Clearance f/r','1.2 m') ],{tcol:C.teal})
+      ];
+    }
+    // performance
+    const cl=this.climates[this.state.climate];
+    return [
+      this.dCard('Measurement boundary',[ this.dText('PUE per '+e.pueBoundary+' at the facility boundary, annualized. WUE per ISO 30134-9 is on-site direct water only.') ],{gap:2}),
+      this.dCard('Selected: '+cl.name,[ this.dRow('PUE (base, dry)', cl.base[0].toFixed(2)+'–'+cl.base[1].toFixed(2)), this.dRow('Evaporative', cl.evap?cl.evap[0].toFixed(2)+'–'+cl.evap[1].toFixed(2):'not warranted'), this.dRow(e.regLabel, cl.enefg, cl.tone) ]),
+      this.dCard(e.regime+' Regulatory',[ this.dText(e.regNote) ],{gap:2,tcol:C.accent}),
+      this.dCard('Electrical losses',[ this.dRow('UPS · TX · dist.','~4–6% at design') ],{tcol:C.teal})
+    ];
+  }
+
+  // canvas overlays: cooling heat-reject toggle, network fabric-layer isolator
+  canvasOverlay() {
+    const h = React.createElement, C = this.pal();
+    if (this.state.view === 'network') {
+      const cur = this.state.netLayer || 'all';
+      const lb=(id,label)=>{ const act=cur===id;
+        return h('button',{key:id+(act?'-a':''),onClick:()=>this.set({netLayer:id}),title:id==='all'?'Show every fabric':'Isolate the '+label+' fabric',
+          style:{cursor:'pointer',height:25,padding:'0 10px',display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid '+(act?C.steelB:C.border),background:act?C.steelT:'#0b1118',color:act?C.strong:C.muted,borderRadius:6,fontFamily:'var(--font-mono)',fontSize:8.5,letterSpacing:'.1em',textTransform:'uppercase',transition:'all .15s'}},label); };
+      return h('div',{key:'nov-'+cur,style:{position:'absolute',top:6,right:10,zIndex:5,display:'inline-flex',gap:3}},
+        lb('all','All'), lb('backend','Backend'), lb('frontend','Frontend'), lb('storage','Storage'), lb('oob','OOB'));
+    }
+    if (this.state.view !== 'cooling') return React.createElement('span',{key:'no-ov'});
+    const mode = this.state.coolMode || 'dry';
+    const cb=(id,label)=>{ const act=mode===id;
+      return h('button',{key:id+(act?'-a':''),onClick:()=>this.set({coolMode:id}),title:id==='evap'?'Evaporative-assisted heat rejection — hot-dry markets':'Dry / free cooling — base design',
+        style:{cursor:'pointer',height:25,padding:'0 11px',display:'flex',alignItems:'center',border:'1px solid '+(act?C.steelB:C.border),background:act?C.steelT:'#0b1118',color:act?C.strong:C.muted,borderRadius:6,fontFamily:'var(--font-mono)',fontSize:9,letterSpacing:'.1em',textTransform:'uppercase',transition:'all .15s'}},label); };
+    return h('div',{key:'ov-'+mode,style:{position:'absolute',top:6,right:10,zIndex:5,display:'flex',alignItems:'center',gap:7}},
+      h('span',{style:{fontFamily:'var(--font-mono)',fontSize:8,letterSpacing:'.12em',color:C.faint,textTransform:'uppercase'}},'Reject'),
+      h('div',{style:{display:'inline-flex',gap:3}}, cb('dry','Dry / Free'), cb('evap','Evaporative')));
+  }
+
+  renderVals() {
+    const t = this.tiers[this.state.tier];
+    const m = this.meta[this.state.view];
+    const pf = this.plat();
+    const racks = t.pods * pf.racksPerPod;
+    const gpus = racks * pf.gpr;
+    const metrics = [
+      { label:'GPUs',          value:this.fmt(gpus),   unit:'',   hasUnit:false },
+      { label:'NVL72 Racks',   value:this.fmt(racks),  unit:'',   hasUnit:false },
+      { label:'Pods',          value:t.pods,           unit:'',   hasUnit:false },
+      { label:'Data Halls',    value:t.halls,          unit:'',   hasUnit:false },
+      { label:'IT Load',       value:t.mw,             unit:'MW', hasUnit:true  },
+      { label:'Facility Load', value:t.fac,            unit:'MW', hasUnit:true  },
+      { label:'SuperPODs',     value:t.sp,             unit:'',   hasUnit:false },
+      { label:'Area',          value:this.fmt(t.area), unit:'m²', hasUnit:true  },
+    ];
+    const h = React.createElement, e = this.ed();
+    const canvasMap = { scale:this.renderScale(), electrical:this.renderElectrical(), cooling:this.renderCooling(), network:this.renderNetwork(), facility:this.renderFacility(), performance:this.renderPerformance() };
+    const sig = this.state.view+'|'+this.state.tier+'|'+this.state.variant+'|'+this.state.climate+'|'+this.state.hoverPod+'|'+this.state.edition+'|'+this.state.platform+'|'+this.state.coolMode+'|'+this.state.netLayer;
+    const dc = this.plat().mode==='dc';
+    const title = this.state.view==='electrical' ? (dc ? '800 VDC Power Architecture' : 'Electrical Architecture ('+e.regime+')') : (m ? m.title : '');
+    let desc = m ? m.desc : '';
+    if (this.state.view==='performance')
+      desc = this.state.edition==='iec'
+        ? 'Annualized PUE by climate band against the EnEfG ≤1.2 annual-average ceiling, the mechanical power budget behind that envelope, and the closed-loop water position. All figures are annualized projections at design load.'
+        : 'Annualized PUE by climate band against a 1.20 reference — ASHRAE 90.4 governs loss components, with no single federal PUE mandate. The mechanical power budget and closed-loop water position behind that envelope. All figures are annualized projections at design load.';
+    if (this.state.view==='electrical' && dc)
+      desc = 'Centralized perimeter AC/DC converts MV grid power straight to a 2N 800 VDC bus — replacing the transformer→UPS→415 V chain. DC busways feed sidecar power racks (DC/DC + storage) and ~600 kW-class racks; mechanical plant stays AC. Built for Vera Rubin and Rubin Ultra (Kyber).';
+    return {
+      tierSelector: this.tierSelector(),
+      viewRail: this.viewRail(),
+      editionToggle: this.editionToggle(),
+      platformToggle: this.platformToggle(),
+      platformLabel: this.plat().label,
+      docNo: e.doc+' · Rev 0.6',
+      metrics,
+      viewIndex: m ? this.views.find(v=>v.id===this.state.view).n : '01',
+      viewTitle: title,
+      viewDesc: desc,
+      zoomControls: this.zoomControls(),
+      canvasOverlay: this.canvasOverlay(),
+      canvas: this.canvasEl(sig, canvasMap[this.state.view]),
+      detailPanel: h('div', { key:'dp-'+sig, style:{ display:'flex', flexDirection:'column', gap:18 } }, this.renderDetail()),
+    };
+  }
+}
+</script>
+</body>
+</html>
