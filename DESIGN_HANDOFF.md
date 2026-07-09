@@ -1,7 +1,9 @@
 # Meridian — Design Handoff
 **For UI/design rebuild · July 2026**
 
-> **STATUS: EXECUTED — July 8, 2026.** The rebuild described in this document shipped (commit `beedeb7`). The UI now follows the deal-room model below: light Voltai design-system visual language (tokens + fonts from `_ds/`), a Screen → Design pipeline instead of a mode toggle, a full-width Design workspace (left rail: study facts + workload controls; sticky KPI strip; sections Power / Compute / Economics / Build), a live off-taker spec sheet rail that builds as you explore, and a full-screen Deliverables takeover with two separate documents (2-page Off-Taker Spec Sheet + internal Advisory Report). New modeled outputs: capex per sustained PFLOPS and time-to-first-training-run. The "What's NOT working well" section below describes the PRE-rebuild state and is kept for historical context; the References section remains current.
+> **STATUS: EXECUTED — July 8, 2026; UPDATED — July 9, 2026.** The UI now follows the deal-room model below: light Voltai design-system visual language (tokens + fonts from `_ds/`), a Screen → Design pipeline instead of a mode toggle, a full-width Design workspace (left rail: study facts + product boundary + workload controls; sticky KPI strip; sections Power / Compute / Sensitivity / Build), a live off-taker spec sheet rail that builds as you explore, and a full-screen Deliverables takeover with two separate documents (2-page Off-Taker Spec Sheet + internal Advisory Report). New modeled outputs: usable IT load, capex per sustained PFLOPS, time-to-first-training-run, and power-validation status. The "What's NOT working well" section below describes the PRE-rebuild state and is kept for historical context; the References section remains current.
+
+> **PRODUCT DIRECTION UPDATE — July 9, 2026.** Meridian is now framed as **utility study / site claim in → compute-ready spec out**. The current UI makes the utility-study boundary explicit, moves NPV/IRR/EBITDA out of the primary KPI strip and off-taker spec sheet, renames the economics workspace to **Commercial Sensitivity**, and positions `power-signoff.html` as **Workload Power Validation**: facility-side transient validation for AI workloads, not utility capacity modeling.
 
 ---
 
@@ -41,7 +43,7 @@ The key outputs that matter:
 - Chip data for 9 chips: GB300 NVL72, GB200 NVL36, B200 SXM, H200 SXM, H100 SXM5, Vera Rubin NVL72, MI355X Helios, MI300X OAM, Gaudi 3 — each with TFLOPS, HBM bandwidth, kW/rack, MFU estimates, lead times, voltage architecture (480V AC / 800V DC / both)
 - MFU model: accounts for cluster scale (all-reduce overhead), model size, parallelism strategy (TP/PP/DP), network topology
 - Inference Pareto chart: tokens/sec/user vs tokens/sec/MW across all chips at 1 MW IT budget, varying batch size 1→512
-- Financial model: full 10-year NPV (operator perspective — includes GPU capex), IRR, EBITDA, P&L
+- Commercial sensitivity model: full 10-year NPV (operator perspective — includes GPU capex), IRR, EBITDA, P&L, kept out of the primary off-taker spec-sheet story
 - BESS + generator sizing when power service is interruptible (non-firm)
 - DSX compatibility check: 6-point NVIDIA DSX validation (voltage, cooling, PUE, power factor, continuity, NVLink)
 - Chip rationale: explains WHY a specific chip was selected for this site
@@ -226,7 +228,7 @@ meridian-web/
 ```
 
 External links in nav:
-- Power Sign-off ↗ → `power-signoff.html`
+- Workload Power Validation ↗ → `power-signoff.html`
 - Helio Reference ↗ → `helio.html`
 
 ---

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meridian — DC Site Intelligence · Voltai</title>
+<title>Meridian — Compute Readiness · Voltai</title>
 <style>
 /* ── Voltai DS webfonts (local, from _ds) ─────────────────────────────── */
 @font-face{font-family:'Space Grotesk';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-400.woff2') format('woff2')}
@@ -102,6 +102,9 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:9.5px;font-weight:600;font-family:var(--m);letter-spacing:.08em}
 .badge.verified{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
 .badge.unverified{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
+.boundary-note{background:var(--volt-tint);border-bottom:1px solid var(--volt-ring)}
+.boundary-note p{font-size:11.5px;line-height:1.55;color:var(--volt);margin:0}
+.boundary-note strong{color:var(--ink);font-weight:600}
 
 /* ── KPI STRIP ────────────────────────────────────────────────────────── */
 .kpi-wrap{position:sticky;top:0;z-index:50;background:rgba(246,248,251,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--hairline);padding:14px 28px 0}
@@ -319,7 +322,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   </div>
   <div class="nav-spacer"></div>
   <div class="nav-r">
-    <a class="ref-link" href="power-signoff.html" target="_blank">Power Sign-off ↗</a>
+    <a class="ref-link" href="power-signoff.html" target="_blank">Power Validation ↗</a>
     <a class="ref-link" href="helio.html" target="_blank">Helio Reference ↗</a>
     <a class="ref-link" href="http://51.21.243.237:5173/" target="_blank">Digital Twin ↗</a>
     <button class="btn-primary" id="nav-cta" onclick="openDeliverables('spec')">Deliverables</button>
@@ -384,7 +387,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 <!-- ════════ STAGE 02 — DESIGN (study-verified workspace) ════════ -->
 <div class="view" id="design-view">
 
-  <!-- left rail: study facts + workload + financial assumptions -->
+  <!-- left rail: study facts + product boundary + workload controls -->
   <div class="rail" id="design-rail">
     <div class="demo-chip" id="m2-demo-chip">
       <span class="dot"></span>
@@ -430,6 +433,11 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       </div>
     </div>
 
+    <div class="rail-section boundary-note">
+      <span class="eyebrow">Product boundary</span>
+      <p><strong>Utility study in.</strong> Meridian does not predict grid capacity. It converts confirmed or claimed MW into compute, cooling, workload, and build-readiness decisions.</p>
+    </div>
+
     <div class="rail-section">
       <span class="eyebrow">Workload</span>
       <div class="field"><label>Primary workload</label>
@@ -458,7 +466,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     </div>
 
     <div class="rail-section">
-      <div class="hint">Financial assumptions live where you use them — GPU rate on each chip card in Compute; power cost, discount rate and EBITDA multiple inline in Economics.</div>
+      <div class="hint">Commercial numbers are internal sensitivities. The off-taker spec sheet leads with power confidence, compute design, workload readiness, and open items.</div>
     </div>
   </div>
 
@@ -469,7 +477,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       <div class="section-tabs" id="section-tabs">
         <a href="#sec-power" onclick="scrollToSec(event,'sec-power')">Power</a>
         <a href="#sec-compute" onclick="scrollToSec(event,'sec-compute')">Compute</a>
-        <a href="#sec-econ" onclick="scrollToSec(event,'sec-econ')">Economics</a>
+        <a href="#sec-econ" onclick="scrollToSec(event,'sec-econ')">Sensitivity</a>
         <a href="#sec-build" onclick="scrollToSec(event,'sec-build')">Build</a>
       </div>
     </div>
@@ -848,15 +856,17 @@ function renderFacts(x) {
 }
 
 function renderKPIs(x,flash) {
-  const {c,gpus,racks,mfu,nameplate,fin,ttfr,ppd,itMW} = x;
+  const {d,c,gpus,racks,mfu,nameplate,ttfr,ppd,itMW} = x;
   const el = document.getElementById('kpi-strip');
+  const validation = d.service_type==='interruptible' ? 'Required' : 'Pending';
+  const validationSub = d.service_type==='interruptible' ? 'interruptible service · full backup path' : 'run workload power validation';
   el.innerHTML = `
     <div class="kpi"><div class="kpi-val">${fc(gpus)}</div><div class="kpi-label">GPUs</div><div class="kpi-sub">${fc(racks)} racks · ${c.n.replace('NVIDIA ','').replace('AMD ','').replace('Intel ','')}</div></div>
     <div class="kpi"><div class="kpi-val">${(nameplate*100).toFixed(0)}<small>%</small> <small>→</small> ${(mfu*100).toFixed(0)}<small>%</small></div><div class="kpi-label">MFU · nameplate → at scale</div><div class="kpi-sub">${wlLabel(m2Wl)} · ${m2ModelB>=1000?'1T':m2ModelB+'B'} model · modeled</div></div>
+    <div class="kpi"><div class="kpi-val">${itMW.toFixed(1)} <small>MW</small></div><div class="kpi-label">Usable IT load</div><div class="kpi-sub">${d.confirmed_mw} MW facility · PUE ${getPUE(d.climate).toFixed(2)}</div></div>
     <div class="kpi"><div class="kpi-val">${fm(ppd)}</div><div class="kpi-label">CapEx / sust. PFLOPS</div><div class="kpi-sub">perf per dollar · lower is better</div></div>
     <div class="kpi"><div class="kpi-val">~${ttfr.mo} <small>mo</small></div><div class="kpi-label">First training run</div><div class="kpi-sub">gated by ${ttfr.gate}</div></div>
-    <div class="kpi"><div class="kpi-val">${fm(fin.npv)}</div><div class="kpi-label">10-yr NPV</div><div class="kpi-sub">operator basis · ${(m2DiscR*100).toFixed(0)}% disc.</div></div>
-    <div class="kpi"><div class="kpi-val">${fm(fin.y5ebitda)}</div><div class="kpi-label">Yr-5 EBITDA</div><div class="kpi-sub">${fin.y5ebitda>0&&fin.gpuRevYr>0?(fin.y5ebitda/fin.gpuRevYr*100).toFixed(0)+'% margin':'—'}</div></div>`;
+    <div class="kpi"><div class="kpi-val">${validation}</div><div class="kpi-label">Power validation</div><div class="kpi-sub">${validationSub}</div></div>`;
   if (flash) el.querySelectorAll('.kpi').forEach(k=>{k.classList.remove('flash');void k.offsetWidth;k.classList.add('flash');});
 }
 
@@ -868,8 +878,8 @@ function renderPower(x) {
   if (isInt) warnings += `<div class="callout risk"><strong>Non-firm service.</strong> The utility can curtail with no notice — standby generation sized for 100% IT load is a hard design requirement, and BESS alone is insufficient for extended curtailment. This is reflected in the BOM and capex below.</div>`;
   if (tight) warnings += `<div class="callout warn"><strong>Expansion ceiling.</strong> ${d.violation_desc} Expansion above ${d.max_clean_mw} MW requires a separate transmission study — do not make Phase 2 commitments before it completes.</div>`;
   document.getElementById('sec-power').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">01</span><span class="ws-title">POWER</span><span class="ws-sub">what your study confirms</span>
-      <span class="badge ${usingDemo?'verified':'verified'}">${d.study_type.toUpperCase()} · ${d.study_date.toUpperCase()}</span></div>
+    <div class="ws-head"><span class="ws-idx">01</span><span class="ws-title">POWER</span><span class="ws-sub">study inputs and confidence boundary</span>
+      <span class="badge ${usingDemo?'verified':'unverified'}">${usingDemo ? d.study_type.toUpperCase()+' · '+d.study_date.toUpperCase() : 'USER INPUT · VERIFY STUDY'}</span></div>
     <div class="pgrid">
       <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--ok-text)">${d.confirmed_mw} MW</div><div class="pgrid-label">Confirmed at POI — no violations P0–P7</div></div>
       <div class="pgrid-cell"><div class="pgrid-val">${d.poi_voltage} kV</div><div class="pgrid-label">${d.poi_desc}</div></div>
@@ -879,6 +889,7 @@ function renderPower(x) {
       <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--warn-text)">${d.max_clean_mw} / ${d.violation_mw} MW</div><div class="pgrid-label">Clean expansion / first violation</div></div>
     </div>
     ${warnings}
+    <div class="callout info" style="margin-top:12px"><strong>Boundary:</strong> Meridian is using the utility study or claim as an input. It does not predict whether the utility can serve this load; it translates the stated MW, voltage, service type, and power factor into compute-readiness implications.</div>
     <div class="callout info" style="margin-top:12px">Usable IT capacity: <strong>${d.confirmed_mw} MW ÷ PUE ${pue.toFixed(2)}</strong> (${climLabel(d.climate).toLowerCase()} climate) = <strong>${itMW.toFixed(1)} MW IT</strong>. Everything below is sized from this number.</div>`;
 }
 
@@ -900,11 +911,11 @@ function renderCompute(x) {
         <span class="cc-tag">${cc.volt==='both'?'AC/DC':cc.volt==='ac480'?'480V AC':'800V DC'}</span>
         <span class="cc-tag">${cc.cool}</span>
       </div>
-      <div class="cc-row"><span class="cc-k">GPUs here</span><span class="cc-v accent">${ok?fc(gp):'—'}</span></div>
+      <div class="cc-row"><span class="cc-k">GPUs @ site</span><span class="cc-v accent">${ok?fc(gp):'—'}</span></div>
       <div class="cc-row"><span class="cc-k">MFU at scale</span><span class="cc-v">${ok?(m*100).toFixed(0)+'%':'—'}</span></div>
       <div class="cc-row"><span class="cc-k">kW / rack</span><span class="cc-v">${cc.kw}</span></div>
       <div class="cc-row"><span class="cc-k">Lead</span><span class="cc-v">${cc.lead}</span></div>
-      <div class="cc-rate" onclick="event.stopPropagation()"><span class="cc-k">Rate $/GPU-hr</span>
+      <div class="cc-rate" onclick="event.stopPropagation()"><span class="cc-k">Scenario $/GPU-hr</span>
         <span class="cc-rate-in">$<input type="number" id="rate-${k}" value="${chipRates[k].toFixed(2)}" step="0.25" min="0.1" oninput="setChipRate('${k}',this.value)" ${ok?'':'disabled'}></span></div>
       ${ok?'':'<div class="cc-note">voltage mismatch at this POI</div>'}
     </div>`;
@@ -919,21 +930,22 @@ function renderCompute(x) {
     const ok = voltCompat(cc,d.poi_voltage);
     const rk = Math.floor(itMW*1000/cc.kw), gp = rk*cc.g;
     const m = getMFU(k,gp,m2ModelB,m2Wl);
-    const rev = gp*UTIL*chipRates[k]*8760;
+    const sustained = ok ? gp*cc.tf*m/1000 : 0;
+    const capPer = sustained>0 ? (gp*cc.cap + itMW*11e6*1.1 + d.upgrade_cost_est)/sustained : 0;
     const dim = !ok || cc.st!=='ship';
     return `<tr class="${k===m2SelChip?'sel ':''}${ok?'clickable':''}" ${ok?`onclick="selectChip('${k}')"`:''}>
       <td class="mono" style="${k===m2SelChip?'font-weight:600;color:var(--volt)':''}">${cc.n}</td>
       <td class="mono ${dim?'dim':''}">${ok?fc(gp):'—'}</td><td class="mono ${dim?'dim':''}">${ok?fc(rk):'—'}</td>
       <td class="mono ${dim?'dim':''}">${ok?(m*100).toFixed(0)+'%':'—'}</td>
+      <td class="mono ${dim?'dim':''}">${ok?fc(sustained):'—'}</td>
+      <td class="mono ${dim?'dim':''}">${ok?fm(capPer):'—'}</td>
       <td class="mono ${dim?'dim':''}">$${chipRates[k].toFixed(2)}</td>
-      <td class="mono ${dim?'dim':''}">${ok?fm(rev)+'/yr':'—'}</td>
-      <td class="mono ${dim?'dim':''}">${ok&&itMW>0?fm(rev/itMW)+'/MW':'—'}</td>
       <td class="mono">${cc.lead}</td><td class="mono">${cc.cool}</td>
       <td style="font-size:11px;color:var(--muted)">${chipNote(k,cc,d.poi_voltage)}</td></tr>`;
   }).join('');
 
   document.getElementById('sec-compute').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">COMPUTE</span><span class="ws-sub">chips × real performance at this site — click a chip, everything updates</span></div>
+    <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">COMPUTE DESIGN</span><span class="ws-sub">site-ready design alternatives — click a platform, the spec updates</span></div>
     <div class="chip-grid">${cards}</div>
     <div class="dsx-chips"><span class="eyebrow" style="align-self:center;margin-right:4px">NVIDIA DSX</span>${dsxChipsHTML}</div>
     <div class="chart-duo">
@@ -959,7 +971,7 @@ function renderCompute(x) {
     </div>
     <details class="drawer" id="dsx-drawer"><summary>DSX compatibility detail — 6-point check</summary><div class="drawer-body">${dsxTable}</div></details>
     <details class="drawer"><summary>Compare all chips at this site</summary><div class="drawer-body" style="overflow-x:auto">
-      <table class="data"><thead><tr><th>Chip</th><th>GPUs</th><th>Racks</th><th>MFU (${wlLabel(m2Wl).toLowerCase()})</th><th>Rate $/hr</th><th>Revenue/yr</th><th>Rev/MW</th><th>Lead</th><th>Cooling</th><th>Notes</th></tr></thead><tbody>${cmpRows}</tbody></table>
+      <table class="data"><thead><tr><th>Platform</th><th>GPUs</th><th>Racks</th><th>MFU (${wlLabel(m2Wl).toLowerCase()})</th><th>Sust. PFLOPS</th><th>CapEx / PFLOPS</th><th>Scenario rate</th><th>Lead</th><th>Cooling</th><th>Notes</th></tr></thead><tbody>${cmpRows}</tbody></table>
     </div></details>`;
 }
 
@@ -967,13 +979,14 @@ function renderEcon(x) {
   const {d,fin} = x;
   const pnl = fin.mdl.slice(0,8);
   document.getElementById('sec-econ').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">ECONOMICS</span><span class="ws-sub">do the numbers work? — adjust and watch</span></div>
+    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">COMMERCIAL SENSITIVITY</span><span class="ws-sub">internal scenario analysis — not underwriting</span></div>
+    <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>Internal lens:</strong> these values help compare design scenarios, but the off-taker-facing spec leads with power confidence, compute readiness, workload performance, and open items.</div>
     <div class="assume-row">
       <div class="assume"><label>GPU rate · ${m2SelChip}</label><div class="in">$ <input type="number" id="rate-econ" value="${curRate().toFixed(2)}" min="0.1" max="30" step="0.25" oninput="setChipRate(m2SelChip,this.value)"> /GPU-hr</div></div>
       <div class="assume"><label>Power cost</label><div class="in">$ <input type="number" id="pwr-econ" value="${m2PwrCost.toFixed(3)}" min="0.01" max="0.15" step="0.005" oninput="m2PwrCost=parseFloat(this.value)||.05;debounce()"> /kWh</div></div>
       <div class="assume"><label>Discount rate</label><div class="in"><input type="number" id="disc-econ" value="${Math.round(m2DiscR*100)}" min="5" max="25" oninput="m2DiscR=(parseFloat(this.value)||10)/100;debounce()"> %</div></div>
       <div class="assume"><label>EBITDA multiple</label><div class="in"><input type="number" id="mult-econ" value="${m2Mult}" min="10" max="30" oninput="m2Mult=parseFloat(this.value)||20;debounce()"> ×</div></div>
-      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">80% billed utilization · GPU capex $${fc(CHIPS[m2SelChip].cap/1000)}K/GPU · rate erodes 8%/yr · GPU refresh yr 5 · operator perspective</span>
+      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">Scenario only · 80% billed utilization · GPU capex $${fc(CHIPS[m2SelChip].cap/1000)}K/GPU · rate erodes 8%/yr · GPU refresh yr 5 · operator perspective</span>
     </div>
     <div class="metric-tiles">
       <div class="mtile"><div class="mtile-val ${fin.npv>0?'accent':''}">${fm(fin.npv)}</div><div class="mtile-label">10-yr NPV</div><div class="mtile-sub">full operator, incl. GPU capex</div></div>
@@ -1051,6 +1064,7 @@ function renderSpecRail(x,flash) {
   const el = document.getElementById('spec-body');
   if (!el) return;
   const row = (k,v) => `<div class="spec-row"><span class="spec-k">${k}</span><span class="spec-v${flash?' pulse':''}">${v}</span></div>`;
+  const powerValidation = d.service_type==='interruptible' ? 'Full backup path required' : 'Transient validation pending';
   el.innerHTML = `
     <div class="spec-sec"><span class="eyebrow">Site</span>
       ${row('Location',d.location)}${row('Utility',d.utility)}${row('Confirmed power',d.confirmed_mw+' MW · '+(d.service_type==='firm'?'firm':'interruptible'))}${row('POI',d.poi_voltage+' kV')}${row('Target COD',d.cod_target)}
@@ -1064,8 +1078,8 @@ function renderSpecRail(x,flash) {
     <div class="spec-sec"><span class="eyebrow">Power & cooling</span>
       ${row('Rack power',c.volt==='dc800'?'800V DC':c.volt==='both'?'415V AC / 800V DC':'480V AC')}${row('Cooling',c.cool)}${row('Power factor',d.power_factor)}
     </div>
-    <div class="spec-sec"><span class="eyebrow">Commercial</span>
-      ${row('GPU rate','$'+curRate().toFixed(2)+'/hr')}${row('Revenue (80% util)',fm(fin.gpuRevYr)+'/yr')}${row('Total capex',fm(fin.totalCapex))}${row('10-yr NPV',fm(fin.npv))}
+    <div class="spec-sec"><span class="eyebrow">Readiness</span>
+      ${row('Power validation',powerValidation)}${row('Open items',openItems(x).length+' before LOI')}${row('Critical gate',ttfr.gate)}${row('Scenario capex',fm(fin.totalCapex))}
     </div>`;
 }
 
@@ -1183,6 +1197,9 @@ function specGrid(items) {
 function buildSpecSheet() {
   const x = designCalc();
   const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr} = x;
+  const powerValidation = d.service_type==='interruptible' ? 'Full backup path required' : 'Transient validation pending';
+  const confLabel = usingDemo ? 'STUDY-VERIFIED' : 'USER INPUT - VERIFY STUDY';
+  const confClass = usingDemo ? 'verified' : 'unverified';
   return `
   <div class="doc-brand"><span class="wm">VOLTAI</span><span class="cls">MERIDIAN · TECHNICAL SPEC SHEET · ${today().toUpperCase()}</span></div>
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -1191,18 +1208,18 @@ function buildSpecSheet() {
       <div class="doc-title" style="margin-top:8px">${d.name}</div>
       <div class="doc-subtitle">${d.study_type} · ${d.utility} · ${d.study_date}</div>
     </div>
-    <span class="badge verified">STUDY-VERIFIED</span>
+    <span class="badge ${confClass}">${confLabel}</span>
   </div>
   <hr class="div">
   <span class="eyebrow">Site & Power</span>
   ${specGrid([['Location',d.location],['Utility',d.utility],['Confirmed grid power',d.confirmed_mw+' MW — '+(d.service_type==='firm'?'firm':'interruptible')],['Point of interconnection',d.poi_voltage+' kV'],['Power factor (confirmed)',d.power_factor],['Target COD',d.cod_target]])}
   <span class="eyebrow">Compute</span>
   ${specGrid([['Total GPUs · '+c.n,fc(gpus)],['Racks · '+c.g+'/rack · '+c.kw+' kW',fc(racks)],['IT load · PUE '+pue.toFixed(2),itMW.toFixed(1)+' MW'],['Modeled '+wlLabel(m2Wl).toLowerCase()+' MFU',(mfu*100).toFixed(0)+'%'],['Rack power architecture',c.volt==='dc800'?'800V DC':c.volt==='both'?'415V AC / 800V DC':'480V AC'],['Cooling',c.cool+' · liquid']])}
-  <span class="eyebrow">Commercial</span>
-  ${specGrid([['Indicated GPU rate','$'+curRate().toFixed(2)+'/GPU-hr'],['Indicative revenue (80% util.)',fm(fin.gpuRevYr)+'/yr'],['Facility CapEx',fm(fin.facCapex)],['Total CapEx incl. GPUs',fm(fin.totalCapex)],['10-yr NPV (modeled)',fm(fin.npv)],['First training run','~'+ttfr.mo+' months']])}
+  <span class="eyebrow">Readiness</span>
+  ${specGrid([['First training run','~'+ttfr.mo+' months'],['Critical gate',ttfr.gate],['Power validation',powerValidation],['Scenario CapEx',fm(fin.totalCapex)],['Open items',openItems(x).length+' before LOI'],['Confidence','Study input + modeled compute']])}
   <span class="eyebrow">Open items before LOI</span>
   <ul class="open-items" style="margin-top:8px">${openItems(x).map(i=>`<li>${i}</li>`).join('')}</ul>
-  <div class="conf-stamp">STUDY-VERIFIED — BASED ON ${d.utility.toUpperCase()} ${d.study_type.toUpperCase()} ${d.study_date.toUpperCase()}<br>
+  <div class="conf-stamp">${confLabel} — BASED ON ${d.utility.toUpperCase()} ${d.study_type.toUpperCase()} ${d.study_date.toUpperCase()}<br>
   PREPARED BY VOLTAI · MERIDIAN DC INTELLIGENCE · ${today().toUpperCase()}<br>
   PERFORMANCE FIGURES ARE MODELED FROM CHIP-LEVEL DATA, NOT MEASURED ON SITE. PRE-ENGINEERING EVALUATION — NOT A CONSTRUCTION SPECIFICATION.</div>`;
 }
@@ -1211,6 +1228,8 @@ function buildSpecSheet() {
 function buildAdvisoryReport() {
   const x = designCalc();
   const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr} = x;
+  const confLabel = usingDemo ? 'STUDY-VERIFIED' : 'USER INPUT - VERIFY STUDY';
+  const confClass = usingDemo ? 'verified' : 'unverified';
   const mfuPct=(mfu*100).toFixed(0);
   const sizeDesc = gpus<5000?'small training':gpus<20000?'mid-scale':gpus<50000?'large-scale':'hyperscale';
   const mfuCtx = mfu>=.55?'This is within the high-end range for production training clusters. Expect to reach this within 2–3 months of first-run optimization.'
@@ -1239,7 +1258,7 @@ function buildAdvisoryReport() {
       <div class="doc-title" style="margin-top:8px">${d.name}</div>
       <div class="doc-subtitle">${d.study_type} · ${d.utility} · ${d.study_date}</div>
     </div>
-    <span class="badge verified">STUDY-VERIFIED</span>
+    <span class="badge ${confClass}">${confLabel}</span>
   </div>
   <hr class="div">
   <div class="dsec"><span class="eyebrow">1 · Power confirmed</span><div class="dsec-text"><p>${powerText}</p></div></div>
@@ -1260,7 +1279,8 @@ function buildAdvisoryReport() {
     ${dsxChecks(m2SelChip,d.poi_voltage,pue,d.power_factor,d.service_type,d.climate).map(ch=>`<tr><td style="font-weight:600;color:var(--ink)">${ch.item}</td><td>${ch.detail}</td><td>${ch.status==='pass'?'<span style="color:var(--ok-text);font-weight:600">✓ Pass</span>':ch.status==='warn'?'<span style="color:var(--warn-text);font-weight:600">! Review</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('')}</tbody></table>
   </div>
   <hr class="div">
-  <div class="dsec"><span class="eyebrow">5 · Financial model</span>
+  <div class="dsec"><span class="eyebrow">5 · Commercial sensitivity</span>
+    <div class="dsec-text"><p>Scenario analysis only. These assumptions are useful for internal comparison, but they are not underwriting and should not replace off-taker credit work, lease structuring, or project finance diligence.</p></div>
     ${specGrid([['10-yr NPV · operator basis',fm(fin.npv)],['IRR · unlevered',fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'],['Yr-5 EBITDA',fm(fin.y5ebitda)],['Total CapEx',fm(fin.totalCapex)],['Revenue (80% util.)',fm(fin.gpuRevYr)+'/yr'],['Asset value @ '+m2Mult+'×',fm(fin.y5ebitda*m2Mult)]])}
     <table class="data"><thead><tr><th>Year</th><th>Revenue</th><th>Opex</th><th>EBITDA</th><th>CapEx</th><th>FCF</th></tr></thead><tbody>
     ${pnl.map(r=>`<tr><td class="mono">${r.y===0?'Y0':'Y'+r.y}</td><td class="${r.rev>0?'pos':'dim'}">${r.rev>0?fm(r.rev):'—'}</td><td class="mono ${r.op>0?'':'dim'}">${r.op>0?fm(-r.op):'—'}</td><td class="${r.ebt>0?'pos':r.rev>0?'neg':'dim'}">${r.rev>0?fm(r.ebt):'—'}</td><td class="${r.cap>0?'neg':'dim'}">${r.cap>0?fm(-r.cap):'—'}</td><td class="${r.fcf>0?'pos':'neg'}">${fm(r.fcf)}</td></tr>`).join('')}</tbody></table>
@@ -1373,6 +1393,7 @@ function renderM1() {
   <div class="doc-subtitle">Generated ${today()} · ${mw} MW claimed · ${volt} kV delivery · ${m1GoKey.toUpperCase()} · ${climLabel(m1Clim)}</div>
   <hr class="div">
   <div class="conf-notice"><strong>Confidence: LOW.</strong> Based entirely on unverified broker-provided information — no utility study exists. Every number below is conditional on the claimed power being confirmed. The purpose of this brief is to identify the right questions before you spend $50K on the study, not to confirm the investment case.</div>
+  <div class="callout info" style="margin-bottom:22px"><strong>Boundary:</strong> Meridian does not confirm utility capacity. It turns the stated claim into compute-readiness implications and the questions needed for a utility study.</div>
   <div class="dsec"><span class="eyebrow">Power situation</span><div class="dsec-text"><p>${powerAdvisory}</p></div></div>
   <hr class="div">
   <div class="dsec"><span class="eyebrow">What you could build — if power is confirmed</span>
@@ -1389,8 +1410,8 @@ function renderM1() {
     <div class="dsec-text"><p>At <span class="hi">${fc(gpus)} GPUs</span>, training MFU is modeled at <span class="hi">${mfuPct}%</span> — ${mfuCtx}.</p></div>
   </div>
   <hr class="div">
-  <div class="dsec"><span class="eyebrow">Rough financials</span>
-    <div class="dsec-text"><p>Modeled at $${gpuRate.toFixed(2)}/GPU-hr, 80% utilization, $${pwrCost.toFixed(3)}/kWh, with estimated upgrade cost of ${fm(upgCostEst)}. Directional only — assumes the claimed power is fully confirmed and delivered on schedule.</p></div>
+  <div class="dsec"><span class="eyebrow">Internal commercial sensitivity</span>
+    <div class="dsec-text"><p>Scenario only: modeled at $${gpuRate.toFixed(2)}/GPU-hr, 80% utilization, $${pwrCost.toFixed(3)}/kWh, with estimated upgrade cost of ${fm(upgCostEst)}. This is not underwriting and assumes the claimed power is fully confirmed and delivered on schedule.</p></div>
     <div class="mrow c3">
       <div class="mtile"><div class="mtile-val ${fin.npv>0?'accent':''}">${fm(fin.npv)}</div><div class="mtile-label">10-yr NPV</div><div class="mtile-sub">rough estimate</div></div>
       <div class="mtile"><div class="mtile-val">${fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'}</div><div class="mtile-label">IRR</div><div class="mtile-sub">full operator</div></div>
@@ -1410,7 +1431,7 @@ function renderM1() {
   <hr class="div">
   <div class="dsec"><span class="eyebrow">Recommended next step</span><div class="dsec-text"><p>${rec}</p></div></div>
   <div class="m1-cta">
-    <div class="m1-cta-text"><strong>Study came back?</strong> Carry these inputs into the Design workspace — replace claims with confirmed numbers and explore the full chip / performance / economics space.</div>
+    <div class="m1-cta-text"><strong>Study came back?</strong> Carry these inputs into the Design workspace — replace claims with confirmed numbers and explore the full chip / performance / sensitivity space.</div>
     <button class="btn-primary" onclick="promoteToDesign()">Continue to Design →</button>
   </div>
   <div class="doc-footer">Prepared by Voltai · Meridian DC Intelligence · ${today()}<br>

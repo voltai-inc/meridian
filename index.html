@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Voltai — Data Center Toolkit</title>
+<title>Voltai — AI Infrastructure Intelligence</title>
 <style>
 /* ── Voltai DS webfonts (local, from _ds) ─────────────────────────────── */
 @font-face{font-family:'Space Grotesk';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-400.woff2') format('woff2')}
@@ -103,22 +103,22 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
 <body>
 
 <nav>
-  <span class="brand"><span class="wordmark">VOLTAI</span><span class="prod">DATA CENTER TOOLKIT</span></span>
+  <span class="brand"><span class="wordmark">VOLTAI</span><span class="prod">AI INFRASTRUCTURE INTELLIGENCE</span></span>
   <div class="nav-spacer"></div>
-  <span class="nav-note">Pre-engineering · Modeled, not measured</span>
+  <span class="nav-note">Utility study in · Compute-ready spec out</span>
 </nav>
 
 <div class="hero">
   <div class="hero-l">
-    <span class="eyebrow">Site → Design → Sign-off → Operate</span>
-    <h1>Evaluate an AI data center site in <em>minutes</em>, not months.</h1>
-    <p>Four tools, one pipeline. Screen a broker claim, design what the site can actually carry, stress the power architecture before you commit, and walk the build in a live twin.</p>
+    <span class="eyebrow">Study / Claim → Compute Spec → Validation → Off-Taker Package</span>
+    <h1>Turn a power study into a <em>compute-ready</em> AI data center spec.</h1>
+    <p>Meridian is the front door: take a utility study or broker claim, translate MW into racks, silicon, cooling, workload performance, and the open items an off-taker or engineering team needs to review.</p>
   </div>
   <div class="pipe">
-    <span class="step"><b>01</b><span class="tick"></span>Screen the site</span>
-    <span class="step"><b>02</b><span class="tick"></span>Design the build</span>
-    <span class="step"><b>03</b><span class="tick"></span>Sign off the power</span>
-    <span class="step"><b>04</b><span class="tick"></span>Walk the twin</span>
+    <span class="step"><b>01</b><span class="tick"></span>Classify confidence</span>
+    <span class="step"><b>02</b><span class="tick"></span>Size compute design</span>
+    <span class="step"><b>03</b><span class="tick"></span>Validate transients</span>
+    <span class="step"><b>04</b><span class="tick"></span>Package for LOI</span>
   </div>
 </div>
 
@@ -126,7 +126,7 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
 
   <a class="tool" href="site-intelligence.html">
     <span class="num">01</span>
-    <div class="tags"><span class="tag live">Live</span><span class="tag">Screen → Design</span></div>
+    <div class="tags"><span class="tag live">Primary</span><span class="tag">Study → Spec</span></div>
     <div class="motif">
       <!-- site plan: parcel, substation, POI feeder, pin -->
       <svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -141,15 +141,15 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
         <text x="18" y="12" style="font-family:var(--m)" font-size="7" fill="currentColor" stroke="none" letter-spacing="1.5">PARCEL 150AC · 230KV POI</text>
       </svg>
     </div>
-    <h2>Meridian — Site Intelligence</h2>
-    <div class="desc">Address in, verdict out: what you can actually build, per-chip economics with editable $/GPU-hr, MFU at scale, 10-yr NPV, and the questions for the utility. Generates the site brief and off-taker spec sheet.</div>
-    <div class="facts"><span class="fact">9 chips</span><span class="fact">IID demo on file</span><span class="fact">Shareable state</span></div>
-    <div class="go"><span class="cta">Open Site Intelligence</span><span class="arrow">→</span></div>
+    <h2>Meridian — Compute Readiness</h2>
+    <div class="desc">Utility study or broker claim in; AI infrastructure spec out. Convert MW into usable IT load, racks, chip platform, cooling fit, workload-adjusted performance, build risk, and a 2-page off-taker spec sheet.</div>
+    <div class="facts"><span class="fact">Study boundary</span><span class="fact">9 platforms</span><span class="fact">Spec sheet</span></div>
+    <div class="go"><span class="cta">Open Meridian</span><span class="arrow">→</span></div>
   </a>
 
   <a class="tool" href="power-signoff.html">
     <span class="num">02</span>
-    <div class="tags"><span class="tag live">Live</span><span class="tag">Simulator</span></div>
+    <div class="tags"><span class="tag live">Module</span><span class="tag">Transient validation</span></div>
     <div class="motif">
       <!-- training-load transient vs. contracted capacity -->
       <svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -161,15 +161,15 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
         <text x="140" y="105" style="font-family:var(--m)" font-size="7" fill="currentColor" stroke="none" letter-spacing="1.5">CHECKPOINT DIP</text>
       </svg>
     </div>
-    <h2>Power Sign-off</h2>
-    <div class="desc">Stress the electrical chain — UPS, genset, BESS per path — against AI training transients: synchronized fleets, checkpoint spikes, ramp limits vs. contracted capacity. Pass/fail before anything is bought.</div>
-    <div class="facts"><span class="fact">Transient model</span><span class="fact">N+1 paths</span><span class="fact">All-checks report</span></div>
-    <div class="go"><span class="cta">Open Power Sign-off</span><span class="arrow">→</span></div>
+    <h2>Workload Power Validation</h2>
+    <div class="desc">Facility-side power check, not utility modeling. Stress UPS, genset, BESS, ramp limits, and N+1 paths against AI workload transients like checkpoint spikes and synchronized fleet ramps.</div>
+    <div class="facts"><span class="fact">AI load traces</span><span class="fact">N+1 paths</span><span class="fact">Pass / warn / fail</span></div>
+    <div class="go"><span class="cta">Open Validation</span><span class="arrow">→</span></div>
   </a>
 
   <a class="tool" href="helio.html">
     <span class="num">03</span>
-    <div class="tags"><span class="tag live">Live</span><span class="tag">Reference design</span></div>
+    <div class="tags"><span class="tag live">Module</span><span class="tag">Reference architecture</span></div>
     <div class="motif">
       <!-- pod repetition around a shared spine -->
       <svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -184,15 +184,15 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
         <text x="20" y="10" style="font-family:var(--m)" font-size="7" fill="currentColor" stroke="none" letter-spacing="1.5">10MW HALL × N · SHARED SPINE</text>
       </svg>
     </div>
-    <h2>Helio — Reference Design</h2>
-    <div class="desc">The standardized block behind every evaluation: a 10 MW pod-based hall that repeats to a 100 MW campus. Electrical one-line (IEC, 2N), two-loop liquid cooling, rail-optimized fabric, PUE by climate band.</div>
+    <h2>Helio — Reference Architecture</h2>
+    <div class="desc">The standard block behind Meridian recommendations: a repeatable 10 MW hall that scales to 100 MW, with electrical, cooling, network, facility, and PUE assumptions visible layer by layer.</div>
     <div class="facts"><span class="fact">10→100 MW</span><span class="fact">Tier III · 2N</span><span class="fact">Interactive diagrams</span></div>
     <div class="go"><span class="cta">Open Reference Design</span><span class="arrow">→</span></div>
   </a>
 
   <a class="tool" href="http://51.21.243.237:5173/" target="_blank" rel="noopener">
     <span class="num">04</span>
-    <div class="tags"><span class="tag ext">External</span><span class="tag">Simulator</span></div>
+    <div class="tags"><span class="tag ext">External</span><span class="tag">Visualization</span></div>
     <div class="motif">
       <!-- isometric wireframe hall -->
       <svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -206,7 +206,7 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
       </svg>
     </div>
     <h2>Digital Twin</h2>
-    <div class="desc">AI data center simulator — a live digital twin of the build. Explore the facility interactively and watch how the design responds before steel goes in the ground. Hosted separately; opens in a new tab.</div>
+    <div class="desc">Later-stage visualization for the selected design. Useful for walking the build, but the core proof stays in Meridian's compute spec, validation checks, and off-taker package.</div>
     <div class="facts"><span class="fact">51.21.243.237:5173</span><span class="fact">Interactive 3D</span></div>
     <div class="go"><span class="cta">Open Digital Twin ↗</span><span class="arrow">→</span></div>
   </a>
@@ -214,7 +214,7 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
 </div>
 
 <footer>
-  <span>Voltai · pre-engineering evaluation · all projections modeled</span>
+  <span>Voltai · utility study in · compute-ready spec out</span>
   <span>Press <kbd>1</kbd>–<kbd>4</kbd> to open a tool</span>
 </footer>
 

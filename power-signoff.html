@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Power Sign-Off Simulator</title>
+<title>Workload Power Validation · Voltai</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root { --blue:#2E75B6; --green:#1E8449; --amber:#D9A400; --red:#C0392B; --ink:#1a1a1a; }
@@ -56,9 +56,9 @@
 </head>
 <body>
 <header>
-  <h1>Pre-Build Power Sign-Off Simulator <span style="color:#99a;font-weight:normal">— MVP web UI</span></h1>
-  <div class="sub">Validate an electrical design against AI workload power transients before construction.
-  Edit the design, site, and workload on the left; Run re-simulates in your browser (nothing leaves your machine).</div>
+  <h1>Workload Power Validation <span style="color:#99a;font-weight:normal">— MVP web UI</span></h1>
+  <div class="sub">Facility-side validation for AI workload power transients, not utility capacity modeling.
+  Edit the electrical design, contracted service assumptions, and workload on the left; Run re-simulates in your browser (nothing leaves your machine).</div>
 </header>
 
 <div class="wrap">
@@ -87,7 +87,7 @@
     <div class="row"><label>Cooling MW per IT MW</label><input type="number" id="coolRatio" value="0.20" step="0.02"></div>
   </fieldset>
 
-  <fieldset><legend>Site / interconnection</legend>
+  <fieldset><legend>Service assumptions</legend>
     <div class="row"><label>Contracted capacity (MW)</label><input type="number" id="contracted" value="16" step="0.5"></div>
     <div class="row"><label>Ramp limit (MW/s, assumed)</label><input type="number" id="rampLim" value="1.0" step="0.1"></div>
     <div class="row"><label>Oscillation limit (× avg load)</label><input type="number" id="oscLim" value="0.10" step="0.01"></div>
@@ -105,7 +105,7 @@
     <div class="row wl-mixed" style="display:none"><label>Training share of fleet</label><input type="number" id="trainShare" value="0.6" step="0.1"></div>
   </fieldset>
 
-  <button class="run" id="runBtn">Run sign-off simulation</button>
+  <button class="run" id="runBtn">Run validation simulation</button>
   <div id="spinner">Simulating…</div>
 </aside>
 
@@ -143,13 +143,13 @@
 </main>
 </div>
 
-<div class="foot">MVP caveats: hierarchical power flow (not AC load flow); ratings are design placeholders;
-utility ramp/oscillation limits are assumptions pending the utility's large-load study. Synthetic traces reproduce
-published fluctuation characteristics — import measured telemetry (CSV: time_s, power_mw) for project sign-off.
+<div class="foot">MVP caveats: hierarchical facility power flow (not AC load flow); ratings are design placeholders;
+utility ramp/oscillation limits are inputs from the utility's large-load study, not predictions by Voltai. Synthetic traces reproduce
+published fluctuation characteristics — import measured telemetry (CSV: time_s, power_mw) for calibrated validation.
 Charts need internet once (CDN); the simulation itself runs fully offline.</div>
 
 <script>
-/* Power Sign-Off Simulator - JS engine (mirrors the Python power_signoff package).
+/* Workload Power Validation - JS engine (mirrors the Python power_signoff package).
    Kept DOM-free so it can be unit-tested under node. */
 "use strict";
 
@@ -732,8 +732,8 @@ $("runBtn").addEventListener("click", () => {
         headroom_mw: rep.headroomMw, checks: rep.checks };
 
       const badge = $("verdictBadge");
-      const label = { PASS: "PASS — sign-off supported", WARN: "WARN — sign-off with conditions",
-                      FAIL: "FAIL — do not sign off as-is" }[rep.verdict];
+      const label = { PASS: "PASS — validation supported", WARN: "WARN — validation with conditions",
+                      FAIL: "FAIL — redesign required" }[rep.verdict];
       badge.textContent = label;
       badge.style.background = COLORS[rep.verdict];
       $("stCounts").textContent = `${rep.counts.PASS} / ${rep.counts.WARN} / ${rep.counts.FAIL}`;
