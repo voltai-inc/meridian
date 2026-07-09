@@ -42,22 +42,23 @@ The tool is a working prototype deployed at `meridian-web-swart.vercel.app`. It 
 - GPU rental rates are market estimates, not signed contracts.
 - Power quality (THD, voltage sag, fault ride-through) is not modeled — entered as a headline MW only.
 
-Every assumption is surfaced explicitly in the Data Gaps tab and flagged in the spec sheet output.
+Every assumption is surfaced explicitly — "modeled, not measured" tags inline, and an Open Items checklist in the spec sheet output.
 
 ---
 
-## Tabs
+## Product Structure (rebuilt July 8, 2026)
 
-| Tab | What it does |
-|-----|-------------|
-| **Overview** | Site verdict (worth pursuing / conditional / more data needed), KPIs, revenue comparison across chips |
-| **Compute** | Chip selection filtered by voltage architecture, cooling approach, CDU product, heat rejection, chip comparison table |
-| **Workload** | Training/inference/mixed, model size, parallelism strategy, network topology, MFU vs cluster scale chart, multi-chip inference Pareto chart |
-| **Financials** | 10-year P&L, NPV (full operator), IRR, Yr5 EBITDA |
-| **Spec Sheet** | Printable pre-build summary: site, compute, power infrastructure, financial summary, BOM summary, open items checklist |
-| **Data Gaps** | Explicit table of what's modeled vs. what requires real data; organized by Chip Team, Site, and Vertiv |
+Two stages, framed as a pipeline — the same site at two confidence levels:
 
-External links: **Power Sign-off** (transient simulation / pre-build electrical validation) and **Helio Reference Design** (visual model of the standard pod architecture).
+| Stage | What it does |
+|-------|-------------|
+| **01 Screen** | Pre-study site brief from broker claims: power situation advisory, what you could build, rough financials, flags, questions for the utility before spending $50K on the study. Everything labeled UNVERIFIED. Ends with "Continue to Design," carrying inputs forward. |
+| **02 Design** | Study-verified workspace. Left rail: study facts + workload controls (model size, batch size, training/mixed/inference) + financial assumptions. Sticky KPI strip: GPUs · nameplate→at-scale MFU · capex per sustained PFLOPS · time-to-first-training-run · 10-yr NPV · Yr-5 EBITDA. Four sections: **Power** (study facts, interruptible/expansion warnings), **Compute** (chip cards × MFU-vs-scale chart × inference Pareto with batch operating point × NVIDIA DSX 6-point check — the hero interaction: click a chip, everything updates), **Economics** (rate/power/discount inputs, NPV/IRR/EBITDA/CapEx, 10-yr P&L), **Build** (BOM with critical path, open items before LOI). |
+| **Deliverables** | Full-screen takeover, two separate documents: the **2-page Off-Taker Spec Sheet** (the commercial deliverable — builds live in the right rail as you explore) and the **Advisory Report** (internal: full narrative, DSX table, financial model, risk matrix). Both printable; shareable URL reproduces exact state. |
+
+Modeled-vs-measured honesty is surfaced inline ("modeled, not measured" tags on MFU and performance figures) and in the spec sheet's Open Items section, rather than a separate Data Gaps tab.
+
+External links: **Power Sign-off** (transient simulation / pre-build electrical validation) and **Helio Reference Design** (visual model of the standard pod architecture). Visual language: Voltai design system light theme (`_ds/` tokens + Space Grotesk / IBM Plex fonts).
 
 ---
 

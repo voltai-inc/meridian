@@ -1,6 +1,8 @@
 # Meridian — Design Handoff
 **For UI/design rebuild · July 2026**
 
+> **STATUS: EXECUTED — July 8, 2026.** The rebuild described in this document shipped (commit `beedeb7`). The UI now follows the deal-room model below: light Voltai design-system visual language (tokens + fonts from `_ds/`), a Screen → Design pipeline instead of a mode toggle, a full-width Design workspace (left rail: study facts + workload controls; sticky KPI strip; sections Power / Compute / Economics / Build), a live off-taker spec sheet rail that builds as you explore, and a full-screen Deliverables takeover with two separate documents (2-page Off-Taker Spec Sheet + internal Advisory Report). New modeled outputs: capex per sustained PFLOPS and time-to-first-training-run. The "What's NOT working well" section below describes the PRE-rebuild state and is kept for historical context; the References section remains current.
+
 ---
 
 ## What Meridian is
