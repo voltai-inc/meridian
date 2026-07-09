@@ -58,7 +58,8 @@ nav{flex:0 0 var(--nav-h);background:var(--surface);border-bottom:1px solid var(
 @media(max-width:980px){.pipe{display:none}}
 
 /* ── PANEL LINEUP ─────────────────────────────────────────────────────── */
-.lineup{flex:1 1 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:4px 40px 22px;max-width:1720px;width:100%;margin:0 auto;min-height:0}
+.lineup{flex:1 1 auto;display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;gap:16px;padding:4px 40px 22px;max-width:1720px;width:100%;margin:0 auto;min-height:0}
+.tool:first-child{border-color:var(--border-strong);box-shadow:0 2px 12px rgba(6,10,14,.05)}
 @media(max-width:1180px){.lineup{grid-template-columns:1fr 1fr;grid-auto-rows:minmax(330px,1fr)}}
 @media(max-width:660px){.lineup{grid-template-columns:1fr}}
 
@@ -103,16 +104,16 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
 <body>
 
 <nav>
-  <span class="brand"><span class="wordmark">VOLTAI</span><span class="prod">AI INFRASTRUCTURE INTELLIGENCE</span></span>
+  <span class="brand"><span class="wordmark">VOLTAI</span><span class="prod">MERIDIAN</span></span>
   <div class="nav-spacer"></div>
   <span class="nav-note">Utility study in · Compute-ready spec out</span>
 </nav>
 
 <div class="hero">
   <div class="hero-l">
-    <span class="eyebrow">Study / Claim → Compute Spec → Validation → Off-Taker Package</span>
-    <h1>Turn a power study into a <em>compute-ready</em> AI data center spec.</h1>
-    <p>Meridian is the front door: take a utility study or broker claim, translate MW into racks, silicon, cooling, workload performance, and the open items an off-taker or engineering team needs to review.</p>
+    <span class="eyebrow">Study / Claim → Compute Design → Workload Power → Off-Taker Package</span>
+    <h1>Utility study in. <em>Compute-ready</em> spec out.</h1>
+    <p>Meridian is the product; the rest are its modules. Take a utility study or broker claim, size what the site actually carries, simulate the workload's power draw against the electrical chain, and package a spec an off-taker can act on. Utility capacity is always an input — never a prediction.</p>
   </div>
   <div class="pipe">
     <span class="step"><b>01</b><span class="tick"></span>Classify confidence</span>
@@ -126,7 +127,7 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
 
   <a class="tool" href="site-intelligence.html">
     <span class="num">01</span>
-    <div class="tags"><span class="tag live">Primary</span><span class="tag">Study → Spec</span></div>
+    <div class="tags"><span class="tag live">Product</span><span class="tag">Study → Spec</span><span class="tag">Inline validation</span></div>
     <div class="motif">
       <!-- site plan: parcel, substation, POI feeder, pin -->
       <svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -142,8 +143,8 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
       </svg>
     </div>
     <h2>Meridian — Compute Readiness</h2>
-    <div class="desc">Utility study or broker claim in; AI infrastructure spec out. Convert MW into usable IT load, racks, chip platform, cooling fit, workload-adjusted performance, build risk, and a 2-page off-taker spec sheet.</div>
-    <div class="facts"><span class="fact">Study boundary</span><span class="fact">9 platforms</span><span class="fact">Spec sheet</span></div>
+    <div class="desc">Utility study or broker claim in; AI infrastructure spec out. Converts MW into usable IT load, racks, platform, cooling fit, workload-adjusted performance — then simulates the workload's power draw against the electrical chain inline and stamps the verdict on the off-taker spec sheet.</div>
+    <div class="facts"><span class="fact">9 platforms</span><span class="fact">19 transient checks inline</span><span class="fact">Confidence ladder</span></div>
     <div class="go"><span class="cta">Open Meridian</span><span class="arrow">→</span></div>
   </a>
 
@@ -162,8 +163,8 @@ kbd{font-family:var(--m);font-size:9px;border:1px solid var(--border);border-bot
       </svg>
     </div>
     <h2>Workload Power Validation</h2>
-    <div class="desc">Facility-side power check, not utility modeling. Stress UPS, genset, BESS, ramp limits, and N+1 paths against AI workload transients like checkpoint spikes and synchronized fleet ramps.</div>
-    <div class="facts"><span class="fact">AI load traces</span><span class="fact">N+1 paths</span><span class="fact">Pass / warn / fail</span></div>
+    <div class="desc">The full validation bench behind Meridian's inline verdict. Stress UPS, genset, BESS, ramp limits, and N+1 paths against AI workload transients — checkpoint spikes, synchronized fleet ramps — with every design knob exposed. Meridian deep-links in with the design prefilled.</div>
+    <div class="facts"><span class="fact">AI load traces</span><span class="fact">CSV telemetry import</span><span class="fact">Pass / warn / fail</span></div>
     <div class="go"><span class="cta">Open Validation</span><span class="arrow">→</span></div>
   </a>
 

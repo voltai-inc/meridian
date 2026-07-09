@@ -23,6 +23,20 @@ The deliverable is a **Spec Sheet**: a structured pre-build summary that an off-
 
 ---
 
+## What "Power Simulation" Means Here
+
+"Power simulation" gets used loosely, so Meridian splits it into three layers and is explicit about which ones Voltai owns:
+
+| Layer | What it is | Who owns it |
+|-------|-----------|-------------|
+| **1 · Utility / grid capacity** | Can the grid deliver X MW — load flow, contingencies, queue position | The utility study. Always an **input** to Meridian, never a prediction. |
+| **2 · Workload power behavior** | The power draw curve the compute actually produces: training-step oscillation, checkpoint dips to ~15%, synchronized fleet ramps, job-end cliffs | **Voltai — modeled today.** Traces are synthesized per workload type from published fluctuation characteristics; chip-measured traces are the roadmap upgrade. |
+| **3 · Transient survivability** | Slam the layer-2 curve against the electrical design: UPS/genset/BESS per path, N-1, contracted-capacity, ramp and oscillation limits | **Voltai — modeled today.** 19 pass/warn/fail checks, run inline in Meridian and in the full Workload Power Validation bench. |
+
+Layers 2+3 together are "the power simulation." The chip picker is not the product — it is one input to the design whose power behavior gets simulated and validated.
+
+---
+
 ## Current State
 
 The tool is a working prototype deployed at `meridian-web-swart.vercel.app`. It is a static web app — no backend, no database, runs entirely in the browser.
@@ -32,9 +46,12 @@ The tool is a working prototype deployed at `meridian-web-swart.vercel.app`. It 
 - PUE calculated from cooling approach, heat rejection type, and climate
 - Chip selection across 9 platforms (GB300, GB200, B200, H200, H100, Vera Rubin, MI355X, MI300X, Gaudi 3), filtered by power architecture (480V AC vs 800V DC)
 - MFU modeled from published benchmarks with communication overhead penalties for cluster scale, model size, parallelism strategy (TP/PP/DP/hybrid), and network topology
+- **Workload power validation, inline (added July 9):** the selected design's workload power trace is simulated against the Helio 2N reference block scaled to the site's IT load — 19 checks covering component loading (2N and N-1), contracted-capacity peak, grid ramp rate raw vs BESS-smoothed, forced-oscillation screen (0.05–1 Hz), and islanded genset capacity/step tolerance. The verdict appears in the KPI strip, the Workload Power section, the off-taker spec sheet, and the advisory report. "Open full validation" deep-links into the standalone bench with the whole design prefilled.
 - Commercial sensitivity model: full operator perspective (facility + GPU capex), GPU rental revenue, rate erosion, refresh capex
 - Equipment BOM with lead times (transformers, CDUs, switchgear, UPS, generators)
 - Multi-chip inference Pareto chart: tokens/sec/user vs tokens/sec/MW across all chips at equal power budget
+
+**A demo insight worth knowing:** the 200 MW IID demo currently FAILS validation with a fully synchronized training fleet — sizing IT from annualized PUE leaves no headroom for peak transients, the raw ramp is ~160 MW/s against an assumed 12.5 MW/s limit, and the islanded genset step check blows through. That is not a bug; it is the pitch. It is the failure mode operators discover after energization, caught here at design time.
 
 **What is assumed (not measured):**
 - MFU values come from published papers and analytical communication overhead models. They have not been validated against real cluster telemetry.
@@ -54,12 +71,12 @@ Two stages, framed as a pipeline — the same site at two confidence levels:
 | Stage | What it does |
 |-------|-------------|
 | **01 Screen** | Pre-study site brief from broker claims: power situation advisory, what you could build if power is confirmed, internal commercial sensitivity, flags, and questions for the utility before spending $50K on the study. Everything labeled UNVERIFIED. Ends with "Continue to Design," carrying inputs forward. |
-| **02 Design** | Study-input workspace. Left rail: study facts + explicit product boundary + workload controls. Sticky KPI strip: GPUs · nameplate→at-scale MFU · usable IT load · capex per sustained PFLOPS · time-to-first-training-run · power validation status. Four sections: **Power** (study facts, confidence boundary, interruptible/expansion warnings), **Compute** (design alternatives, MFU-vs-scale, inference Pareto, NVIDIA DSX 6-point check), **Sensitivity** (internal commercial scenario, NPV/IRR/EBITDA/CapEx), **Build** (BOM with critical path, open items before LOI). |
+| **02 Design** | Study-input workspace. Left rail: study facts + **confidence ladder** (broker-claimed → study-verified → vendor-verified → telemetry-calibrated; last two are roadmap rungs) + workload controls. Sticky KPI strip: GPUs · nameplate→at-scale MFU · usable IT load · capex per sustained PFLOPS · time-to-first-training-run · **live workload-power verdict** (click-through). Five sections: **Power** (study facts, confidence boundary, interruptible/expansion warnings), **Compute design** (design alternatives with per-chip scenario rates, MFU-vs-scale, inference Pareto, NVIDIA DSX 6-point check), **Workload power** (simulated meter-power trace with BESS smoothing, transient stats, all 19 checks, verdict, deep link to the full bench), **Sensitivity** (internal commercial scenario, NPV/IRR/EBITDA/CapEx), **Build** (BOM with critical path, open items before LOI). |
 | **Deliverables** | Full-screen takeover, two separate documents: the **2-page Off-Taker Spec Sheet** (technical readiness deliverable — no NPV/IRR hero metrics) and the **Advisory Report** (internal: full narrative, DSX table, commercial sensitivity, risk matrix). Both printable; shareable URL reproduces exact state. |
 
 Modeled-vs-measured honesty is surfaced inline ("modeled, not measured" tags on MFU and performance figures) and in the spec sheet's Open Items section, rather than a separate Data Gaps tab.
 
-External links: **Workload Power Validation** (facility-side transient validation, not utility modeling) and **Helio Reference Architecture** (visual model of the standard pod architecture). Visual language: Voltai design system light theme (`_ds/` tokens + Space Grotesk / IBM Plex fonts).
+Modules: **Workload Power Validation** is no longer a sibling tool — its engine (`power-validation.js`, shared between both pages) runs inline in Meridian's Workload Power section, and the standalone page remains the full bench with every design knob exposed (Meridian deep-links in with the design prefilled). **Helio Reference Architecture** supplies the 2N block whose scaled ratios Meridian validates against. Visual language: Voltai design system light theme (`_ds/` tokens + Space Grotesk / IBM Plex fonts).
 
 ---
 
@@ -103,8 +120,10 @@ Meridian supports these models by producing the technical artifact that makes th
 
 ## Immediate Next Steps
 
-1. Get chip team to review MFU assumptions — even a ballpark validation ("our GB300 clusters run 50–55% MFU") would let us label the number as verified
+1. Get chip team to review MFU assumptions — even a ballpark validation ("our GB300 clusters run 50–55% MFU") would let us label the number as verified and light up the "vendor-verified" rung of the confidence ladder
 2. Send Vertiv technical ask (see separate document)
-3. Connect a selected Meridian design into Workload Power Validation so transient readiness becomes part of the same product story
-4. Use on a real live site — run Meridian against the Louisiana site or the Alberta site from Brian's list, generate the spec sheet, and see if it's useful for the off-taker conversation
-5. Decide if the commercial sensitivity model should offer a "developer perspective" toggle (facility only, lease revenue) vs the current "operator perspective" (full capex, GPU rental revenue)
+3. ~~Connect a selected Meridian design into Workload Power Validation~~ **Done July 9** — validation runs inline; the standalone bench is the deep-linked full version
+4. Replace synthesized workload traces with chip-measured power traces (chip team power draw time series by training phase) — this is the highest-value upgrade to the validation verdict
+5. Use on a real live site — run Meridian against the Louisiana site or the Alberta site from Brian's list, generate the spec sheet, and see if it's useful for the off-taker conversation
+6. Decide if the commercial sensitivity model should offer a "developer perspective" toggle (facility only, lease revenue) vs the current "operator perspective" (full capex, GPU rental revenue)
+7. Confidence bands on MFU and PUE instead of single-point estimates (per the product direction review)

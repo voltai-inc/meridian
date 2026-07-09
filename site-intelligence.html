@@ -102,9 +102,17 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:9.5px;font-weight:600;font-family:var(--m);letter-spacing:.08em}
 .badge.verified{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
 .badge.unverified{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
-.boundary-note{background:var(--volt-tint);border-bottom:1px solid var(--volt-ring)}
-.boundary-note p{font-size:11.5px;line-height:1.55;color:var(--volt);margin:0}
-.boundary-note strong{color:var(--ink);font-weight:600}
+/* confidence ladder */
+.ladder{display:flex;flex-direction:column;gap:0}
+.lstep{display:flex;align-items:flex-start;gap:9px;padding:5px 0;position:relative}
+.lstep .ldot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--border-strong);background:var(--surface);margin-top:3px;flex-shrink:0}
+.lstep.done .ldot{background:var(--ok);border-color:var(--ok)}
+.lstep.current .ldot{background:var(--volt);border-color:var(--volt);box-shadow:0 0 0 3px var(--volt-tint)}
+.lstep .lname{font-size:11px;font-weight:600;color:var(--faint);line-height:1.3}
+.lstep.done .lname,.lstep.current .lname{color:var(--ink)}
+.lstep .lsub{font-size:9.5px;color:var(--faint);font-family:var(--m);letter-spacing:.03em}
+.lstep.current .lsub{color:var(--volt)}
+.lstep:not(:last-child)::before{content:'';position:absolute;left:4px;top:17px;bottom:-6px;width:1px;background:var(--border)}
 
 /* ── KPI STRIP ────────────────────────────────────────────────────────── */
 .kpi-wrap{position:sticky;top:0;z-index:50;background:rgba(246,248,251,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--hairline);padding:14px 28px 0}
@@ -310,6 +318,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   body:not(.printing-del) nav,body:not(.printing-del) .rail,body:not(.printing-del) #spec-rail,body:not(.printing-del) .kpi-wrap{display:none}
 }
 </style>
+<script src="power-validation.js"></script>
 </head>
 <body>
 
@@ -433,9 +442,10 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       </div>
     </div>
 
-    <div class="rail-section boundary-note">
-      <span class="eyebrow">Product boundary</span>
-      <p><strong>Utility study in.</strong> Meridian does not predict grid capacity. It converts confirmed or claimed MW into compute, cooling, workload, and build-readiness decisions.</p>
+    <div class="rail-section">
+      <span class="eyebrow">Confidence ladder</span>
+      <div class="ladder" id="conf-ladder"></div>
+      <div class="hint" style="margin-top:8px">Every figure inherits the lowest rung it depends on. Utility capacity is always an input — Meridian never predicts it.</div>
     </div>
 
     <div class="rail-section">
@@ -477,6 +487,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       <div class="section-tabs" id="section-tabs">
         <a href="#sec-power" onclick="scrollToSec(event,'sec-power')">Power</a>
         <a href="#sec-compute" onclick="scrollToSec(event,'sec-compute')">Compute</a>
+        <a href="#sec-valid" onclick="scrollToSec(event,'sec-valid')">Workload power</a>
         <a href="#sec-econ" onclick="scrollToSec(event,'sec-econ')">Sensitivity</a>
         <a href="#sec-build" onclick="scrollToSec(event,'sec-build')">Build</a>
       </div>
@@ -484,6 +495,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     <div class="workspace">
       <div class="ws-section" id="sec-power"></div>
       <div class="ws-section" id="sec-compute"></div>
+      <div class="ws-section" id="sec-valid"></div>
       <div class="ws-section" id="sec-econ"></div>
       <div class="ws-section" id="sec-build"></div>
     </div>
@@ -816,7 +828,141 @@ function designCalc() {
   const ppd = perfPerDollar(fin,c);
   const pareto = getInfPareto(m2SelChip,m2ModelB);
   const opPt = pareto.length?pareto.reduce((best,p)=>Math.abs(p.b-m2Batch)<Math.abs(best.b-m2Batch)?p:best,pareto[0]):null;
-  return {d,c,pue,itMW,racks,gpus,mfu,nameplate,fin,ttfr,ppd,opPt};
+  const val = runValidation(itMW,d,m2Wl);
+  return {d,c,pue,itMW,racks,gpus,mfu,nameplate,fin,ttfr,ppd,opPt,val};
+}
+
+// ─── WORKLOAD POWER VALIDATION (inline) ──────────────────────────────────
+// The electrical design is the Helio 2N reference block scaled to this site's
+// IT load (same ratios as the 12 MW block in the full validation tool). The
+// workload trace is synthesized per workload type — chip-measured traces and
+// telemetry calibration are roadmap items, so the trace is workload-level today.
+function buildValidationModel(itMW, d) {
+  const r = x => +(itMW*x).toFixed(1);
+  const design = {
+    name:'Helio 2N reference block — scaled to site', revision:'meridian-inline',
+    critical_it_mw:+itMW.toFixed(1), redundancy:'2N',
+    genset_firm_mw:r(1.083), genset_step_frac:0.40,
+    bess_power_mw:r(0.417), bess_energy_mwh:r(0.208),
+    mech_base_mw:r(0.05), mech_cooling_ratio:0.20, mech_lag_s:180,
+    path_components:[
+      {id:'feed',    name:'Utility feed',   kind:'utility_feed',  rating_mw:r(1.425), short_time_factor:1.05, efficiency:1.0,   warn_loading:0.8},
+      {id:'mv_swgr', name:'MV switchgear',  kind:'mv_switchgear', rating_mw:r(1.425), short_time_factor:1.10, efficiency:1.0,   warn_loading:0.8},
+      {id:'tx',      name:'Transformer',    kind:'transformer',   rating_mw:r(1.425), short_time_factor:1.10, efficiency:0.99,  warn_loading:0.8},
+      {id:'lv_swgr', name:'LV switchgear',  kind:'lv_switchgear', rating_mw:r(1.425), short_time_factor:1.10, efficiency:1.0,   warn_loading:0.8},
+      {id:'ups',     name:'UPS (2N)',       kind:'ups',           rating_mw:r(1.0),   short_time_factor:1.25, efficiency:0.96,  warn_loading:0.85},
+      {id:'pdu',     name:'PDU / busway',   kind:'pdu',           rating_mw:r(1.0),   short_time_factor:1.10, efficiency:0.995, warn_loading:0.8},
+    ],
+  };
+  const site = {
+    contracted_mw:d.confirmed_mw,
+    ramp_limit_mw_per_s:+(d.confirmed_mw*0.0625).toFixed(2), // assumption pending the utility's large-load study
+    osc_p2p_limit_frac:0.10,
+  };
+  return {design,site};
+}
+
+let valCache = {key:null,result:null};
+function runValidation(itMW, d, wl) {
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl].join('|');
+  if (valCache.key===key) return valCache.result;
+  const {design,site} = buildValidationModel(itMW,d);
+  const trace = wl==='infer' ? inferenceTrace(design.critical_it_mw,{duration_s:1800})
+              : wl==='mix'   ? mixedTrace(design.critical_it_mw,{duration_s:1800,training_share:0.6,job_end_at_s:1530})
+              :                trainingTrace(design.critical_it_mw,{duration_s:1800,job_end_at_s:1530});
+  const sim = simulate(design,trace,30);
+  const rep = runChecks(sim,site);
+  valCache = {key,result:{design,site,trace,sim,rep}};
+  return valCache.result;
+}
+
+// deep link into the full validation tool with this design prefilled
+function validationLink(val, wl) {
+  const d0=val.design, s0=val.site;
+  const p=new URLSearchParams({
+    it:d0.critical_it_mw, path:d0.path_components[0].rating_mw,
+    ups:d0.path_components[4].rating_mw, pdu:d0.path_components[5].rating_mw,
+    gen:d0.genset_firm_mw, bessp:d0.bess_power_mw, besse:d0.bess_energy_mwh,
+    mechbase:d0.mech_base_mw, cool:d0.mech_cooling_ratio,
+    contracted:s0.contracted_mw, ramp:s0.ramp_limit_mw_per_s,
+    wl: wl==='infer'?'inference':wl==='mix'?'mixed':'training',
+    trainshare:0.6, from:'meridian',
+  });
+  return 'power-signoff.html?'+p.toString();
+}
+
+// meter-power trace chart: raw + BESS-smoothed envelope, contracted line
+function buildTraceSVG(val) {
+  const {sim,site} = val;
+  const W=1180,H=240,pL=52,pR=16,pT=18,pB=34;
+  const env=(p,buckets=240)=>{ const n=p.length,per=Math.max(1,Math.floor(n/buckets)),out=[];
+    for(let i=0;i<n;i+=per){let mn=1e30,mx=-1e30;for(let j=i;j<Math.min(i+per,n);j++){const v=p[j];if(v<mn)mn=v;if(v>mx)mx=v;}out.push({t:sim.t[i]/60,mn,mx});} return out;};
+  const e1=env(sim.pMeter), e2=env(sim.pMeterSm);
+  const tMax=sim.t[sim.t.length-1]/60;
+  const yMax=Math.max(site.contracted_mw*1.06, amax(sim.pMeter)*1.04), yMin=0;
+  const sx=t=>pL+(t/tMax)*(W-pL-pR);
+  const sy=v=>pT+(1-(v-yMin)/(yMax-yMin))*(H-pT-pB);
+  const band=e=>{ let up='',dn='';
+    e.forEach((p,i)=>{up+=`${i?'L':'M'}${sx(p.t).toFixed(1)},${sy(p.mx).toFixed(1)} `;});
+    for(let i=e.length-1;i>=0;i--) dn+=`L${sx(e[i].t).toFixed(1)},${sy(e[i].mn).toFixed(1)} `;
+    return up+dn+'Z';};
+  let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">`;
+  const step=yMax>150?50:yMax>60?20:yMax>30?10:5;
+  for(let g=0;g<=yMax;g+=step){
+    s+=`<line x1="${pL}" y1="${sy(g).toFixed(0)}" x2="${W-pR}" y2="${sy(g).toFixed(0)}" stroke="#e2e8ee" stroke-width="1"/>`;
+    s+=`<text x="${pL-7}" y="${sy(g)+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#949da7">${g}</text>`;
+  }
+  s+=`<path d="${band(e1)}" fill="rgba(45,134,189,.18)"/>`;
+  s+=`<path d="${band(e2)}" fill="rgba(31,94,133,.42)"/>`;
+  const cy=sy(site.contracted_mw);
+  s+=`<line x1="${pL}" y1="${cy.toFixed(1)}" x2="${W-pR}" y2="${cy.toFixed(1)}" stroke="#ab4433" stroke-width="1.4" stroke-dasharray="6 4"/>`;
+  s+=`<text x="${W-pR}" y="${cy-6}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#ab4433">contracted ${site.contracted_mw} MW</text>`;
+  [0,5,10,15,20,25,30].forEach(m=>{ if(m<=tMax) s+=`<text x="${sx(m).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#949da7">${m}</text>`;});
+  s+=`<text x="${(pL+W-pR)/2}" y="${H-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#68727d">minutes — light band: meter power raw · dark band: after BESS smoothing</text>`;
+  s+=`</svg>`;
+  return s;
+}
+
+function renderValidation(x) {
+  const {d,val,itMW} = x;
+  const {rep,design,site} = val;
+  const vClass = rep.verdict==='PASS'?'ok':rep.verdict==='WARN'?'warn':'risk';
+  const vText = rep.verdict==='PASS'
+    ? 'The scaled Helio reference design absorbs this workload — every component, grid and islanded check passes.'
+    : rep.verdict==='WARN'
+    ? 'Survivable with conditions — review the warned checks below before locking the electrical design.'
+    : 'This design does not survive this workload as-sized. Sizing IT from annualized PUE leaves no headroom for peak transients — the fixes are some combination of derating IT below the PUE-average figure, more BESS power, larger gensets, or de-synchronizing the training fleet. This is the failure mode operators typically discover after energization; here it costs a design iteration instead.';
+  const worst = rep.checks.filter(c=>c.status!=='PASS').slice(0,6);
+  const rows = rep.checks.map(ch=>`<tr>
+    <td style="font-weight:600;color:var(--ink)">${ch.name}</td>
+    <td class="mono" style="font-size:11px">${ch.value}</td>
+    <td class="mono" style="font-size:11px">${ch.limit}</td>
+    <td>${ch.status==='PASS'?'<span style="color:var(--ok-text);font-weight:600">✓ Pass</span>':ch.status==='WARN'?'<span style="color:var(--warn-text);font-weight:600">! Warn</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('');
+  document.getElementById('sec-valid').innerHTML = `
+    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">the power draw curve this design produces — and whether the electrical chain survives it</span>
+      <span class="badge ${rep.verdict==='PASS'?'verified':'unverified'}">${rep.verdict} · ${rep.counts.PASS}✓ ${rep.counts.WARN}! ${rep.counts.FAIL}✗</span></div>
+    <div class="chart-panel" style="margin-bottom:14px">
+      <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · 30 min · synthesized trace</div>
+      <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet to ~15% for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
+      ${buildTraceSVG(val)}
+    </div>
+    <div class="pgrid" style="grid-template-columns:repeat(6,1fr);margin-bottom:14px">
+      <div class="pgrid-cell"><div class="pgrid-val">${rep.peakMeter.toFixed(1)} MW</div><div class="pgrid-label">Peak at meter vs ${site.contracted_mw} MW contracted</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${rep.headroomMw.toFixed(1)} MW</div><div class="pgrid-label">Headroom (${(rep.headroomFrac*100).toFixed(0)}%)</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${rep.rampRaw.toFixed(1)} → ${rep.rampSm.toFixed(2)}</div><div class="pgrid-label">Worst ramp MW/s · raw → BESS-smoothed (limit ${site.ramp_limit_mw_per_s})</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${rep.oscRaw.p2p.toFixed(1)} → ${rep.oscSm.p2p.toFixed(1)} MW</div><div class="pgrid-label">Oscillation p2p 0.05–1 Hz · raw → smoothed</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${(2*design.bess_power_mw).toFixed(0)} MW</div><div class="pgrid-label">BESS installed · ${val.sim.bessEnergyUsedMwh.toFixed(1)} MWh cycled/30 min</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${vClass}-text)">${rep.verdict}</div><div class="pgrid-label">${rep.counts.FAIL} fail · ${rep.counts.WARN} warn · ${rep.counts.PASS} pass</div></div>
+    </div>
+    <div class="callout ${vClass==='ok'?'info':vClass}">${vText} Electrical chain modeled as the Helio 2N reference block scaled to ${itMW.toFixed(1)} MW IT; ramp/oscillation limits are assumptions pending ${d.utility}'s large-load study.</div>
+    ${worst.length?`<div style="margin-top:10px"></div>`:''}
+    <details class="drawer" ${rep.verdict!=='PASS'?'open':''}><summary>All ${rep.checks.length} checks — component loading (2N + N-1), grid limits, islanded genset</summary>
+      <div class="drawer-body" style="overflow-x:auto"><table class="data"><thead><tr><th>Check</th><th>Simulated</th><th>Limit</th><th style="width:80px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </details>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
+      <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open full validation tool — prefilled with this design ↗</a>
+      <span style="font-size:10px;color:var(--faint);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation</span>
+    </div>`;
 }
 
 // ─── DESIGN RENDER ───────────────────────────────────────────────────────
@@ -830,6 +976,7 @@ function renderDesign(flash) {
   renderKPIs(x,flash);
   renderPower(x);
   renderCompute(x);
+  renderValidation(x);
   renderEcon(x);
   renderBuild(x);
   renderSpecRail(x,flash);
@@ -853,20 +1000,39 @@ function renderFacts(x) {
     <div class="fact-row"><span class="fact-k">Expansion ceiling</span><span class="fact-v warn">${d.max_clean_mw} MW clean</span></div>
     <div class="fact-row"><span class="fact-k">Climate</span><span class="fact-v">${climLabel(d.climate)}</span></div>
     <div class="fact-row"><span class="fact-k">Study</span><span class="fact-v">${d.study_type} · ${d.study_date}</span></div>`;
+  renderLadder();
+}
+
+// confidence ladder — where this evaluation sits, and what upgrades it
+function renderLadder() {
+  const el = document.getElementById('conf-ladder');
+  if (!el) return;
+  const lvl = usingDemo ? 1 : 0; // 0 claimed · 1 study-verified · 2 vendor-verified · 3 telemetry-calibrated
+  const steps = [
+    {n:'Broker-claimed',      s:'power figures unverified'},
+    {n:'Study-verified',      s:'utility study on file'},
+    {n:'Vendor-verified',     s:'chip + cooling data confirmed — roadmap'},
+    {n:'Telemetry-calibrated',s:'measured traces & MFU — roadmap'},
+  ];
+  el.innerHTML = steps.map((st,i)=>`<div class="lstep${i<lvl?' done':i===lvl?' current':''}">
+    <span class="ldot"></span><span><span class="lname">${st.n}</span><br><span class="lsub">${st.s}</span></span></div>`).join('');
 }
 
 function renderKPIs(x,flash) {
-  const {d,c,gpus,racks,mfu,nameplate,ttfr,ppd,itMW} = x;
+  const {d,c,gpus,racks,mfu,nameplate,ttfr,ppd,itMW,val} = x;
   const el = document.getElementById('kpi-strip');
-  const validation = d.service_type==='interruptible' ? 'Required' : 'Pending';
-  const validationSub = d.service_type==='interruptible' ? 'interruptible service · full backup path' : 'run workload power validation';
+  const v = val.rep.verdict;
+  const vColor = v==='PASS'?'var(--ok-text)':v==='WARN'?'var(--warn-text)':'var(--risk-text)';
+  const vSub = v==='PASS' ? 'all '+val.rep.checks.length+' transient checks pass'
+             : val.rep.counts.FAIL ? val.rep.counts.FAIL+' failing check'+(val.rep.counts.FAIL>1?'s':'')+' — see Workload power'
+             : val.rep.counts.WARN+' check'+(val.rep.counts.WARN>1?'s':'')+' to review';
   el.innerHTML = `
     <div class="kpi"><div class="kpi-val">${fc(gpus)}</div><div class="kpi-label">GPUs</div><div class="kpi-sub">${fc(racks)} racks · ${c.n.replace('NVIDIA ','').replace('AMD ','').replace('Intel ','')}</div></div>
     <div class="kpi"><div class="kpi-val">${(nameplate*100).toFixed(0)}<small>%</small> <small>→</small> ${(mfu*100).toFixed(0)}<small>%</small></div><div class="kpi-label">MFU · nameplate → at scale</div><div class="kpi-sub">${wlLabel(m2Wl)} · ${m2ModelB>=1000?'1T':m2ModelB+'B'} model · modeled</div></div>
     <div class="kpi"><div class="kpi-val">${itMW.toFixed(1)} <small>MW</small></div><div class="kpi-label">Usable IT load</div><div class="kpi-sub">${d.confirmed_mw} MW facility · PUE ${getPUE(d.climate).toFixed(2)}</div></div>
     <div class="kpi"><div class="kpi-val">${fm(ppd)}</div><div class="kpi-label">CapEx / sust. PFLOPS</div><div class="kpi-sub">perf per dollar · lower is better</div></div>
     <div class="kpi"><div class="kpi-val">~${ttfr.mo} <small>mo</small></div><div class="kpi-label">First training run</div><div class="kpi-sub">gated by ${ttfr.gate}</div></div>
-    <div class="kpi"><div class="kpi-val">${validation}</div><div class="kpi-label">Power validation</div><div class="kpi-sub">${validationSub}</div></div>`;
+    <div class="kpi" style="cursor:pointer" onclick="scrollToSec(event,'sec-valid')"><div class="kpi-val" style="color:${vColor}">${v}</div><div class="kpi-label">Workload power validation</div><div class="kpi-sub">${vSub}</div></div>`;
   if (flash) el.querySelectorAll('.kpi').forEach(k=>{k.classList.remove('flash');void k.offsetWidth;k.classList.add('flash');});
 }
 
@@ -979,7 +1145,7 @@ function renderEcon(x) {
   const {d,fin} = x;
   const pnl = fin.mdl.slice(0,8);
   document.getElementById('sec-econ').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">COMMERCIAL SENSITIVITY</span><span class="ws-sub">internal scenario analysis — not underwriting</span></div>
+    <div class="ws-head"><span class="ws-idx">04</span><span class="ws-title">COMMERCIAL SENSITIVITY</span><span class="ws-sub">internal scenario analysis — not underwriting</span></div>
     <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>Internal lens:</strong> these values help compare design scenarios, but the off-taker-facing spec leads with power confidence, compute readiness, workload performance, and open items.</div>
     <div class="assume-row">
       <div class="assume"><label>GPU rate · ${m2SelChip}</label><div class="in">$ <input type="number" id="rate-econ" value="${curRate().toFixed(2)}" min="0.1" max="30" step="0.25" oninput="setChipRate(m2SelChip,this.value)"> /GPU-hr</div></div>
@@ -1044,7 +1210,7 @@ function renderBuild(x) {
   const bom = buildBOM(x);
   const critPath = `The MV switchgear at 78–130 weeks and transformer procurement at 52–78 weeks are the critical path items driving ${d.cod_target} COD. GPU rack delivery is also gating but can be parallelized once allocation is locked. CDUs and trim coolers are not on the critical path at standard lead times. ${d.utility} upgrade commitment must be confirmed within 30 days of LOI to avoid COD slippage.`;
   document.getElementById('sec-build').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">04</span><span class="ws-title">BUILD</span><span class="ws-sub">equipment, critical path, what to lock first</span></div>
+    <div class="ws-head"><span class="ws-idx">05</span><span class="ws-title">BUILD</span><span class="ws-sub">equipment, critical path, what to lock first</span></div>
     <div style="overflow-x:auto"><table class="data">
       <thead><tr><th style="width:44px">Qty</th><th>Item</th><th>Spec</th><th>Lead time</th><th style="width:110px">Critical path</th></tr></thead>
       <tbody>${bom.map(b=>`<tr>
@@ -1060,11 +1226,11 @@ function renderBuild(x) {
 }
 
 function renderSpecRail(x,flash) {
-  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr} = x;
+  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr,val} = x;
   const el = document.getElementById('spec-body');
   if (!el) return;
   const row = (k,v) => `<div class="spec-row"><span class="spec-k">${k}</span><span class="spec-v${flash?' pulse':''}">${v}</span></div>`;
-  const powerValidation = d.service_type==='interruptible' ? 'Full backup path required' : 'Transient validation pending';
+  const powerValidation = `${val.rep.verdict} · ${val.rep.counts.FAIL} fail / ${val.rep.counts.WARN} warn` + (d.service_type==='interruptible'?' · full backup path required':'');
   el.innerHTML = `
     <div class="spec-sec"><span class="eyebrow">Site</span>
       ${row('Location',d.location)}${row('Utility',d.utility)}${row('Confirmed power',d.confirmed_mw+' MW · '+(d.service_type==='firm'?'firm':'interruptible'))}${row('POI',d.poi_voltage+' kV')}${row('Target COD',d.cod_target)}
@@ -1196,8 +1362,8 @@ function specGrid(items) {
 // The commercial deliverable — 2-page off-taker spec sheet
 function buildSpecSheet() {
   const x = designCalc();
-  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr} = x;
-  const powerValidation = d.service_type==='interruptible' ? 'Full backup path required' : 'Transient validation pending';
+  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr,val} = x;
+  const powerValidation = `${val.rep.verdict} — ${val.rep.counts.PASS}/${val.rep.checks.length} transient checks pass (modeled)`;
   const confLabel = usingDemo ? 'STUDY-VERIFIED' : 'USER INPUT - VERIFY STUDY';
   const confClass = usingDemo ? 'verified' : 'unverified';
   return `
@@ -1227,7 +1393,7 @@ function buildSpecSheet() {
 // The internal advisory report — for the developer / investment committee
 function buildAdvisoryReport() {
   const x = designCalc();
-  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr} = x;
+  const {d,c,pue,itMW,racks,gpus,mfu,fin,ttfr,val} = x;
   const confLabel = usingDemo ? 'STUDY-VERIFIED' : 'USER INPUT - VERIFY STUDY';
   const confClass = usingDemo ? 'verified' : 'unverified';
   const mfuPct=(mfu*100).toFixed(0);
@@ -1279,19 +1445,25 @@ function buildAdvisoryReport() {
     ${dsxChecks(m2SelChip,d.poi_voltage,pue,d.power_factor,d.service_type,d.climate).map(ch=>`<tr><td style="font-weight:600;color:var(--ink)">${ch.item}</td><td>${ch.detail}</td><td>${ch.status==='pass'?'<span style="color:var(--ok-text);font-weight:600">✓ Pass</span>':ch.status==='warn'?'<span style="color:var(--warn-text);font-weight:600">! Review</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('')}</tbody></table>
   </div>
   <hr class="div">
-  <div class="dsec"><span class="eyebrow">5 · Commercial sensitivity</span>
+  <div class="dsec"><span class="eyebrow">5 · Workload power validation</span>
+    <div class="dsec-text"><p>The workload power trace for a ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT was simulated against the Helio 2N reference block scaled to this site: verdict <strong>${val.rep.verdict}</strong> (${val.rep.counts.PASS} pass / ${val.rep.counts.WARN} warn / ${val.rep.counts.FAIL} fail). Peak at meter ${val.rep.peakMeter.toFixed(1)} MW vs ${val.site.contracted_mw} MW contracted; worst grid ramp ${val.rep.rampRaw.toFixed(1)} MW/s raw, ${val.rep.rampSm.toFixed(2)} MW/s after BESS smoothing against an assumed ${val.site.ramp_limit_mw_per_s} MW/s limit. Ramp and oscillation limits are assumptions pending the utility's large-load study; traces are synthesized from published fluctuation characteristics, not measured telemetry.</p></div>
+    ${val.rep.checks.some(ch=>ch.status!=='PASS')?`<table class="data" style="margin-top:6px"><thead><tr><th>Check requiring attention</th><th>Simulated</th><th>Limit</th><th style="width:80px">Status</th></tr></thead><tbody>
+    ${val.rep.checks.filter(ch=>ch.status!=='PASS').map(ch=>`<tr><td style="font-weight:600;color:var(--ink)">${ch.name}</td><td class="mono" style="font-size:11px">${ch.value}</td><td class="mono" style="font-size:11px">${ch.limit}</td><td>${ch.status==='WARN'?'<span style="color:var(--warn-text);font-weight:600">! Warn</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('')}</tbody></table>`:''}
+  </div>
+  <hr class="div">
+  <div class="dsec"><span class="eyebrow">6 · Commercial sensitivity</span>
     <div class="dsec-text"><p>Scenario analysis only. These assumptions are useful for internal comparison, but they are not underwriting and should not replace off-taker credit work, lease structuring, or project finance diligence.</p></div>
     ${specGrid([['10-yr NPV · operator basis',fm(fin.npv)],['IRR · unlevered',fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'],['Yr-5 EBITDA',fm(fin.y5ebitda)],['Total CapEx',fm(fin.totalCapex)],['Revenue (80% util.)',fm(fin.gpuRevYr)+'/yr'],['Asset value @ '+m2Mult+'×',fm(fin.y5ebitda*m2Mult)]])}
     <table class="data"><thead><tr><th>Year</th><th>Revenue</th><th>Opex</th><th>EBITDA</th><th>CapEx</th><th>FCF</th></tr></thead><tbody>
     ${pnl.map(r=>`<tr><td class="mono">${r.y===0?'Y0':'Y'+r.y}</td><td class="${r.rev>0?'pos':'dim'}">${r.rev>0?fm(r.rev):'—'}</td><td class="mono ${r.op>0?'':'dim'}">${r.op>0?fm(-r.op):'—'}</td><td class="${r.ebt>0?'pos':r.rev>0?'neg':'dim'}">${r.rev>0?fm(r.ebt):'—'}</td><td class="${r.cap>0?'neg':'dim'}">${r.cap>0?fm(-r.cap):'—'}</td><td class="${r.fcf>0?'pos':'neg'}">${fm(r.fcf)}</td></tr>`).join('')}</tbody></table>
   </div>
   <hr class="div">
-  <div class="dsec"><span class="eyebrow">6 · Equipment & critical path</span>
+  <div class="dsec"><span class="eyebrow">7 · Equipment & critical path</span>
     <table class="data"><thead><tr><th style="width:44px">Qty</th><th>Item</th><th>Spec</th><th>Lead</th><th style="width:100px"></th></tr></thead><tbody>
     ${bom.map(b=>`<tr><td class="mono">${b.qty}</td><td style="font-weight:600;color:var(--ink)">${b.item}</td><td style="color:var(--muted);font-size:11.5px">${b.spec}</td><td class="mono" style="color:var(--warn-text)">${b.lead}</td><td>${b.crit?'<span class="crit-flag">● CRITICAL</span>':''}</td></tr>`).join('')}</tbody></table>
   </div>
   <hr class="div">
-  <div class="dsec"><span class="eyebrow">7 · Risk matrix</span>
+  <div class="dsec"><span class="eyebrow">8 · Risk matrix</span>
     <table class="data"><thead><tr><th>Risk</th><th style="width:84px">Likelihood</th><th style="width:74px">Impact</th><th>Mitigation</th></tr></thead><tbody>
     ${risks.map(r=>`<tr><td style="font-weight:600;color:var(--ink)">${r.risk}</td><td><span class="risk-pill ${lh(r.lh)}">${r.lh}</span></td><td><span class="risk-pill ${lh(r.im)}">${r.im}</span></td><td>${r.mit}</td></tr>`).join('')}</tbody></table>
   </div>
@@ -1441,7 +1613,7 @@ function renderM1() {
 
 // ─── SECTION TAB SCROLL-SPY ──────────────────────────────────────────────
 document.getElementById('design-scroll').addEventListener('scroll', () => {
-  const secs=['sec-power','sec-compute','sec-econ','sec-build'];
+  const secs=['sec-power','sec-compute','sec-valid','sec-econ','sec-build'];
   const scroll=document.getElementById('design-scroll');
   const top=scroll.scrollTop+180;
   let cur=secs[0];
