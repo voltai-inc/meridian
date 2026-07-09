@@ -542,16 +542,18 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 // ─── DATA ────────────────────────────────────────────────────────────────
 // g = GPUs per rack (x8 platforms assume multi-node racks at the stated kW)
 // rate = assumed rental $/GPU-hr (editable per chip in the UI) · cap = all-in capex $/GPU incl. server + fabric share
+// smooth = on-board power smoothing (fraction of training-step swing damped by rack-level energy storage —
+//          documented on GB300-class racks, estimated elsewhere; 0 = raw synchronized swing hits the facility)
 const CHIPS = {
-  GB300:  {n:'NVIDIA GB300 NVL72',  g:72, kw:130, kw_max:142, cool:'CDU', rate:5.00, cap:70000, mt:.58, mi:.72, tf:1400, hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'both'},
-  GB200:  {n:'NVIDIA GB200 NVL36',  g:36, kw:65,  kw_max:72,  cool:'CDU', rate:4.00, cap:58000, mt:.57, mi:.71, tf:1400, hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'both'},
-  B200:   {n:'NVIDIA B200 SXM',     g:48, kw:90,  kw_max:100, cool:'CDU', rate:3.25, cap:50000, mt:.62, mi:.76, tf:900,  hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
-  H200:   {n:'NVIDIA H200 SXM',     g:48, kw:70,  kw_max:80,  cool:'CDU', rate:2.50, cap:38000, mt:.55, mi:.68, tf:990,  hbm:4.8,  ver:true,  st:'ship', lead:'8–10 mo',  leadHi:10, volt:'ac480'},
-  H100:   {n:'NVIDIA H100 SXM5',    g:48, kw:70,  kw_max:80,  cool:'CDU', rate:2.00, cap:28000, mt:.50, mi:.65, tf:990,  hbm:3.35, ver:true,  st:'ship', lead:'6–8 mo',   leadHi:8,  volt:'ac480'},
-  VERA:   {n:'Vera Rubin NVL72',     g:72, kw:210, kw_max:227, cool:'CDU', rate:7.00, cap:90000, mt:.60, mi:.74, tf:1800, hbm:10.0, ver:false, st:'road', lead:'2026→',    leadHi:18, volt:'dc800'},
-  MI355X: {n:'AMD MI355X DLC',       g:96, kw:220, kw_max:250, cool:'DLC', rate:3.00, cap:42000, mt:.45, mi:.62, tf:1300, hbm:5.3,  ver:false, st:'ship', lead:'14–16 mo', leadHi:16, volt:'dc800'},
-  MI300X: {n:'AMD MI300X OAM',       g:64, kw:110, kw_max:125, cool:'CDU', rate:1.75, cap:22000, mt:.38, mi:.55, tf:1307, hbm:7.68, ver:false, st:'ship', lead:'10–12 mo', leadHi:12, volt:'ac480'},
-  GAUDI3: {n:'Intel Gaudi 3',        g:64, kw:90,  kw_max:110, cool:'CDU', rate:1.00, cap:18000, mt:.42, mi:.60, tf:800,  hbm:3.7,  ver:false, st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
+  GB300:  {n:'NVIDIA GB300 NVL72',  g:72, kw:130, kw_max:142, cool:'CDU', rate:5.00, cap:70000, smooth:0.50, mt:.58, mi:.72, tf:1400, hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'both'},
+  GB200:  {n:'NVIDIA GB200 NVL36',  g:36, kw:65,  kw_max:72,  cool:'CDU', rate:4.00, cap:58000, smooth:0.35, mt:.57, mi:.71, tf:1400, hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'both'},
+  B200:   {n:'NVIDIA B200 SXM',     g:48, kw:90,  kw_max:100, cool:'CDU', rate:3.25, cap:50000, smooth:0.10, mt:.62, mi:.76, tf:900,  hbm:8.0,  ver:true,  st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
+  H200:   {n:'NVIDIA H200 SXM',     g:48, kw:70,  kw_max:80,  cool:'CDU', rate:2.50, cap:38000, smooth:0.00, mt:.55, mi:.68, tf:990,  hbm:4.8,  ver:true,  st:'ship', lead:'8–10 mo',  leadHi:10, volt:'ac480'},
+  H100:   {n:'NVIDIA H100 SXM5',    g:48, kw:70,  kw_max:80,  cool:'CDU', rate:2.00, cap:28000, smooth:0.00, mt:.50, mi:.65, tf:990,  hbm:3.35, ver:true,  st:'ship', lead:'6–8 mo',   leadHi:8,  volt:'ac480'},
+  VERA:   {n:'Vera Rubin NVL72',     g:72, kw:210, kw_max:227, cool:'CDU', rate:7.00, cap:90000, smooth:0.60, mt:.60, mi:.74, tf:1800, hbm:10.0, ver:false, st:'road', lead:'2026→',    leadHi:18, volt:'dc800'},
+  MI355X: {n:'AMD MI355X DLC',       g:96, kw:220, kw_max:250, cool:'DLC', rate:3.00, cap:42000, smooth:0.15, mt:.45, mi:.62, tf:1300, hbm:5.3,  ver:false, st:'ship', lead:'14–16 mo', leadHi:16, volt:'dc800'},
+  MI300X: {n:'AMD MI300X OAM',       g:64, kw:110, kw_max:125, cool:'CDU', rate:1.75, cap:22000, smooth:0.00, mt:.38, mi:.55, tf:1307, hbm:7.68, ver:false, st:'ship', lead:'10–12 mo', leadHi:12, volt:'ac480'},
+  GAUDI3: {n:'Intel Gaudi 3',        g:64, kw:90,  kw_max:110, cool:'CDU', rate:1.00, cap:18000, smooth:0.00, mt:.42, mi:.60, tf:800,  hbm:3.7,  ver:false, st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
 };
 // data-viz palette — Voltai DS spectral accents
 const CHIP_COLORS = {
@@ -828,7 +830,7 @@ function designCalc() {
   const ppd = perfPerDollar(fin,c);
   const pareto = getInfPareto(m2SelChip,m2ModelB);
   const opPt = pareto.length?pareto.reduce((best,p)=>Math.abs(p.b-m2Batch)<Math.abs(best.b-m2Batch)?p:best,pareto[0]):null;
-  const val = runValidation(itMW,d,m2Wl);
+  const val = runValidation(itMW,d,m2Wl,m2SelChip);
   return {d,c,pue,itMW,racks,gpus,mfu,nameplate,fin,ttfr,ppd,opPt,val};
 }
 
@@ -842,7 +844,7 @@ function buildValidationModel(itMW, d) {
   const design = {
     name:'Helio 2N reference block — scaled to site', revision:'meridian-inline',
     critical_it_mw:+itMW.toFixed(1), redundancy:'2N',
-    genset_firm_mw:r(1.083), genset_step_frac:0.40,
+    genset_firm_mw:r(1.25), genset_step_frac:0.40, // firm sized for facility peak (IT + mech + losses), N+1
     bess_power_mw:r(0.417), bess_energy_mwh:r(0.208),
     mech_base_mw:r(0.05), mech_cooling_ratio:0.20, mech_lag_s:180,
     path_components:[
@@ -862,18 +864,39 @@ function buildValidationModel(itMW, d) {
   return {design,site};
 }
 
-let valCache = {key:null,result:null};
-function runValidation(itMW, d, wl) {
-  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl].join('|');
-  if (valCache.key===key) return valCache.result;
+// The chip shapes the DEMAND curve: training-step swing damped by on-board
+// smoothing (rack-level energy storage), and cooling type sets the mechanical
+// power ratio. The trace timing (iteration, checkpoints) is workload-level —
+// chip-measured traces are the roadmap upgrade.
+function chipPowerProfile(chip) {
+  const c = CHIPS[chip];
+  const s = c.smooth||0;
+  const mid = (1.00+0.45)/2, hs = ((1.00-0.45)/2)*(1-s);
+  return {
+    high_frac:+(mid+hs).toFixed(3), low_frac:+(mid-hs).toFixed(3),
+    checkpoint_frac:+(0.15+(mid-0.15)*s*0.5).toFixed(3), // storage partially bridges the ~20 s dip
+    noise_frac:+(0.02*(1-s)).toFixed(3),                 // smoothing also absorbs stochastic jitter
+    coolRatio:c.cool==='DLC'?0.15:0.20, smooth:s,
+  };
+}
+
+const valCacheMap = new Map();
+function runValidation(itMW, d, wl, chip) {
+  const prof = chipPowerProfile(chip);
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio].join('|');
+  if (valCacheMap.has(key)) return valCacheMap.get(key);
   const {design,site} = buildValidationModel(itMW,d);
+  design.mech_cooling_ratio = prof.coolRatio;
+  const tOpts = {duration_s:1800, job_end_at_s:1530, high_frac:prof.high_frac, low_frac:prof.low_frac, checkpoint_frac:prof.checkpoint_frac, noise_frac:prof.noise_frac};
   const trace = wl==='infer' ? inferenceTrace(design.critical_it_mw,{duration_s:1800})
-              : wl==='mix'   ? mixedTrace(design.critical_it_mw,{duration_s:1800,training_share:0.6,job_end_at_s:1530})
-              :                trainingTrace(design.critical_it_mw,{duration_s:1800,job_end_at_s:1530});
+              : wl==='mix'   ? mixedTrace(design.critical_it_mw,{...tOpts,training_share:0.6})
+              :                trainingTrace(design.critical_it_mw,tOpts);
   const sim = simulate(design,trace,30);
   const rep = runChecks(sim,site);
-  valCache = {key,result:{design,site,trace,sim,rep}};
-  return valCache.result;
+  const result = {design,site,trace,sim,rep,prof};
+  if (valCacheMap.size>80) valCacheMap.clear();
+  valCacheMap.set(key,result);
+  return result;
 }
 
 // deep link into the full validation tool with this design prefilled
@@ -938,12 +961,14 @@ function renderValidation(x) {
     <td class="mono" style="font-size:11px">${ch.value}</td>
     <td class="mono" style="font-size:11px">${ch.limit}</td>
     <td>${ch.status==='PASS'?'<span style="color:var(--ok-text);font-weight:600">✓ Pass</span>':ch.status==='WARN'?'<span style="color:var(--warn-text);font-weight:600">! Warn</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('');
+  const c = CHIPS[m2SelChip];
   document.getElementById('sec-valid').innerHTML = `
-    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">the power draw curve this design produces — and whether the electrical chain survives it</span>
+    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">demand curve vs. electrical chain — does the design survive the draw?</span>
       <span class="badge ${rep.verdict==='PASS'?'verified':'unverified'}">${rep.verdict} · ${rep.counts.PASS}✓ ${rep.counts.WARN}! ${rep.counts.FAIL}✗</span></div>
+    <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>How to read this.</strong> The curve is the <strong>demand</strong>: what a ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT actually pulls, shaped by the ${c.n} power profile${val.prof.smooth?` (on-board smoothing damps ${(val.prof.smooth*100).toFixed(0)}% of the training-step swing)`:` (no on-board smoothing — the synchronized swing hits the facility raw)`} and ${c.cool} cooling. The chain it is tested against is the <strong>supply</strong>: the Helio 2N reference block scaled to this site — a template, since no site-specific one-line exists pre-engineering. A FAIL here means <em>our reference design, sized this way, would not survive this workload</em> — change the chip, derate IT, or resize BESS/gensets and watch the verdict move. Compute performance (MFU, tokens/sec) is the separate model in Compute Design; both run off the same workload inputs in the left rail.</div>
     <div class="chart-panel" style="margin-bottom:14px">
-      <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · 30 min · synthesized trace</div>
-      <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet to ~15% for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
+      <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · ${c.n} profile${val.prof.smooth?' · smoothing credited':''} · 30 min</div>
+      <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
       ${buildTraceSVG(val)}
     </div>
     <div class="pgrid" style="grid-template-columns:repeat(6,1fr);margin-bottom:14px">
@@ -1081,6 +1106,10 @@ function renderCompute(x) {
       <div class="cc-row"><span class="cc-k">MFU at scale</span><span class="cc-v">${ok?(m*100).toFixed(0)+'%':'—'}</span></div>
       <div class="cc-row"><span class="cc-k">kW / rack</span><span class="cc-v">${cc.kw}</span></div>
       <div class="cc-row"><span class="cc-k">Lead</span><span class="cc-v">${cc.lead}</span></div>
+      ${(()=>{ if(!ok) return '<div class="cc-row"><span class="cc-k">Power verdict</span><span class="cc-v">—</span></div>';
+        const r = runValidation(itMW,d,m2Wl,k).rep;
+        const col = r.verdict==='PASS'?'var(--ok-text)':r.verdict==='WARN'?'var(--warn-text)':'var(--risk-text)';
+        return `<div class="cc-row"><span class="cc-k">Power verdict${cc.smooth?' · smoothing':''}</span><span class="cc-v" style="color:${col};font-weight:600">${r.verdict}${r.counts.FAIL?' · '+r.counts.FAIL+'✗':r.counts.WARN?' · '+r.counts.WARN+'!':''}</span></div>`;})()}
       <div class="cc-rate" onclick="event.stopPropagation()"><span class="cc-k">Scenario $/GPU-hr</span>
         <span class="cc-rate-in">$<input type="number" id="rate-${k}" value="${chipRates[k].toFixed(2)}" step="0.25" min="0.1" oninput="setChipRate('${k}',this.value)" ${ok?'':'disabled'}></span></div>
       ${ok?'':'<div class="cc-note">voltage mismatch at this POI</div>'}

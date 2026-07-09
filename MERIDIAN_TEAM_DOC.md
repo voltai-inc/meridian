@@ -30,10 +30,14 @@ The deliverable is a **Spec Sheet**: a structured pre-build summary that an off-
 | Layer | What it is | Who owns it |
 |-------|-----------|-------------|
 | **1 · Utility / grid capacity** | Can the grid deliver X MW — load flow, contingencies, queue position | The utility study. Always an **input** to Meridian, never a prediction. |
-| **2 · Workload power behavior** | The power draw curve the compute actually produces: training-step oscillation, checkpoint dips to ~15%, synchronized fleet ramps, job-end cliffs | **Voltai — modeled today.** Traces are synthesized per workload type from published fluctuation characteristics; chip-measured traces are the roadmap upgrade. |
+| **2 · Workload power behavior** | The power draw curve the compute actually produces: training-step oscillation, checkpoint dips to ~15%, synchronized fleet ramps, job-end cliffs | **Voltai — modeled today.** Traces are synthesized per workload type from published fluctuation characteristics, then shaped by a **chip power profile**: GB300/Rubin-class racks carry on-board energy storage that damps the training-step swing (documented NVIDIA feature; ~50–60% credited, estimated elsewhere), and cooling type (DLC vs CDU) sets the mechanical power ratio. Chip-measured traces are the roadmap upgrade. |
 | **3 · Transient survivability** | Slam the layer-2 curve against the electrical design: UPS/genset/BESS per path, N-1, contracted-capacity, ramp and oscillation limits | **Voltai — modeled today.** 19 pass/warn/fail checks, run inline in Meridian and in the full Workload Power Validation bench. |
 
 Layers 2+3 together are "the power simulation." The chip picker is not the product — it is one input to the design whose power behavior gets simulated and validated.
+
+**Two models, one set of inputs.** The same left-rail workload inputs (training/mixed/inference, model size, batch) drive two separate models: the **performance model** (MFU at scale, tokens/sec, inference Pareto — "how much compute do you get," shown in Compute Design) and the **power model** (layers 2+3 — "does the electrical design survive," shown in Workload Power). Demand vs supply in the power model: the **demand** is the workload trace at the site's IT MW shaped by the chip's power profile; the **supply** is the Helio 2N reference block scaled to the site — a template, because no site-specific one-line exists at pre-engineering. A FAIL verdict therefore reads: *our reference design, sized this way, would not survive this workload* — not a claim about the site.
+
+**Chip choice now changes the verdict** (added July 9): on the 200 MW demo with a fully synchronized training fleet, GB300 and Vera Rubin come out **WARN** (on-board smoothing keeps the peak inside the contract and the BESS bridges the islanded step), while H100/H200/B200-class platforms **FAIL** (raw synchronized swing breaks contracted peak, UPS N-1, and genset checks). Every chip card shows its own power verdict.
 
 ---
 
@@ -51,7 +55,7 @@ The tool is a working prototype deployed at `meridian-web-swart.vercel.app`. It 
 - Equipment BOM with lead times (transformers, CDUs, switchgear, UPS, generators)
 - Multi-chip inference Pareto chart: tokens/sec/user vs tokens/sec/MW across all chips at equal power budget
 
-**A demo insight worth knowing:** the 200 MW IID demo currently FAILS validation with a fully synchronized training fleet — sizing IT from annualized PUE leaves no headroom for peak transients, the raw ramp is ~160 MW/s against an assumed 12.5 MW/s limit, and the islanded genset step check blows through. That is not a bug; it is the pitch. It is the failure mode operators discover after energization, caught here at design time.
+**The demo story:** on the 200 MW IID demo with a fully synchronized training fleet, chip choice decides the verdict — GB300/Rubin (on-board power smoothing) come out WARN, H100-class platforms FAIL on contracted peak, UPS N-1, and genset checks. Sizing IT from annualized PUE leaves no transient headroom unless the silicon damps the swing. That is the failure mode operators discover after energization, caught here at design time — and it makes "which chip" a power question, not just a performance question.
 
 **What is assumed (not measured):**
 - MFU values come from published papers and analytical communication overhead models. They have not been validated against real cluster telemetry.
