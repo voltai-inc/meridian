@@ -215,6 +215,81 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:#fff;bord
   .right-panel{padding:0}
   .report-doc{border:none;box-shadow:none;padding:20px}
 }
+
+/* Chip cards */
+.chip-cards{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px}
+.chip-card{flex-shrink:0;width:160px;border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:.15s;background:var(--panel)}
+.chip-card:hover{border-color:var(--v2)}
+.chip-card.selected{border-color:var(--v);background:var(--vl)}
+.chip-card.dimmed{opacity:.4;cursor:not-allowed}
+.chip-card-name{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:8px;line-height:1.3}
+.chip-card-stat{font-size:10px;color:var(--t3);margin-bottom:3px}
+.chip-card-val{font-family:var(--m);font-size:13px;font-weight:700;color:var(--v)}
+
+/* Section headers (sticky) */
+.explore-section{margin-bottom:32px}
+.section-header{position:sticky;top:0;background:var(--bg);z-index:10;padding:10px 0 8px;border-bottom:2px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-num{width:24px;height:24px;border-radius:50%;background:var(--v);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:14px;font-weight:700;color:var(--t1)}
+.section-sub{font-size:11px;color:var(--t3)}
+
+/* Inline inputs for economics */
+.inline-input-group{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.inline-input-wrap{display:flex;align-items:center;gap:6px}
+.inline-input-wrap label{font-size:11px;color:var(--t3)}
+.inline-input-wrap input{width:70px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:13px;font-weight:600;color:var(--v);text-align:right}
+
+/* Generate bar */
+.generate-bar{margin-top:32px;padding:20px 24px;background:var(--panel);border:2px solid var(--v);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.generate-summary{font-size:12px;color:var(--t3);font-family:var(--m)}
+.generate-btn{background:var(--v);color:#fff;border:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap}
+.generate-btn:hover{background:var(--v2)}
+
+/* Share bar */
+.share-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--vl);border-radius:6px;margin-bottom:20px;flex-wrap:wrap}
+.share-url{flex:1;font-family:var(--m);font-size:11px;color:var(--t3);word-break:break-all;min-width:0}
+.share-bar button{padding:6px 14px;border:1px solid var(--v);border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--v);font-family:var(--f);white-space:nowrap}
+
+/* Workload toggle */
+.wl-toggle{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px}
+.wl-btn{padding:4px 12px;font-size:11px;font-weight:500;color:var(--t3);cursor:pointer;border-radius:3px;border:none;background:none;font-family:var(--f);transition:.15s}
+.wl-btn.active{background:#fff;color:var(--v);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* Explore power info grid */
+.power-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.power-grid-item{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px}
+.power-grid-val{font-family:var(--m);font-size:13px;font-weight:700;color:var(--t1);line-height:1.2;margin-bottom:2px}
+.power-grid-label{font-size:9px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em}
+
+/* Warning boxes in exploration */
+.explore-warn{border-radius:4px;padding:10px 14px;margin:10px 0;font-size:12px;line-height:1.6}
+.explore-warn.amber{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+.explore-warn.red{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+
+/* Charts side by side */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+
+/* DSX collapsible */
+.dsx-collapsible{border:1px solid var(--border);border-radius:5px;margin-top:16px;overflow:hidden}
+.dsx-header{padding:9px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--bg);font-size:11px;font-weight:600;color:var(--t3);user-select:none}
+.dsx-header:hover{background:#edf0f4}
+.dsx-body{display:none;padding:12px;border-top:1px solid var(--border)}
+.dsx-collapsible.open .dsx-body{display:block}
+
+/* Explore report header */
+.explore-report-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.back-btn{padding:6px 14px;border:1px solid var(--border);border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--t2);font-family:var(--f)}
+.back-btn:hover{border-color:var(--v);color:var(--v)}
+
+/* Status badge in exploration */
+.status-badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--m);letter-spacing:.06em}
+.status-confirmed{background:#f0fdf4;color:var(--ok);border:1px solid #bbf7d0}
+.status-unverified{background:#fff7ed;color:var(--warn);border:1px solid #fed7aa}
+
+/* Shipping badge on chip card */
+.ship-badge{display:inline-block;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:700;font-family:var(--m);margin-bottom:4px}
+.ship-badge.shipping{background:#f0fdf4;color:var(--ok);border:1px solid #bbf7d0}
+.ship-badge.roadmap{background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd}
 </style>
 </head>
 <body>
@@ -525,6 +600,15 @@ let m1GoKey = 'pjm';
 let usingDemo = true;
 let debTimer = null;
 
+// Mode 2 exploration state
+let m2SelChip = 'GB300';
+let m2Wl = 'train';
+let m2ModelB = 70;
+let m2GpuRate = 3.00;
+let m2PwrCost = 0.05;
+let m2DiscR = 0.10;
+let m2InExplore = true;
+
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
 const fm = n => {
   const a=Math.abs(n), s=n<0?'-':'';
@@ -678,6 +762,7 @@ function calcFinancials(mw, chip, wl, gpuRate, pwrCost, discR, ebitdaMult, upgCo
 // ─── MODE SWITCHING ─────────────────────────────────────────────────────────────
 function setMode(m) {
   mode = m;
+  if (m === 2) m2InExplore = true; // always start exploration fresh when switching to mode 2
   document.getElementById('btn-mode1').classList.toggle('active', m===1);
   document.getElementById('btn-mode2').classList.toggle('active', m===2);
   document.getElementById('m1-inputs').style.display = m===1 ? '' : 'none';
@@ -690,6 +775,7 @@ function enterOwnStudy() {
   document.getElementById('m2-demo-banner').style.display = 'none';
   document.getElementById('m2-own-inputs').style.display = '';
   document.getElementById('m2-demo-inputs').style.display = 'none';
+  m2InExplore = true;
   renderReport();
 }
 
@@ -1457,6 +1543,918 @@ function renderMode2() {
 </div>`;
 }
 
+// ─── MODE 2: GET STUDY DATA ──────────────────────────────────────────────────────
+function getM2Data() {
+  let d;
+  if (usingDemo) {
+    d = {...IID_DEMO};
+    d.chip = m2SelChip;
+    d.wl = m2Wl;
+    d.gpuRate = m2GpuRate;
+    d.pwrCost = m2PwrCost;
+    d.discR = m2DiscR;
+    d.ebitdaMult = 20;
+  } else {
+    d = {
+      name: document.getElementById('m2-location').value || 'Data Center Campus',
+      location: document.getElementById('m2-location').value || 'Location TBD',
+      utility: document.getElementById('m2-utility').value || 'Utility TBD',
+      poi_voltage: parseFloat(document.getElementById('m2-poi-volt').value)||230,
+      poi_desc: `${document.getElementById('m2-poi-volt').value} kV POI`,
+      confirmed_mw: parseFloat(document.getElementById('m2-mw').value)||100,
+      max_clean_mw: Math.round((parseFloat(document.getElementById('m2-mw').value)||100)*1.25),
+      violation_mw: parseFloat(document.getElementById('m2-exp-limit').value)||500,
+      violation_desc: 'Violation at expansion limit — separate transmission study required.',
+      power_factor: parseFloat(document.getElementById('m2-pf').value)||0.95,
+      service_type: document.getElementById('m2-service').value||'firm',
+      upgrade_required: 'Utility upgrades per study',
+      upgrade_cost_est: parseFloat(document.getElementById('m2-upg-cost').value)*1e6||12e6,
+      upgrade_timeline_mo: parseFloat(document.getElementById('m2-upg-mo').value)||18,
+      study_type: document.getElementById('m2-study-type').value||'Feasibility Study',
+      study_date: 'Study date TBD',
+      cod_target: 'COD TBD',
+      climate: document.getElementById('m2-climate').value||'hot_dry',
+      grid_op: 'Grid operator TBD',
+      chip: m2SelChip,
+      wl: m2Wl,
+      gpuRate: m2GpuRate,
+      pwrCost: m2PwrCost,
+      discR: m2DiscR,
+      ebitdaMult: parseFloat(document.getElementById('m2-mult').value)||20,
+    };
+  }
+  return d;
+}
+
+// ─── MODE 2: EXPLORATION SECTIONS ───────────────────────────────────────────────
+function renderSection1(d, pue) {
+  const itMW = d.confirmed_mw / pue;
+  const isDemo = usingDemo;
+  const isInterruptible = d.service_type === 'interruptible';
+  const expansionTight = d.violation_mw < d.confirmed_mw * 2;
+  const badge = isDemo
+    ? `<span class="status-badge status-confirmed">CONFIRMED</span>`
+    : `<span class="status-badge status-unverified">UNVERIFIED</span>`;
+
+  let warnings = '';
+  if (isInterruptible) {
+    warnings += `<div class="explore-warn amber">Non-firm service — standby generation sized for 100% IT load is required in this design. BESS alone is insufficient for extended curtailment events.</div>`;
+  }
+  if (expansionTight) {
+    warnings += `<div class="explore-warn red"><strong>Expansion ceiling flag:</strong> ${d.violation_desc} Expansion above ${d.max_clean_mw} MW requires a separate transmission study. Do not make Phase 2 commitments before that study is complete.</div>`;
+  }
+
+  return `<div class="explore-section" id="exp-sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">POWER CONFIRMED ${badge}</div>
+        <div class="section-sub">What your study says</div>
+      </div>
+    </div>
+    <div class="power-grid">
+      <div class="power-grid-item">
+        <div class="power-grid-val">${d.confirmed_mw} MW</div>
+        <div class="power-grid-label">Confirmed at POI</div>
+      </div>
+      <div class="power-grid-item">
+        <div class="power-grid-val">${d.poi_voltage} kV</div>
+        <div class="power-grid-label">POI voltage</div>
+      </div>
+      <div class="power-grid-item">
+        <div class="power-grid-val" style="color:${isInterruptible?'var(--risk)':'var(--ok)'}">${isInterruptible ? 'Interruptible' : 'Firm'}</div>
+        <div class="power-grid-label">Service type</div>
+      </div>
+      <div class="power-grid-item">
+        <div class="power-grid-val">${d.power_factor}</div>
+        <div class="power-grid-label">Power factor</div>
+      </div>
+      <div class="power-grid-item">
+        <div class="power-grid-val">${fm(d.upgrade_cost_est)} · ${d.upgrade_timeline_mo} mo</div>
+        <div class="power-grid-label">Required upgrade + timeline</div>
+      </div>
+      <div class="power-grid-item">
+        <div class="power-grid-val">${d.max_clean_mw} MW clean / ${d.violation_mw} MW limit</div>
+        <div class="power-grid-label">Expansion ceiling</div>
+      </div>
+    </div>
+    ${warnings}
+  </div>`;
+}
+
+function renderSection2(d, pue) {
+  const itMW = d.confirmed_mw / pue;
+  // Chip cards
+  let cards = '';
+  for (const [k, c] of Object.entries(CHIPS)) {
+    const voltMatch = c.volt === 'both' || c.volt === 'ac480' || d.poi_voltage >= 115;
+    const isDimmed = !voltMatch;
+    const isSelected = k === m2SelChip;
+    const racks = Math.floor(itMW * 1000 / c.kw);
+    const gpus = racks * c.g;
+    const mfu = getMFU(k, gpus, m2ModelB, m2Wl);
+    const mfuNameplate = m2Wl === 'train' ? c.mt : (m2Wl === 'mix' ? (c.mt+c.mi)/2 : c.mi);
+    const revYr = gpus * 0.80 * c.p * 8760 * mfu;
+    const shipBadge = c.st === 'road'
+      ? `<div class="ship-badge roadmap">ROADMAP</div>`
+      : `<div class="ship-badge shipping">SHIPPING</div>`;
+    const voltNote = isDimmed ? `<div style="font-size:9px;color:var(--risk);margin-top:4px">voltage mismatch</div>` : '';
+    const clickHandler = isDimmed ? '' : `onclick="selectChip('${k}')"`;
+    cards += `<div class="chip-card${isSelected?' selected':''}${isDimmed?' dimmed':''}" ${clickHandler}>
+      ${shipBadge}
+      <div class="chip-card-name">${c.n}</div>
+      <div style="border-top:1px solid var(--border);margin:6px 0 8px"></div>
+      <div class="chip-card-stat">GPUs</div>
+      <div class="chip-card-val">${isDimmed ? '—' : fc(gpus)}</div>
+      <div class="chip-card-stat" style="margin-top:6px">Racks</div>
+      <div class="chip-card-val" style="font-size:12px">${isDimmed ? '—' : racks}</div>
+      <div class="chip-card-stat" style="margin-top:6px">MFU (nameplate → scale)</div>
+      <div class="chip-card-val" style="font-size:12px">${isDimmed ? '—' : (mfuNameplate*100).toFixed(0)+'% → '+(mfu*100).toFixed(0)+'%'}</div>
+      <div class="chip-card-stat" style="margin-top:6px">Revenue / yr</div>
+      <div class="chip-card-val" style="font-size:12px">${isDimmed ? '—' : fm(revYr)}</div>
+      <div class="chip-card-stat" style="margin-top:6px">Lead time</div>
+      <div class="chip-card-val" style="font-size:11px;color:var(--warn)">${c.lead}</div>
+      <div class="chip-card-stat" style="margin-top:6px">Cooling</div>
+      <div class="chip-card-val" style="font-size:12px">${c.cool}</div>
+      ${voltNote}
+    </div>`;
+  }
+
+  // Comparison table (expanded buildAlternativesTable with revenue/MW)
+  const headerStyle = 'style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:2px solid var(--border);text-align:left"';
+  const tdS = (dim, sel) => `style="padding:7px 10px;font-size:12px;color:${dim?'var(--t4)':'var(--t2)'};border-bottom:1px solid var(--border);background:${sel?'var(--vl)':''}; cursor:${dim?'default':'pointer'}"`;
+
+  let tableRows = '';
+  for (const [k, c] of Object.entries(CHIPS)) {
+    const racks = Math.floor(itMW * 1000 / c.kw);
+    const gpus = racks * c.g;
+    const mfu = getMFU(k, gpus, m2ModelB, m2Wl);
+    const pctMfu = (mfu * 100).toFixed(0);
+    const revYr = gpus * 0.80 * c.p * 8760 * mfu;
+    const revPerMw = itMW > 0 ? fm(revYr / itMW) + '/MW' : '—';
+    const voltOk = c.volt === 'both' || (d.poi_voltage >= 115 ? true : c.volt === 'ac480');
+    const pts = [];
+    if (!voltOk) pts.push('voltage mismatch');
+    if (c.st !== 'ship') pts.push('not yet shipping');
+    if (!c.ver) pts.push('specs unverified');
+    const note = pts.length ? pts.join(' · ') : (k === 'H100' ? 'widely deployed, lower density' : k === 'MI300X' ? 'ROCm overhead reduces effective MFU' : k === 'GAUDI3' ? 'limited ecosystem maturity' : '—');
+    const dim = pts.some(p => p.includes('voltage') || p.includes('shipping'));
+    const isSel = k === m2SelChip;
+    const clickH = dim ? '' : `onclick="selectChip('${k}')"`;
+    tableRows += `<tr ${clickH}>
+      <td ${tdS(dim, isSel)}><span style="font-family:var(--m);font-size:11px;${isSel?'font-weight:700;color:var(--v)':''}">${c.n}</span></td>
+      <td ${tdS(dim, isSel)}>${dim ? '—' : fc(gpus)}</td>
+      <td ${tdS(dim, isSel)}>${dim ? '—' : racks}</td>
+      <td ${tdS(dim, isSel)}>${dim ? '—' : pctMfu + '%'}</td>
+      <td ${tdS(dim, isSel)}>${dim ? '—' : fm(revYr) + '/yr'}</td>
+      <td ${tdS(dim, isSel)}>${dim ? '—' : revPerMw}</td>
+      <td ${tdS(dim, isSel)}>${c.lead}</td>
+      <td ${tdS(dim, isSel)}>${c.cool}</td>
+      <td ${tdS(dim, isSel)} style="font-size:11px;color:var(--t3);background:${isSel?'var(--vl)':''}">${note}</td>
+    </tr>`;
+  }
+
+  return `<div class="explore-section" id="exp-sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">DESIGN OPTIONS</div>
+        <div class="section-sub">What you can build here</div>
+      </div>
+    </div>
+    <div class="chip-cards">${cards}</div>
+    <div style="overflow-x:auto;margin-top:4px">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--f)">
+        <thead><tr>
+          <th ${headerStyle}>Chip</th>
+          <th ${headerStyle}>GPUs</th>
+          <th ${headerStyle}>Racks</th>
+          <th ${headerStyle}>MFU (${m2Wl})</th>
+          <th ${headerStyle}>Revenue/yr</th>
+          <th ${headerStyle}>Rev/MW</th>
+          <th ${headerStyle}>Lead Time</th>
+          <th ${headerStyle}>Cooling</th>
+          <th ${headerStyle}>Notes</th>
+        </tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderSection3(d, pue) {
+  const c = CHIPS[m2SelChip];
+  const itMW = d.confirmed_mw / pue;
+  const racks = Math.floor(itMW * 1000 / c.kw);
+  const gpus = racks * c.g;
+  const mfu = getMFU(m2SelChip, gpus, m2ModelB, m2Wl);
+  const mfuPct = (mfu * 100).toFixed(0);
+
+  const mfuCtx = mfu >= .55
+    ? 'This is within the high-end range for production training clusters. Expect to reach this within 2–3 months of first-run optimization.'
+    : mfu >= .45
+    ? 'Typical for large-scale clusters after 3–6 months of software tuning. Budget for the ramp period.'
+    : mfu >= .35
+    ? `Below the number vendors quote, but consistent with what operators actually report at this scale. Plan for a 3–6 month ramp period post-energization.`
+    : `At ${fc(gpus)} GPUs, all-reduce communication overhead is the dominant constraint. Plan for an extended optimization period — the business model at this scale depends on inference revenue to offset training-phase inefficiency.`;
+
+  const infMfu = getMFU(m2SelChip, gpus, m2ModelB, 'infer');
+  const tokensPerSecMW = Math.round(c.tf * infMfu * 0.3 / itMW * 1000);
+
+  const perfNarrative = m2Wl === 'infer'
+    ? `At <strong>${fc(gpus)} GPUs</strong>, inference MFU is modeled at <strong>${(infMfu*100).toFixed(0)}%</strong> — producing approximately ${fc(tokensPerSecMW)} tokens/sec/MW at ${m2ModelB}B model size. ${c.hbm >= 8.0 ? 'Memory-bandwidth-rich HBM profile is well-suited for large-model decode.' : 'HBM bandwidth may limit decode throughput at large batch sizes.'}`
+    : m2Wl === 'mix'
+    ? `At <strong>${fc(gpus)} GPUs</strong>, mixed workload MFU is modeled at <strong>${mfuPct}%</strong>. ${mfuCtx}`
+    : `At <strong>${fc(gpus)} GPUs</strong>, training MFU is modeled at <strong>${mfuPct}%</strong>. ${mfuCtx}`;
+
+  // Build smaller inline chart wrappers for the side-by-side layout
+  const mfuSvg = buildMfuSVG(m2SelChip, gpus, m2Wl, m2ModelB);
+  const paretSvg = buildInfParetoSVG(m2SelChip, m2ModelB);
+
+  const wlButtons = ['train','infer','mix'].map(v =>
+    `<button class="wl-btn${m2Wl===v?' active':''}" onclick="selectWl('${v}')">${v==='train'?'Training':v==='infer'?'Inference':'Mixed'}</button>`
+  ).join('');
+  const modelButtons = [7, 70, 405].map(v =>
+    `<button class="wl-btn${m2ModelB===v?' active':''}" onclick="selectModelB(${v})">${v}B</button>`
+  ).join('');
+
+  return `<div class="explore-section" id="exp-sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">PERFORMANCE</div>
+        <div class="section-sub">What it will actually do</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--t3)">Workload:</span>
+        <div class="wl-toggle">${wlButtons}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--t3)">Model size:</span>
+        <div class="wl-toggle">${modelButtons}</div>
+      </div>
+    </div>
+    <div class="rsec-text" style="margin-bottom:14px"><p>${perfNarrative}</p></div>
+    <div class="charts-row">
+      <div>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px">MFU vs Cluster Scale</div>
+        ${mfuSvg}
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px">Inference Pareto — tokens/sec/user vs tokens/sec/MW</div>
+        ${paretSvg}
+      </div>
+    </div>
+    <div class="dsx-collapsible" id="dsx-collapsible">
+      <div class="dsx-header" onclick="document.getElementById('dsx-collapsible').classList.toggle('open')">
+        NVIDIA DSX Compatibility
+        <span style="font-size:10px">▾</span>
+      </div>
+      <div class="dsx-body">
+        ${buildDSXCheck(m2SelChip, d.poi_voltage, pue, d.power_factor, d.service_type, d.climate)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSection4(d, pue) {
+  const c = CHIPS[m2SelChip];
+  const itMW = d.confirmed_mw / pue;
+
+  // Add BESS/generator capex if interruptible
+  let extraCapex = 0;
+  if (d.service_type === 'interruptible') {
+    extraCapex += itMW * 0.25 * 500000; // BESS
+    extraCapex += itMW * 0.33 * 1000000; // generators
+  }
+
+  const fin = calcFinancials(d.confirmed_mw, m2SelChip, m2Wl, m2GpuRate, m2PwrCost, m2DiscR, d.ebitdaMult, d.upgrade_cost_est + extraCapex, d.climate);
+  const pnlRows = fin.mdl.slice(0, 8);
+
+  return `<div class="explore-section" id="exp-sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">ECONOMICS</div>
+        <div class="section-sub">Do the numbers work?</div>
+      </div>
+    </div>
+    <div class="inline-input-group">
+      <div class="inline-input-wrap">
+        <label>GPU rate</label>
+        <span style="font-size:11px;color:var(--t3)">$</span>
+        <input type="number" value="${m2GpuRate.toFixed(2)}" min="0.5" max="30" step="0.25"
+          oninput="m2GpuRate=parseFloat(this.value)||3;reRenderEcon()" style="width:70px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:13px;font-weight:600;color:var(--v);text-align:right">
+        <span style="font-size:11px;color:var(--t3)">/GPU/hr</span>
+      </div>
+      <div class="inline-input-wrap">
+        <label>Power cost</label>
+        <span style="font-size:11px;color:var(--t3)">$</span>
+        <input type="number" value="${m2PwrCost.toFixed(3)}" min="0.01" max="0.15" step="0.005"
+          oninput="m2PwrCost=parseFloat(this.value)||0.05;reRenderEcon()" style="width:70px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:13px;font-weight:600;color:var(--v);text-align:right">
+        <span style="font-size:11px;color:var(--t3)">/kWh</span>
+      </div>
+      <div class="inline-input-wrap">
+        <label>Discount rate</label>
+        <input type="number" value="${Math.round(m2DiscR*100)}" min="5" max="25"
+          oninput="m2DiscR=(parseFloat(this.value)||10)/100;reRenderEcon()" style="width:55px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:13px;font-weight:600;color:var(--v);text-align:right">
+        <span style="font-size:11px;color:var(--t3)">%</span>
+      </div>
+    </div>
+    <div id="econ-metrics" class="metrics-row metrics-4" style="margin-bottom:16px">
+      <div class="metric-cell">
+        <div class="metric-val${fin.npv>0?' v-blue':''}">${fm(fin.npv)}</div>
+        <div class="metric-label">10-yr NPV</div>
+        <div class="metric-sub">Full operator</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'}</div>
+        <div class="metric-label">IRR</div>
+        <div class="metric-sub">Unlevered</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val${fin.y5ebitda>0?' v-blue':''}">${fm(fin.y5ebitda)}</div>
+        <div class="metric-label">Yr5 EBITDA</div>
+        <div class="metric-sub">${fin.y5ebitda>0&&fin.gpuRevYr>0?(fin.y5ebitda/fin.gpuRevYr*100).toFixed(0)+'% margin':''}</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${fm(fin.facCapex)}</div>
+        <div class="metric-label">Total CapEx</div>
+        <div class="metric-sub">Facility incl. upgrades${d.service_type==='interruptible'?' + gen/BESS':''}</div>
+      </div>
+    </div>
+    <table class="pnl-table">
+      <thead>
+        <tr>
+          <th>Year</th><th>GPUs</th><th>Revenue</th><th>Power + Opex</th><th>EBITDA</th><th>CapEx</th><th>FCF</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pnlRows.map(r=>`
+        <tr class="${r.y===5?'highlight-row':''}">
+          <td>${r.y===0?'Y0 (construction)':r.live?'Year '+r.y:'Year '+r.y+' ⏳'}</td>
+          <td>${r.live?fc(fin.gpus):'—'}</td>
+          <td class="${r.rev>0?'pnl-pos':''}">${r.rev>0?fm(r.rev):'—'}</td>
+          <td class="${r.op>0?'pnl-dim':''}">${r.op>0?fm(-r.op):'—'}</td>
+          <td class="${r.ebt>0?'pnl-pos':r.ebt<0?'pnl-neg':''}">${r.rev>0?fm(r.ebt):'—'}</td>
+          <td class="${r.cap>0?'pnl-neg':''}">${r.cap>0?fm(-r.cap):'—'}</td>
+          <td class="${r.fcf>0?'pnl-pos':r.fcf<0?'pnl-neg':''}">${fm(r.fcf)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderSection5(d, pue) {
+  const c = CHIPS[m2SelChip];
+  const itMW = d.confirmed_mw / pue;
+  const racks = Math.floor(itMW * 1000 / c.kw);
+  const pods = Math.ceil(racks / 16);
+
+  const bom = [];
+  if (d.service_type === 'interruptible') {
+    bom.push({qty: Math.max(1, Math.ceil(itMW/4)), item: 'BESS (grid-scale)', spec: `~${(itMW/4).toFixed(0)} MWh · 15-min full IT load ride-through · Li-ion`, lead: '20–30 wks', crit: true});
+    bom.push({qty: Math.max(1, Math.round(itMW/3)), item: 'Standby generators (continuous)', spec: `~${(itMW/3).toFixed(1)} MW per unit · 24-hr fuel storage · ISO 8528`, lead: '20–28 wks', crit: true});
+  }
+  bom.push(
+    {qty: Math.max(1, Math.round(pods*1.5)), item: 'Power transformers', spec: `3.15 MVA cast-resin IEC 60076-11 · step-down from ${d.poi_voltage} kV`, lead: '52–78 wks', crit: true},
+    {qty: pods, item: `CDUs (${c.cool})`, spec: `Tier 1 CDU · 1,200–1,350 kW · 1,600–1,800 L/min`, lead: '10–16 wks', crit: false},
+    {qty: pods, item: 'Trim coolers / dry coolers', spec: 'Up to 3 MW per unit · free cooling capable', lead: '14–22 wks', crit: false},
+    {qty: Math.max(1, Math.round(itMW/5)), item: 'MV switchgear', spec: `SF6-free · ${d.poi_voltage} kV / 15 kV`, lead: '78–130 wks', crit: true},
+    {qty: Math.max(1, Math.round(pods*.75)), item: 'UPS modules', spec: '2.5–3.0 MW · Li-ion · 5-min ride-through', lead: '16–24 wks', crit: false},
+    {qty: Math.max(1, Math.round(itMW/5)), item: 'Standby generators', spec: '~3 MW · ISO 8528 · 24-hr fuel', lead: '20–28 wks', crit: false},
+    {qty: Math.max(1, Math.ceil(racks/32)), item: 'IB spine switches', spec: '800G NVIDIA Quantum-X / InfiniBand HDR', lead: '12–20 wks', crit: false},
+    {qty: racks, item: `GPU racks (${c.n})`, spec: `${c.g} GPUs/rack · ${c.kw_max} kW max · ${c.cool} required`, lead: 'Per allocation · 12–14 mo', crit: true}
+  );
+
+  const critPath = `The MV switchgear at 78–130 weeks and transformer procurement at 52–78 weeks are the critical path items driving ${d.cod_target} COD. GPU rack delivery is also gating but can be parallelized once allocation is locked. CDUs and trim coolers are not on the critical path at standard lead times. ${d.utility} upgrade commitment must be confirmed within 30 days of LOI to avoid COD slippage.`;
+
+  return `<div class="explore-section" id="exp-sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">PATH TO BUILD</div>
+        <div class="section-sub">Equipment &amp; critical path</div>
+      </div>
+    </div>
+    <table class="bom-table">
+      <thead>
+        <tr><th>Qty</th><th>Item</th><th>Spec</th><th>Lead Time</th><th>Critical Path</th></tr>
+      </thead>
+      <tbody>
+        ${bom.map(b=>`
+        <tr>
+          <td class="bom-qty">${b.qty}</td>
+          <td style="font-weight:600;color:var(--t1)">${b.item}</td>
+          <td style="color:var(--t3);font-size:11px">${b.spec}</td>
+          <td class="bom-lead">${b.lead}</td>
+          <td class="${b.crit?'bom-crit':''}" style="font-size:11px">${b.crit?'● CRITICAL PATH':'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="rsec-text" style="margin-top:12px"><p>${critPath}</p></div>
+    <div style="margin-top:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px">Open Items Before Off-Taker LOI</div>
+      <ul class="open-items">
+        <li>Power quality report — THD, voltage sag, fault ride-through from ${d.utility}</li>
+        <li>MFU calibration — actual cluster telemetry vs. modeled (requires chip team)</li>
+        <li>CDU transient data — checkpoint spike validation under AI training load (Vertiv)</li>
+        <li>GPU allocation — confirm ${racks} racks of ${c.n} available for ${d.cod_target}</li>
+        <li>Off-taker LOI — align SLA structure with MFU ramp timeline (90-day ramp exclusion)</li>
+      </ul>
+    </div>
+  </div>`;
+}
+
+function renderExploration() {
+  const d = getM2Data();
+  const pue = getPUE(d.climate);
+  const c = CHIPS[m2SelChip];
+  const itMW = d.confirmed_mw / pue;
+  const racks = Math.floor(itMW * 1000 / c.kw);
+  const gpus = racks * c.g;
+
+  const climLabels = {cold_dry:'Cold/Dry',temperate:'Temperate',hot_dry:'Hot/Dry',hot_humid:'Hot/Humid'};
+  const wlLabels = {train:'Training',infer:'Inference',mix:'Mixed'};
+
+  const generateSummary = `${c.n} · ${d.confirmed_mw} MW · ${climLabels[d.climate]||d.climate} · ${wlLabels[m2Wl]||m2Wl}`;
+
+  return `<div id="explore-workspace" style="max-width:820px;margin:0 auto">
+    ${renderSection1(d, pue)}
+    ${renderSection2(d, pue)}
+    ${renderSection3(d, pue)}
+    ${renderSection4(d, pue)}
+    ${renderSection5(d, pue)}
+    <div class="generate-bar">
+      <div class="generate-summary">${generateSummary}</div>
+      <button class="generate-btn" onclick="generateReport()">Generate Report →</button>
+    </div>
+  </div>`;
+}
+
+// ─── MODE 2: EXPLORATION INTERACTION ────────────────────────────────────────────
+function selectChip(k) {
+  m2SelChip = k;
+  // sync left panel dropdown if custom mode
+  const sel = document.getElementById('m2-chip');
+  if (sel) sel.value = k;
+  // re-render sections 2-5
+  const d = getM2Data();
+  const pue = getPUE(d.climate);
+  const sec2 = document.getElementById('exp-sec2');
+  if (sec2) sec2.outerHTML = renderSection2(d, pue);
+  const sec3 = document.getElementById('exp-sec3');
+  if (sec3) sec3.outerHTML = renderSection3(d, pue);
+  const sec4 = document.getElementById('exp-sec4');
+  if (sec4) sec4.outerHTML = renderSection4(d, pue);
+  const sec5 = document.getElementById('exp-sec5');
+  if (sec5) sec5.outerHTML = renderSection5(d, pue);
+}
+
+function selectWl(v) {
+  m2Wl = v;
+  const sel = document.getElementById('m2-wl');
+  if (sel) sel.value = v;
+  const d = getM2Data();
+  const pue = getPUE(d.climate);
+  const sec3 = document.getElementById('exp-sec3');
+  if (sec3) sec3.outerHTML = renderSection3(d, pue);
+  const sec4 = document.getElementById('exp-sec4');
+  if (sec4) sec4.outerHTML = renderSection4(d, pue);
+  const sec5 = document.getElementById('exp-sec5');
+  if (sec5) sec5.outerHTML = renderSection5(d, pue);
+}
+
+function selectModelB(v) {
+  m2ModelB = v;
+  const d = getM2Data();
+  const pue = getPUE(d.climate);
+  const sec3 = document.getElementById('exp-sec3');
+  if (sec3) sec3.outerHTML = renderSection3(d, pue);
+}
+
+function reRenderEcon() {
+  const d = getM2Data();
+  const pue = getPUE(d.climate);
+  const sec4 = document.getElementById('exp-sec4');
+  if (sec4) sec4.outerHTML = renderSection4(d, pue);
+}
+
+// ─── MODE 2: GENERATE REPORT ─────────────────────────────────────────────────────
+function encodeStateToHash(d) {
+  const params = new URLSearchParams({
+    mode: '2',
+    chip: d.chip,
+    mw: d.confirmed_mw,
+    volt: d.poi_voltage,
+    service: d.service_type,
+    pf: d.power_factor,
+    upg: Math.round(d.upgrade_cost_est/1e6),
+    upgmo: d.upgrade_timeline_mo,
+    explimit: d.violation_mw,
+    climate: d.climate,
+    wl: d.wl,
+    rate: d.gpuRate,
+    pwr: d.pwrCost,
+    disc: Math.round(d.discR*100),
+    demo: usingDemo ? '1' : '0'
+  });
+  window.location.hash = params.toString();
+}
+
+function generateReport() {
+  const d = getM2Data();
+  m2InExplore = false;
+
+  const explore = document.getElementById('explore-workspace');
+  if (explore) explore.style.display = 'none';
+
+  let reportEl = document.getElementById('m2-report-state');
+  if (!reportEl) {
+    // Create it if not present (shouldn't happen but guard anyway)
+    const reportWrap = document.createElement('div');
+    reportWrap.id = 'm2-report-state';
+    document.getElementById('report').appendChild(reportWrap);
+    reportEl = reportWrap;
+  }
+  reportEl.style.display = '';
+  reportEl.innerHTML = buildM2ReportHTML(d);
+
+  encodeStateToHash(d);
+}
+
+function buildM2ReportHTML(d) {
+  const shareUrl = window.location.href.split('#')[0] + window.location.hash;
+  const reportContent = renderMode2FromData(d);
+  return `<div class="explore-report-header">
+    <button class="back-btn" onclick="backToExplore()">← Edit</button>
+  </div>
+  <div class="share-bar">
+    <div class="share-url" id="share-url">${shareUrl}</div>
+    <button onclick="copyShareLink()">Copy link</button>
+    <button onclick="window.print()">Download PDF</button>
+  </div>
+  ${reportContent}`;
+}
+
+function copyShareLink() {
+  const url = document.getElementById('share-url');
+  if (url) {
+    navigator.clipboard.writeText(url.textContent).then(() => {
+      const btn = url.nextElementSibling;
+      if (btn) { const prev = btn.textContent; btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent=prev, 1500); }
+    }).catch(() => {
+      const range = document.createRange();
+      range.selectNode(url);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+  }
+}
+
+function backToExplore() {
+  m2InExplore = true;
+  history.replaceState(null, '', window.location.pathname);
+  // Re-render mode 2 fresh so explore workspace is shown
+  renderReport();
+}
+
+// ─── MODE 2: REPORT RENDERER USING DATA OBJECT ──────────────────────────────────
+function renderMode2FromData(d) {
+  const c = CHIPS[d.chip];
+  const pue = getPUE(d.climate);
+  const itMW = d.confirmed_mw / pue;
+  const racks = Math.floor(itMW*1000/c.kw);
+  const gpus = racks*c.g;
+  const mfu = getMFU(d.chip, gpus, 70, d.wl);
+  const mfuPct = (mfu*100).toFixed(0);
+  const sizeDesc = gpus<5000?'small training':gpus<20000?'mid-scale':gpus<50000?'large-scale':'hyperscale';
+
+  const mfuCtx = mfu>=.55
+    ? 'This is within the high-end range for production training clusters. Expect to reach this within 2–3 months of first-run optimization.'
+    : mfu>=.45
+    ? 'This is typical for large-scale GPU clusters after 3–6 months of software tuning. Budget for the ramp period.'
+    : mfu>=.35
+    ? `This is below the number vendors quote, but consistent with what operators actually report at this scale. Industry benchmarks show large training clusters typically launch at 20–35% MFU before deliberate infrastructure and software co-optimization — reaching ${mfuPct}% requires that effort. Plan for a 3–6 month ramp period post-energization.`
+    : `At ${fc(gpus)} GPUs, all-reduce communication overhead is the dominant constraint on training efficiency. This is a known limitation at hyperscale — no amount of software optimization fully closes the gap. The business model at this scale depends on inference revenue (higher MFU) to offset training-phase inefficiency.`;
+
+  let voltReasoning;
+  if ((d.chip==='GB300'||d.chip==='GB200') && d.poi_voltage>=230) {
+    voltReasoning = `The ${d.poi_voltage} kV delivery voltage with step-down to 415V AC aligns with ${c.n}'s rack power architecture — no additional transformation stage required beyond the site substation.`;
+  } else {
+    voltReasoning = `Standard 480V AC power architecture. Step-down from ${d.poi_voltage} kV through customer substation to 480V distribution — conventional design, no complications.`;
+  }
+
+  let coolReasoning;
+  if (d.climate==='hot_dry') {
+    coolReasoning = `Hot/dry climate makes evaporative cooling efficient during low-humidity periods but limits free cooling availability. CDU with trim cooler recommended — this gives free cooling when ambient allows (estimated 42% of hours annually) with mechanical backup for peak summer conditions.`;
+  } else if (d.climate==='temperate') {
+    coolReasoning = `Temperate climate is the most favorable for liquid cooling. CDU with trim cooler gives free cooling approximately 62% of annual hours — PUE of ${pue.toFixed(2)} is achievable without mechanical chillers.`;
+  } else if (d.climate==='cold_dry') {
+    coolReasoning = `Cold/dry climate enables high free cooling availability — approximately 88% of annual hours. CDU with trim cooler achieves PUE below 1.10 in this climate. Freeze protection must be designed into the secondary loop.`;
+  } else {
+    coolReasoning = `Hot/humid climate is the most challenging for cooling. CDU with hybrid system (trim + mechanical assist) recommended — evaporative cooling loses effectiveness at high wet-bulb. PUE ${pue.toFixed(2)}–${(pue+0.04).toFixed(2)} expected.`;
+  }
+
+  const infMfu = getMFU(d.chip, gpus, 70, 'infer');
+  const infMfuPct = (infMfu*100).toFixed(0);
+  const tokensPerSecMW = Math.round(c.tf * infMfu * 0.3 / itMW * 1000);
+
+  let powerConfirmed = `The ${d.utility} ${d.study_type} confirms ${d.confirmed_mw} MW at the ${d.poi_voltage} kV POI with no thermal or voltage violations under P0–P7 contingency scenarios. The same campus at ${d.violation_mw} MW creates a ${d.violation_desc.toLowerCase()} — the expansion path above ${d.max_clean_mw} MW requires a new independent ${d.poi_voltage} kV circuit and a separate transmission study before commitment. Power factor is confirmed at ${d.power_factor} — no reactive compensation equipment required for the proposed GPU deployment. Service is ${d.service_type}.`;
+  if (d.service_type==='interruptible') {
+    powerConfirmed += ` NOTE: Interruptible service means the utility can curtail your load during peak events with no notice. This is a hard design requirement — standby generation or BESS must be sized to carry full IT load independently. This is not optional for a GPU training cluster.`;
+  }
+
+  const designAdvisory = `At ${d.confirmed_mw} MW with a PUE of ${pue.toFixed(2)} for ${d.climate.replace('_','/')} climate, ${itMW.toFixed(1)} MW of IT capacity supports ${racks} ${c.n} racks at ${c.kw} kW each — a ${sizeDesc} cluster of ${fc(gpus)} GPUs. ${voltReasoning} ${coolReasoning}`;
+
+  // Add interruptible capex extras in report financials
+  let extraCapex = 0;
+  if (d.service_type === 'interruptible') {
+    extraCapex += itMW * 0.25 * 500000;
+    extraCapex += itMW * 0.33 * 1000000;
+  }
+  const fin = calcFinancials(d.confirmed_mw, d.chip, d.wl, d.gpuRate, d.pwrCost, d.discR, d.ebitdaMult, d.upgrade_cost_est + extraCapex, d.climate);
+
+  const pods = Math.ceil(racks/16);
+  const bom = [];
+  if (d.service_type === 'interruptible') {
+    bom.push({qty: Math.max(1, Math.ceil(itMW/4)), item: 'BESS (grid-scale)', spec: `~${(itMW/4).toFixed(0)} MWh · 15-min full IT load ride-through · Li-ion`, lead: '20–30 wks', crit: true});
+    bom.push({qty: Math.max(1, Math.round(itMW/3)), item: 'Standby generators (continuous)', spec: `~${(itMW/3).toFixed(1)} MW per unit · 24-hr fuel storage · ISO 8528`, lead: '20–28 wks', crit: true});
+  }
+  bom.push(
+    {qty:Math.max(1,Math.round(pods*1.5)),item:'Power transformers',spec:`3.15 MVA cast-resin IEC 60076-11 · step-down from ${d.poi_voltage} kV`,lead:'52–78 wks',crit:true},
+    {qty:pods,item:`CDUs (${c.cool})`,spec:`Tier 1 CDU · 1,200–1,350 kW · 1,600–1,800 L/min`,lead:'10–16 wks',crit:false},
+    {qty:pods,item:'Trim coolers / dry coolers',spec:'Up to 3 MW per unit · free cooling capable',lead:'14–22 wks',crit:false},
+    {qty:Math.max(1,Math.round(itMW/5)),item:'MV switchgear',spec:`SF6-free · ${d.poi_voltage} kV / 15 kV`,lead:'78–130 wks',crit:true},
+    {qty:Math.max(1,Math.round(pods*.75)),item:'UPS modules',spec:'2.5–3.0 MW · Li-ion · 5-min ride-through',lead:'16–24 wks',crit:false},
+    {qty:Math.max(1,Math.round(itMW/5)),item:'Standby generators',spec:'~3 MW · ISO 8528 · 24-hr fuel',lead:'20–28 wks',crit:false},
+    {qty:Math.max(1,Math.ceil(racks/32)),item:'IB spine switches',spec:'800G NVIDIA Quantum-X / InfiniBand HDR',lead:'12–20 wks',crit:false},
+    {qty:racks,item:`GPU racks (${c.n})`,spec:`${c.g} GPUs/rack · ${c.kw_max} kW max · ${c.cool} required`,lead:'Per allocation · 12–14 mo',crit:true}
+  );
+
+  const expansionLikelihood = d.violation_mw < d.confirmed_mw*2 ? 'High' : 'Medium';
+  const risks = [
+    {risk:'Expansion ceiling hard stop',likelihood:expansionLikelihood,impact:'High',mitigation:`Do not sign off-taker leases with expansion commitments above ${d.max_clean_mw} MW. Conduct separate transmission study before marketing Phase 2.`},
+    {risk:'GPU allocation lead time',likelihood:'Medium',impact:'High',mitigation:`GB300/H200 lead times are 10–14 months. At ${racks} racks, commit GPU allocation within 30 days of LOI signing to align with ${d.cod_target} COD.`},
+    {risk:'CDU transient under training load',likelihood:'Medium',impact:'Medium',mitigation:`Published CDU specs are steady-state. Training workloads produce checkpoint spikes (10–30 second surges to 130%+ nominal). Validate with your CDU vendor under AI training load profile before commissioning — standard spec sheets do not cover this condition.`},
+    d.service_type==='interruptible'
+      ? {risk:'Non-firm power — curtailment risk',likelihood:'Medium',impact:'High',mitigation:'Size standby generation to carry 100% of IT load. BESS alone is insufficient for extended curtailment events. This is a non-negotiable design requirement.'}
+      : {risk:'MFU ramp timeline',likelihood:'High',impact:'Medium',mitigation:'First 90 days of cluster operation will see significantly lower MFU than steady-state model. Stagger off-taker revenue commitments to avoid SLA exposure during ramp-up.'},
+    {risk:'Upgrade timeline slippage',likelihood:'Medium',impact:'High',mitigation:`The ${fm(d.upgrade_cost_est)} upgrade at ${d.utility} is on the critical path to COD ${d.cod_target}. Transformer procurement alone is 12–18 months. Engage ${d.utility} engineering immediately post-LOI and confirm upgrade slot.`},
+  ];
+
+  const pnlRows = fin.mdl.slice(0, 8);
+  const critPath = `The MV switchgear at 78–130 weeks and transformer procurement at 52–78 weeks are the critical path items driving ${d.cod_target} COD. GPU rack delivery is also gating but can be parallelized once allocation is locked. CDUs and trim coolers are not on the critical path at standard lead times. ${d.utility} upgrade commitment must be confirmed within 30 days of LOI to avoid COD slippage.`;
+  const lhClass = l => l==='High'?'high':l==='Medium'?'med':'low';
+
+  return `
+<div class="report-doc">
+  <div class="report-header">
+    <span class="report-mode-label">Design Intelligence Report</span>
+    <span class="report-badge badge-verified">STUDY-VERIFIED</span>
+  </div>
+  <div class="report-title">${d.name}</div>
+  <div class="report-subtitle">${d.study_type} &nbsp;·&nbsp; ${d.utility} &nbsp;·&nbsp; ${d.study_date}</div>
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">1. Power Confirmed</div>
+    <div class="rsec-text"><p>${powerConfirmed}</p></div>
+    <table class="findings-table" style="margin-top:14px">
+      <tr><td>Confirmed MW at POI</td><td>${d.confirmed_mw} MW — <span style="color:var(--ok);font-weight:600">CONFIRMED</span></td></tr>
+      <tr><td>Point of interconnection</td><td>${d.poi_desc}</td></tr>
+      <tr><td>Service type</td><td>${d.service_type==='firm'?'<span style="color:var(--ok)">Firm</span>':'<span style="color:var(--risk)">Non-firm (interruptible)</span>'}</td></tr>
+      <tr><td>Power factor</td><td>${d.power_factor} — no reactive compensation required</td></tr>
+      <tr><td>Required upgrade</td><td>${d.upgrade_required}</td></tr>
+      <tr><td>Upgrade cost estimate</td><td>${fm(d.upgrade_cost_est)}</td></tr>
+      <tr><td>Upgrade timeline</td><td>${d.upgrade_timeline_mo} months</td></tr>
+      <tr><td>Expansion ceiling</td><td>${d.max_clean_mw} MW clean · <span style="color:var(--risk)">${d.violation_mw} MW first violation</span></td></tr>
+      <tr><td>Target COD</td><td>${d.cod_target}</td></tr>
+    </table>
+    ${d.violation_mw < d.confirmed_mw*2 ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:10px 14px;margin-top:12px;font-size:12px;color:#7f1d1d"><strong>Expansion ceiling flag:</strong> ${d.violation_desc} Expansion above ${d.max_clean_mw} MW requires a separate transmission study. Do not make Phase 2 commitments before that study is complete.</div>` : ''}
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">2. Recommended Design</div>
+    <div class="rsec-text"><p>${designAdvisory}</p></div>
+    <div class="metrics-row metrics-4" style="margin-top:14px">
+      <div class="metric-cell">
+        <div class="metric-val v-blue">${fc(gpus)}</div>
+        <div class="metric-label">GPUs</div>
+        <div class="metric-sub">${racks} racks · ${c.g}/rack</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${itMW.toFixed(1)} MW</div>
+        <div class="metric-label">IT Load</div>
+        <div class="metric-sub">PUE ${pue.toFixed(2)} · ${d.climate.replace('_','/')}</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${c.kw} kW</div>
+        <div class="metric-label">Per Rack</div>
+        <div class="metric-sub">${c.n.split(' ').pop()}</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${c.cool}</div>
+        <div class="metric-label">Cooling</div>
+        <div class="metric-sub">+ trim cooler HR</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rsec" style="margin-top:18px">
+    <div class="rsec-label" style="margin-bottom:10px">Why ${c.n}?</div>
+    <div class="rsec-text" style="margin-bottom:12px">${buildChipRationale(d.chip, d.poi_voltage, d.climate, d.wl)}</div>
+    <div class="rsec-label" style="margin-bottom:10px">Alternatives at this site</div>
+    ${buildAlternativesTable(d.chip, d.confirmed_mw, d.climate, d.wl, d.poi_voltage)}
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">3. Performance Projection</div>
+    <div class="rsec-text">
+      <p>At <span class="hi-blue">${fc(gpus)} GPUs</span> — a <strong>${sizeDesc}</strong> cluster — training MFU is modeled at <span class="hi-blue">${mfuPct}%</span>. ${mfuCtx}</p>
+      <p>For inference workloads, ${c.n}'s ${c.hbm} TB/s HBM bandwidth profile produces more favorable efficiency: inference MFU modeled at <span class="hi-blue">${infMfuPct}%</span>, meaning approximately ${fc(tokensPerSecMW)} tokens/sec/MW at optimal batch size.</p>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px">Training MFU vs. Cluster Scale — ${c.n}</div>
+      ${buildMfuSVG(d.chip, gpus, d.wl, 70)}
+    </div>
+    <div style="margin-top:20px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px">Inference Pareto — tokens/sec/user vs tokens/sec/MW · 70B model · all chips</div>
+      ${buildInfParetoSVG(d.chip, 70)}
+    </div>
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">NVIDIA DSX Compatibility</div>
+    <div class="rsec-text" style="margin-bottom:12px"><p>DSX (Data Center Solution Exchange) is NVIDIA's reference architecture for GPU compute deployments. The checks below validate that this design meets DSX requirements — deviations require design changes before NVIDIA-supported deployment.</p></div>
+    ${buildDSXCheck(d.chip, d.poi_voltage, pue, d.power_factor, d.service_type, d.climate)}
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">4. Equipment &amp; Critical Path</div>
+    <table class="bom-table">
+      <thead>
+        <tr><th>Qty</th><th>Item</th><th>Spec</th><th>Lead Time</th><th>Critical Path</th></tr>
+      </thead>
+      <tbody>
+        ${bom.map(b=>`
+        <tr>
+          <td class="bom-qty">${b.qty}</td>
+          <td style="font-weight:600;color:var(--t1)">${b.item}</td>
+          <td style="color:var(--t3);font-size:11px">${b.spec}</td>
+          <td class="bom-lead">${b.lead}</td>
+          <td class="${b.crit?'bom-crit':''}" style="font-size:11px">${b.crit?'● CRITICAL PATH':'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="rsec-text" style="margin-top:12px"><p>${critPath}</p></div>
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">5. Financial Model</div>
+    <div class="metrics-row metrics-4" style="margin-bottom:16px">
+      <div class="metric-cell">
+        <div class="metric-val${fin.npv>0?' v-blue':''}">${fm(fin.npv)}</div>
+        <div class="metric-label">10-yr NPV</div>
+        <div class="metric-sub">Full operator</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'}</div>
+        <div class="metric-label">IRR</div>
+        <div class="metric-sub">Unlevered</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val${fin.y5ebitda>0?' v-blue':''}">${fm(fin.y5ebitda)}</div>
+        <div class="metric-label">Year 5 EBITDA</div>
+        <div class="metric-sub">${fin.y5ebitda>0&&fin.gpuRevYr>0?(fin.y5ebitda/fin.gpuRevYr*100).toFixed(0)+'% margin':''}</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${fm(fin.facCapex)}</div>
+        <div class="metric-label">Total CapEx</div>
+        <div class="metric-sub">Facility incl. upgrades</div>
+      </div>
+    </div>
+    <div class="rsec-text" style="margin-bottom:14px">
+      <p>The economics at <span class="hi-blue">${fc(fin.gpus)} GPUs</span> are driven by GPU utilization rate and lease duration — a 10% drop in utilization from 80% to 70% reduces revenue by ~$${((fin.gpuRevYr||0)*0.10/1e6).toFixed(1)}M/yr. The upgrade cost of ${fm(d.upgrade_cost_est)} is front-loaded; at ${d.upgrade_timeline_mo} months it clears before commercial operations. Power cost at $${d.pwrCost.toFixed(3)}/kWh is the primary variable opex driver — every $0.01/kWh change moves annual EBITDA by approximately ${fm(d.confirmed_mw*1000*8760*0.88*0.01)}.</p>
+    </div>
+    <table class="pnl-table">
+      <thead>
+        <tr>
+          <th>Year</th><th>GPUs</th><th>Revenue</th><th>Power + Opex</th><th>EBITDA</th><th>CapEx</th><th>FCF</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pnlRows.map(r=>`
+        <tr class="${r.y===5?'highlight-row':''}">
+          <td>${r.y===0?'Y0 (construction)':r.live?'Year '+r.y:'Year '+r.y+' ⏳'}</td>
+          <td>${r.live?fc(fin.gpus):'—'}</td>
+          <td class="${r.rev>0?'pnl-pos':''}">${r.rev>0?fm(r.rev):'—'}</td>
+          <td class="${r.op>0?'pnl-dim':''}">${r.op>0?fm(-r.op):'—'}</td>
+          <td class="${r.ebt>0?'pnl-pos':r.ebt<0?'pnl-neg':''}">${r.rev>0?fm(r.ebt):'—'}</td>
+          <td class="${r.cap>0?'pnl-neg':''}">${r.cap>0?fm(-r.cap):'—'}</td>
+          <td class="${r.fcf>0?'pnl-pos':r.fcf<0?'pnl-neg':''}">${fm(r.fcf)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">6. Risk Matrix</div>
+    <table class="risk-table">
+      <thead>
+        <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+      </thead>
+      <tbody>
+        ${risks.map(r=>`
+        <tr>
+          <td>${r.risk}</td>
+          <td><span class="risk-pill ${lhClass(r.likelihood)}">${r.likelihood}</span></td>
+          <td><span class="risk-pill ${lhClass(r.impact)}">${r.impact}</span></td>
+          <td style="color:var(--t2)">${r.mitigation}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="report-divider">
+
+  <div class="rsec">
+    <div class="rsec-label">7. Off-Taker Spec Sheet</div>
+    <div class="spec-section">
+      <div class="spec-section-title">Site</div>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-item-val">${d.location}</div><div class="spec-item-label">Location</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.utility}</div><div class="spec-item-label">Utility</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.confirmed_mw} MW</div><div class="spec-item-label">Confirmed grid power</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.poi_voltage} kV</div><div class="spec-item-label">POI voltage</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.service_type==='firm'?'Firm':'Interruptible'}</div><div class="spec-item-label">Service type</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.cod_target}</div><div class="spec-item-label">Target COD</div></div>
+      </div>
+    </div>
+    <div class="spec-section">
+      <div class="spec-section-title">Compute</div>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-item-val">${fc(gpus)}</div><div class="spec-item-label">Total GPUs · ${c.n}</div></div>
+        <div class="spec-item"><div class="spec-item-val">${racks} racks</div><div class="spec-item-label">${c.g}/rack · ${c.kw} kW/rack</div></div>
+        <div class="spec-item"><div class="spec-item-val">${itMW.toFixed(1)} MW</div><div class="spec-item-label">IT load · PUE ${pue.toFixed(2)}</div></div>
+        <div class="spec-item"><div class="spec-item-val">${mfuPct}%</div><div class="spec-item-label">Modeled training MFU</div></div>
+      </div>
+    </div>
+    <div class="spec-section">
+      <div class="spec-section-title">Power</div>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-item-val">${c.volt==='dc800'?'800V DC':'480V AC'}</div><div class="spec-item-label">Rack power architecture</div></div>
+        <div class="spec-item"><div class="spec-item-val">${c.cool}</div><div class="spec-item-label">Cooling approach</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.power_factor}</div><div class="spec-item-label">Confirmed power factor</div></div>
+        <div class="spec-item"><div class="spec-item-val">${d.service_type==='interruptible'?'Interruptible':'Firm'}</div><div class="spec-item-label">Interruptible flag</div></div>
+      </div>
+    </div>
+    <div class="spec-section">
+      <div class="spec-section-title">Commercial</div>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-item-val">$${d.gpuRate.toFixed(2)}/GPU-hr</div><div class="spec-item-label">Indicated GPU rate</div></div>
+        <div class="spec-item"><div class="spec-item-val">${fm(fin.gpuRevYr)}/yr</div><div class="spec-item-label">Indicative revenue (80% util.)</div></div>
+        <div class="spec-item"><div class="spec-item-val">${fm(fin.facCapex)}</div><div class="spec-item-label">Facility CapEx</div></div>
+        <div class="spec-item"><div class="spec-item-val">${fm(fin.npv)}</div><div class="spec-item-label">10-yr NPV</div></div>
+      </div>
+    </div>
+    <div class="spec-section">
+      <div class="spec-section-title">Open Items Before Off-Taker LOI</div>
+      <ul class="open-items">
+        <li>Power quality report — THD, voltage sag, fault ride-through from ${d.utility}</li>
+        <li>MFU calibration — actual cluster telemetry vs. modeled ${mfuPct}% (requires chip team)</li>
+        <li>CDU transient data — checkpoint spike validation under AI training load (Vertiv)</li>
+        <li>GPU allocation — confirm ${racks} racks of ${c.n} available for ${d.cod_target}</li>
+        <li>Off-taker LOI — align SLA structure with MFU ramp timeline (90-day ramp exclusion)</li>
+      </ul>
+    </div>
+    <div class="conf-stamp">
+      STUDY-VERIFIED — Based on ${d.utility} ${d.study_type} ${d.study_date}<br>
+      Prepared by Voltai · Meridian DC Intelligence · ${today()}
+    </div>
+  </div>
+
+  <div class="report-footer">
+    Prepared by Voltai · Meridian DC Intelligence<br>
+    This report is based on ${d.utility} ${d.study_type} findings and Voltai's analytical models. It is a pre-engineering evaluation, not a construction specification. All financial projections are modeled estimates subject to change.
+  </div>
+</div>`;
+}
+
 // ─── MAIN RENDER ───────────────────────────────────────────────────────────────
 function renderReport() {
   const el = document.getElementById('report');
@@ -1464,18 +2462,79 @@ function renderReport() {
     if (mode===1) {
       el.innerHTML = renderMode1();
     } else {
-      el.innerHTML = renderMode2();
+      // Mode 2: render the two-state container
+      el.innerHTML = `<div id="m2-explore-wrap"></div><div id="m2-report-state" style="display:none"></div>`;
+      if (m2InExplore) {
+        document.getElementById('m2-explore-wrap').outerHTML = renderExploration();
+      } else {
+        const d = getM2Data();
+        document.getElementById('m2-report-state').style.display = '';
+        document.getElementById('m2-report-state').innerHTML = buildM2ReportHTML(d);
+      }
     }
   } catch(e) {
-    el.innerHTML = `<div class="report-placeholder"><div class="icon">⚠</div><p>Error rendering report: ${e.message}</p></div>`;
+    el.innerHTML = `<div class="report-placeholder"><div class="icon">&#9888;</div><p>Error rendering report: ${e.message}</p></div>`;
     console.error(e);
   }
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
 buildM1Chips();
-m1Fetch();
-// m1Fetch calls renderReport at the end
+
+window.onload = function() {
+  // Check for URL hash with mode=2 params
+  const hash = window.location.hash.replace('#', '');
+  if (hash && hash.includes('mode=2')) {
+    try {
+      const params = new URLSearchParams(hash);
+      // Apply chip selection state
+      m2SelChip = params.get('chip') || 'GB300';
+      m2Wl = params.get('wl') || 'train';
+      m2GpuRate = parseFloat(params.get('rate')) || 3.00;
+      m2PwrCost = parseFloat(params.get('pwr')) || 0.05;
+      m2DiscR = (parseFloat(params.get('disc')) || 10) / 100;
+      usingDemo = params.get('demo') !== '0';
+
+      if (!usingDemo) {
+        // Pre-fill custom inputs
+        const mw = params.get('mw');
+        const volt = params.get('volt');
+        const service = params.get('service');
+        const pf = params.get('pf');
+        const upg = params.get('upg');
+        const upgmo = params.get('upgmo');
+        const explimit = params.get('explimit');
+        const climate = params.get('climate');
+        if (mw) document.getElementById('m2-mw').value = mw;
+        if (volt) document.getElementById('m2-poi-volt').value = volt;
+        if (service) document.getElementById('m2-service').value = service;
+        if (pf) document.getElementById('m2-pf').value = pf;
+        if (upg) document.getElementById('m2-upg-cost').value = upg;
+        if (upgmo) document.getElementById('m2-upg-mo').value = upgmo;
+        if (explimit) document.getElementById('m2-exp-limit').value = explimit;
+        if (climate) document.getElementById('m2-climate').value = climate;
+        // Show custom input panel
+        document.getElementById('m2-demo-banner').style.display = 'none';
+        document.getElementById('m2-own-inputs').style.display = '';
+        document.getElementById('m2-demo-inputs').style.display = 'none';
+      }
+
+      // Switch to mode 2, skip exploration, go straight to report
+      mode = 2;
+      m2InExplore = false;
+      document.getElementById('btn-mode1').classList.remove('active');
+      document.getElementById('btn-mode2').classList.add('active');
+      document.getElementById('m1-inputs').style.display = 'none';
+      document.getElementById('m2-inputs').style.display = '';
+      renderReport();
+      return;
+    } catch(e) {
+      console.warn('Hash restore failed:', e);
+    }
+  }
+  m1Fetch();
+  // m1Fetch calls renderReport at the end
+};
 </script>
 </body>
 </html>
