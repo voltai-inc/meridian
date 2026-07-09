@@ -158,6 +158,59 @@ Doesn't need an exploration flow — the output is inherently short and linear. 
 
 ---
 
+## Context & references
+
+These shaped the product decisions and are useful background for anyone redesigning the UI:
+
+### Public links (accessible to anyone)
+
+**The core problem this product solves:**
+- [The Blind Spot in Data Center Design](https://medium.com/@yuxuan1994_44197/the-blind-spot-in-data-center-design-2e3e3298efc7) — Medium article. MFU in practice is 35–45%, not the 50–70% nameplate. Simulation tools (AstraSim, Meta's Arcadia) exist but are all internal. This is the gap Meridian fills.
+
+**Why the inference Pareto chart matters:**
+- [Jake Epstein's LinkedIn post](https://www.linkedin.com/posts/jakepstein_inference-acceleration-gets-treated-as-one-activity-7340060000000000000) — "Inference acceleration gets treated as one problem. It's really several collapsed into one. The chip fastest for one user is often the worst per watt at scale." Includes the tokens/sec/user vs tokens/sec/MW chart for 17 chips on DeepSeek V3 decode phase — this is the visualization the Meridian inference Pareto chart is modeled after. The ideal chart is this but interactive and filtered to chips relevant to your site.
+
+**The real utility study used as demo data:**
+- [IID Imperial Valley Data Center Feasibility Study (May 2025)](https://www.imperialdatacenter.com/_files/ugd/6bb284_304b224bf287450e90f68dc7c3bfd09a.pdf) — Real power flow analysis for a 150/200/250/500 MW DC campus. 200 MW is clean, 500 MW hits voltage collapse. This is pre-populated in Mode 2 as the demo. Understanding this document helps explain why Mode 2 exists.
+
+**DC interconnection context:**
+- [GridLab — Practical Guidance for Large Load Interconnections](https://gridlab.org/wp-content/uploads/2025/03/GridLab-Report-Large-Loads-Interim-Report.pdf) — Explains the utility study process, Class 5 vs Class 3, why power is harder than marketed.
+
+**Voltai product:**
+- [voltai.ai](https://www.voltai.ai) — Voltai's existing product: Part Explorer, knowledge agent, schematic review, BOM management for semiconductor/hardware design. Meridian applies the same "spec-to-verified-reality" approach to data centers.
+
+### Internal meeting notes (Granola)
+
+These conversations directly shaped the product direction:
+
+- [DC Sync — Erfan + Eric + AB](https://notes.granola.ai/t/4e86660b-0fa5-4bbc-b6f9-1777f86d63e2-00b881l8) — Core product ideation. Erfan's pitch: "even xAI got it wrong on MFU, most DC builders don't think about workload simulation." Jensen's GTC metrics (performance per dollar, time to first training run, longevity) should be the outputs as you change sliders. Key quote: "the simulation should include the things Jensen talked about in GTC."
+- [DC Sync — site updates + Vertiv](https://notes.granola.ai/t/ffccab29-30a9-4a26-9ae1-0e28cba9f380-00b881l8) — Eric describes building the HTML prototype. Vertiv CEO (Giordano Albertazzi) becomes an advisor. Discussion of using Meridian to generate spec sheets for off-takers.
+- [Eric (Voltai) x Ian (ARUP)](https://notes.granola.ai/t/d3bf9103-95bc-49ef-ba87-0ab285703532-00b881l8) — ARUP MEP firm: reference designs take 4–6 months. They explicitly do NOT model what happens inside racks — "that's the tenant's job." This is the gap Meridian fills.
+- [TBDI / SK Site Results](https://notes.granola.ai/t/6d2ed591-9bad-42da-9173-aac32527ee5d-00b881l8) — Korea site search. 20+ brownfield sites evaluated.
+- [Chase x Erfan — DC infrastructure, off-takers](https://notes.granola.ai/t/f0fb086f-f536-4905-91a3-ead884c641d0-00b881l8) — Owner-rep business model. Chase explains: off-taker LOI only needs a 2-page spec sheet, not a full engineering study. "Voltai would drive the build, get % of lease value."
+- [Phanos.ai (Dhanasekar)](https://notes.granola.ai/t/1b88d830-2b65-4e60-92d1-79f2404305e1-00b881l8) — Real DC builder. Confirms the problem: "people build for wrong generation, wrong cooling, wrong power." AMD MI455X Helios (800V DC, 250kW/rack) is their chip. GPU utilization in teens on live clusters.
+- [Voltai x Giordano (Vertiv CEO)](https://docs.google.com/document/d/15pTTMFtc4hL2_xG8GM0m0YoCWbgg65SZlNGik9zoDB4/edit) — Gemini notes from July 2, 2026 meeting. Giordano accepted advisor role. Agreed to connect technical teams. The Vertiv data ask (CDU transient performance under training loads) is the next step.
+- [Atria + Entergy MS](https://notes.granola.ai/t/2c12e862-8500-47e6-aad0-a05b3e8285ba-008umkv4) — Class 5 study explained ($50K, 2–3 months, per site per load scenario, 60-day validity). Entergy MS requires all DC to be interruptible. >15 MW needs dedicated substation (36–48 months). This is why power modeling is not Voltai's lane.
+- [Khalil + Entergy LA](https://notes.granola.ai/t/49c16f28-066e-414a-b995-7dc5d734a93a-00b881l8) — Entergy LA perspective. Similar process. Power factor critical on distribution. $50K study per site. Sites being marketed as "powered" often have outdated or unverified data.
+
+### Key product decisions from internal discussions (not publicly linked)
+
+The following shaped the product direction from internal meetings and conversations. The links are private but the decisions are documented here:
+
+- **Power modeling is not Voltai's lane.** Utility capacity data is proprietary, per-site, expires in 60 days. Entergy charges $50K for a Class 5 study. Meridian's job is to take the output of that study and translate it into chip/cooling/performance/financial specifications — not to model the grid.
+
+- **The xAI Colossus / cluster MFU story is the pitch hook.** Large training clusters launch well below nameplate MFU before software optimization. DC developers don't think about this — they assume hardware just works. This is Voltai's opening.
+
+- **The inference Pareto chart is the most important visualization.** Erfan (Voltai CEO) referenced Jensen Huang's GTC metrics: performance per dollar, time to first training run, longevity. The inference chart shows exactly this trade-off: fast per user vs. efficient per MW. No single winner. The chip ranking changes as you vary batch size. This should be the hero chart of the product.
+
+- **DSX (NVIDIA Data Center Solution eXchange) validation is a differentiator.** Voltai works with NVIDIA on Blackwell formal verification. Meridian validates that a proposed DC design meets NVIDIA's DSX requirements. No other consulting firm can claim this from first-principles chip knowledge.
+
+- **The spec sheet is the commercial deliverable.** Off-takers need a 2-page technical spec to issue an LOI. That's the Meridian output that creates business value — not the exploration itself.
+
+- **BESS design changes fundamentally with interruptible power.** Entergy Mississippi requires all data centers to be on non-firm (interruptible) service. This means BESS must be sized to carry 100% IT load independently, not just as a smoothing buffer. This changes equipment BOM, capex, and NPV significantly.
+
+---
+
 ## Files in the repo
 
 ```
