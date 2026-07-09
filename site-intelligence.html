@@ -353,6 +353,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
         </select>
       </div>
       <div class="field"><label>Land area (acres)</label><input type="number" id="m1-land" value="150" min="1" oninput="debounce()"></div>
+      <div class="field"><label>Quoted power cost ($/kWh)</label><input type="number" id="m1-pwr" value="0.05" step="0.005" min="0.01" oninput="debounce()"></div>
     </div>
     <div class="rail-section">
       <span class="eyebrow">Plan</span>
@@ -373,11 +374,6 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
           <option value="mix" selected>Mixed</option>
         </select>
       </div>
-    </div>
-    <div class="rail-section">
-      <span class="eyebrow">Financial assumptions</span>
-      <div class="field"><label>Power cost ($/kWh)</label><input type="number" id="m1-pwr" value="0.05" step="0.005" min="0.01" oninput="debounce()"></div>
-      <div class="field"><label>Discount rate (%)</label><input type="number" id="m1-disc" value="10" min="1" max="30" oninput="debounce()"></div>
     </div>
   </div>
   <div class="main-scroll">
@@ -462,13 +458,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     </div>
 
     <div class="rail-section">
-      <span class="eyebrow">Financial assumptions</span>
-      <div class="field"><label>Power cost ($/kWh)</label><input type="number" id="m2-pwr" value="0.05" step="0.005" min="0.01" oninput="m2PwrCost=parseFloat(this.value)||.05;debounce()"></div>
-      <div class="field"><label>Discount rate (%)</label><input type="number" id="m2-disc" value="10" min="1" max="30" oninput="m2DiscR=(parseFloat(this.value)||10)/100;debounce()"></div>
-      <div class="field"><label>EBITDA multiple</label><input type="number" id="m2-mult" value="20" min="10" max="30" oninput="m2Mult=parseFloat(this.value)||20;debounce()">
-        <div class="hint">AI DCs trading 15–25× EBITDA currently</div>
-      </div>
-      <div class="hint" style="margin-top:10px">GPU rental rate is assumed per chip — edit it on the chip cards in Compute, or in Economics.</div>
+      <div class="hint">Financial assumptions live where you use them — GPU rate on each chip card in Compute; power cost, discount rate and EBITDA multiple inline in Economics.</div>
     </div>
   </div>
 
@@ -980,9 +970,9 @@ function renderEcon(x) {
     <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">ECONOMICS</span><span class="ws-sub">do the numbers work? — adjust and watch</span></div>
     <div class="assume-row">
       <div class="assume"><label>GPU rate · ${m2SelChip}</label><div class="in">$ <input type="number" id="rate-econ" value="${curRate().toFixed(2)}" min="0.1" max="30" step="0.25" oninput="setChipRate(m2SelChip,this.value)"> /GPU-hr</div></div>
-      <div class="assume"><label>Power cost</label><div class="in">$ <input type="number" value="${m2PwrCost.toFixed(3)}" min="0.01" max="0.15" step="0.005" oninput="m2PwrCost=parseFloat(this.value)||.05;debounce()"> /kWh</div></div>
-      <div class="assume"><label>Discount rate</label><div class="in"><input type="number" value="${Math.round(m2DiscR*100)}" min="5" max="25" oninput="m2DiscR=(parseFloat(this.value)||10)/100;debounce()"> %</div></div>
-      <div class="assume"><label>EBITDA multiple</label><div class="in"><input type="number" value="${m2Mult}" min="10" max="30" oninput="m2Mult=parseFloat(this.value)||20;debounce()"> ×</div></div>
+      <div class="assume"><label>Power cost</label><div class="in">$ <input type="number" id="pwr-econ" value="${m2PwrCost.toFixed(3)}" min="0.01" max="0.15" step="0.005" oninput="m2PwrCost=parseFloat(this.value)||.05;debounce()"> /kWh</div></div>
+      <div class="assume"><label>Discount rate</label><div class="in"><input type="number" id="disc-econ" value="${Math.round(m2DiscR*100)}" min="5" max="25" oninput="m2DiscR=(parseFloat(this.value)||10)/100;debounce()"> %</div></div>
+      <div class="assume"><label>EBITDA multiple</label><div class="in"><input type="number" id="mult-econ" value="${m2Mult}" min="10" max="30" oninput="m2Mult=parseFloat(this.value)||20;debounce()"> ×</div></div>
       <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">80% billed utilization · GPU capex $${fc(CHIPS[m2SelChip].cap/1000)}K/GPU · rate erodes 8%/yr · GPU refresh yr 5 · operator perspective</span>
     </div>
     <div class="metric-tiles">
@@ -1334,7 +1324,7 @@ function renderM1() {
   const wl = document.getElementById('m1-wl').value||'mix';
   const gpuRate = parseFloat(document.getElementById('m1-rate').value)||chipRates[chip];
   const pwrCost = parseFloat(document.getElementById('m1-pwr').value)||0.05;
-  const discR = parseFloat(document.getElementById('m1-disc').value)/100||0.10;
+  const discR = 0.10; // fixed for the pre-study brief — tune it in Design
   const c = CHIPS[chip];
   const pue = getPUE(m1Clim);
   const itMW = mw/pue;
@@ -1460,9 +1450,6 @@ window.onload = function() {
       usingDemo = p.get('demo')!=='0';
       document.getElementById('m2-model').value = String(m2ModelB);
       document.getElementById('m2-batch').value = Math.max(0,BATCHES.indexOf(m2Batch));
-      document.getElementById('m2-pwr').value = m2PwrCost;
-      document.getElementById('m2-disc').value = Math.round(m2DiscR*100);
-      document.getElementById('m2-mult').value = m2Mult;
       document.querySelectorAll('#wl-seg button').forEach(b=>b.classList.toggle('on',b.dataset.wl===m2Wl));
       if (!usingDemo) {
         const set=(id,k)=>{const v=p.get(k);if(v!==null&&v!=='')document.getElementById(id).value=v;};
