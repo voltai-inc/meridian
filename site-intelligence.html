@@ -18,7 +18,7 @@
 /* ── Voltai DS tokens — light theme ───────────────────────────────────── */
 :root{
   --bg:#f6f8fb; --surface:#ffffff; --sunken:#eef2f6; --fill:#e2e8ee;
-  --ink:#060a0e; --body:#141d26; --muted:#68727d; --faint:#d2d2d2;
+  --ink:#060a0e; --body:#141d26; --muted:#5b646e; --faint:#8a929b;
   --border:#d2dae2; --hairline:rgba(6,10,14,.08); --border-strong:#bfc6ce;
   --volt:#AF0000; --volt-vivid:#c92121; --volt-tint:#fbeeee; --volt-ring:#f0cbcb;
   --ok:#2fa37a; --ok-text:#1e7a5a; --ok-tint:#edf7f3;
@@ -28,12 +28,12 @@
   --nav-h:52px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f);font-size:13px;line-height:1.55}
+html,body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f);font-size:13.5px;line-height:1.55}
 ::selection{background:var(--volt-ring);color:var(--ink)}
 button{font-family:var(--f)}
 
 /* eyebrow — the brand ALL-CAPS mono register */
-.eyebrow{font-family:var(--m);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font-family:var(--m);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 
 /* ── NAV ──────────────────────────────────────────────────────────────── */
 nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;padding:0 20px;z-index:100;gap:20px}
@@ -72,10 +72,10 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .rail-section .eyebrow{margin-bottom:12px;display:block}
 .field{margin-bottom:11px}
 .field:last-child{margin-bottom:0}
-.field label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px}
-.field input[type=text],.field input[type=number],.field select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:7px 10px;border-radius:5px;font-size:12.5px;font-family:var(--f);transition:.12s}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.field input[type=text],.field input[type=number],.field select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:7px 10px;border-radius:5px;font-size:13px;font-family:var(--f);transition:.12s}
 .field input:focus,.field select:focus{outline:none;border-color:var(--volt-vivid);box-shadow:0 0 0 3px var(--volt-tint)}
-.field .hint{font-size:10px;color:var(--faint);margin-top:3px;line-height:1.4}
+.field .hint{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
 .addr-row{display:flex;gap:6px}
 .addr-row input{flex:1}
 .btn-mini{background:var(--ink);border:none;color:#fff;padding:7px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap}
@@ -86,20 +86,24 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .range-row input[type=range]{flex:1;accent-color:var(--volt)}
 .range-val{font-family:var(--m);font-size:12px;font-weight:500;color:var(--volt);min-width:44px;text-align:right}
 .seg{display:flex;gap:2px;background:var(--sunken);border:1px solid var(--hairline);border-radius:5px;padding:2px}
-.seg button{flex:1;padding:5px 4px;font-size:11px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;transition:.12s}
+.seg button{flex:1;padding:5px 4px;font-size:12px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;transition:.12s}
 .seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(6,10,14,.08)}
-.demo-chip{display:flex;align-items:center;gap:8px;background:#f5f5f5;border:1px solid #e4e4e4;border-radius:6px;padding:9px 12px;margin:14px 16px 0;font-size:11px;color:#3a3a3a;line-height:1.45}
-.demo-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--volt-vivid);flex-shrink:0}
-.demo-chip button{margin-left:auto;background:none;border:none;color:var(--volt);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;white-space:nowrap}
+.demo-chip{display:flex;flex-direction:column;gap:9px;background:#f5f5f5;border:1px solid #e4e4e4;border-radius:6px;padding:11px 12px;margin:14px 16px 0;font-size:12px;color:#3a3a3a;line-height:1.5}
+.demo-chip .demo-msg{display:flex;align-items:flex-start;gap:8px}
+.demo-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--volt-vivid);flex-shrink:0;margin-top:5px}
+.demo-chip .demo-actions{display:flex;flex-direction:column;gap:7px;align-items:flex-start;padding-left:15px}
+.demo-chip .demo-actions a{font-size:12px;font-weight:500;color:var(--volt)}
+.demo-chip button{background:var(--ink);border:none;color:#fff;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.demo-chip button:hover{background:#26323d}
 .study-facts{display:grid;gap:0}
 .fact-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px solid var(--hairline)}
 .fact-row:last-child{border-bottom:none}
-.fact-k{font-size:11px;color:var(--muted)}
-.fact-v{font-family:var(--m);font-size:11.5px;color:var(--ink);text-align:right}
+.fact-k{font-size:12px;color:var(--muted)}
+.fact-v{font-family:var(--m);font-size:12px;color:var(--ink);text-align:right}
 .fact-v.ok{color:var(--ok-text)} .fact-v.warn{color:var(--warn-text)} .fact-v.risk{color:var(--risk-text)}
 
 /* badges */
-.badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:9.5px;font-weight:600;font-family:var(--m);letter-spacing:.08em}
+.badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--m);letter-spacing:.08em}
 .badge.verified{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
 .badge.unverified{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
 /* confidence ladder */
@@ -108,9 +112,9 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .lstep .ldot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--border-strong);background:var(--surface);margin-top:3px;flex-shrink:0}
 .lstep.done .ldot{background:var(--ok);border-color:var(--ok)}
 .lstep.current .ldot{background:var(--volt);border-color:var(--volt);box-shadow:0 0 0 3px var(--volt-tint)}
-.lstep .lname{font-size:11px;font-weight:600;color:var(--faint);line-height:1.3}
+.lstep .lname{font-size:12px;font-weight:600;color:var(--faint);line-height:1.3}
 .lstep.done .lname,.lstep.current .lname{color:var(--ink)}
-.lstep .lsub{font-size:9.5px;color:var(--faint);font-family:var(--m);letter-spacing:.03em}
+.lstep .lsub{font-size:10.5px;color:var(--faint);font-family:var(--m);letter-spacing:.03em}
 .lstep.current .lsub{color:var(--volt)}
 .lstep:not(:last-child)::before{content:'';position:absolute;left:4px;top:17px;bottom:-6px;width:1px;background:var(--border)}
 
@@ -120,12 +124,12 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .kpi{background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:12px 14px 10px;min-width:0}
 .kpi-val{font-family:var(--disp);font-size:21px;font-weight:700;color:var(--ink);line-height:1.05;white-space:nowrap;transition:color .15s}
 .kpi-val small{font-family:var(--m);font-size:11px;font-weight:400;color:var(--muted)}
-.kpi-label{font-family:var(--m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
-.kpi-sub{font-size:10px;color:var(--faint);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-label{font-family:var(--m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi.flash .kpi-val{animation:kflash .7s ease}
 @keyframes kflash{0%{color:var(--volt-vivid)}100%{color:var(--ink)}}
 .section-tabs{display:flex;gap:22px;padding:10px 2px 0}
-.section-tabs a{font-family:var(--m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding-bottom:9px;border-bottom:2px solid transparent}
+.section-tabs a{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding-bottom:9px;border-bottom:2px solid transparent}
 .section-tabs a:hover{color:var(--ink)}
 .section-tabs a.on{color:var(--volt);border-bottom-color:var(--volt)}
 
@@ -135,15 +139,15 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .ws-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
 .ws-idx{font-family:var(--m);font-size:11px;color:var(--volt);letter-spacing:.08em}
 .ws-title{font-family:var(--disp);font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.02em}
-.ws-sub{font-size:11.5px;color:var(--muted)}
+.ws-sub{font-size:12.5px;color:var(--muted)}
 .ws-head .badge{margin-left:auto}
 
 /* power facts grid */
 .pgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 @media(max-width:1500px){.pgrid{grid-template-columns:repeat(3,1fr)}}
 .pgrid-cell{background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:11px 13px}
-.pgrid-val{font-family:var(--m);font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.3}
-.pgrid-label{font-size:10px;color:var(--muted);margin-top:3px}
+.pgrid-val{font-family:var(--m);font-size:14px;font-weight:500;color:var(--ink);line-height:1.3}
+.pgrid-label{font-size:11px;color:var(--muted);margin-top:3px}
 .callout{border-radius:6px;padding:11px 14px;font-size:12px;line-height:1.6;margin-top:12px}
 .callout.warn{background:var(--warn-tint);border:1px solid #ecd9a8;color:var(--warn-text)}
 .callout.risk{background:var(--risk-tint);border:1px solid #f0cdc5;color:var(--risk-text)}
@@ -158,13 +162,13 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .chip-card.dimmed:hover{border-color:var(--border);box-shadow:none}
 .cc-name{font-family:var(--disp);font-size:12px;font-weight:700;color:var(--ink);line-height:1.25;min-height:30px}
 .cc-tags{display:flex;gap:4px;margin:6px 0 8px;flex-wrap:wrap}
-.cc-tag{font-family:var(--m);font-size:8.5px;letter-spacing:.06em;padding:2px 6px;border-radius:3px;background:var(--sunken);color:var(--muted);border:1px solid var(--hairline)}
+.cc-tag{font-family:var(--m);font-size:9.5px;letter-spacing:.06em;padding:2px 6px;border-radius:3px;background:var(--sunken);color:var(--muted);border:1px solid var(--hairline)}
 .cc-tag.road{background:var(--warn-tint);color:var(--warn-text);border-color:#ecd9a8}
 .cc-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-top:1px solid var(--hairline)}
-.cc-k{font-size:9.5px;color:var(--muted)}
-.cc-v{font-family:var(--m);font-size:11px;color:var(--ink)}
+.cc-k{font-size:10.5px;color:var(--muted)}
+.cc-v{font-family:var(--m);font-size:11.5px;color:var(--ink)}
 .cc-v.accent{color:var(--volt);font-weight:500}
-.cc-note{font-size:9px;color:var(--risk-text);margin-top:5px;font-family:var(--m)}
+.cc-note{font-size:10px;color:var(--risk-text);margin-top:5px;font-family:var(--m)}
 .cc-rate{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
 .cc-rate-in{display:flex;align-items:center;gap:2px;font-family:var(--m);font-size:11px;color:var(--muted)}
 .cc-rate-in input{width:54px;border:1px solid var(--border);border-radius:4px;padding:2px 5px;font-family:var(--m);font-size:11px;color:var(--ink);background:var(--surface)}
@@ -178,10 +182,12 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 @media(max-width:1500px){.chart-duo{grid-template-columns:1fr}}
 .chart-panel{border:1px solid var(--hairline);border-radius:7px;padding:14px 16px 10px;background:var(--surface)}
 .chart-panel.full{grid-column:1/-1}
-.chart-title{font-family:var(--m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
-.chart-caption{font-size:11px;color:var(--faint);margin-bottom:8px;line-height:1.45}
-.chart-legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 2px 2px}
-.chart-legend-item{display:flex;align-items:center;gap:5px;font-family:var(--m);font-size:9.5px;color:var(--muted);cursor:pointer}
+.chart-title{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.chart-caption{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.45}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 2px 2px}
+.chart-legend-item{display:flex;align-items:center;gap:6px;font-family:var(--m);font-size:11px;color:var(--muted);cursor:pointer}
+.legend-swatch{width:16px;height:10px;border-radius:2px;flex-shrink:0}
+.legend-dash{width:16px;height:0;border-top:2px dashed var(--risk-text);flex-shrink:0}
 .chart-legend-item.sel{color:var(--ink);font-weight:500}
 .legend-dot{width:8px;height:8px;border-radius:50%}
 
@@ -192,7 +198,7 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .dsx-chip.pass .s{color:var(--ok)} .dsx-chip.warn{background:var(--warn-tint);border-color:#ecd9a8} .dsx-chip.warn .s{color:var(--warn-text)}
 .dsx-chip.fail{background:var(--risk-tint);border-color:#f0cdc5} .dsx-chip.fail .s{color:var(--risk-text)}
 details.drawer{border:1px solid var(--hairline);border-radius:6px;margin-top:10px;background:var(--surface)}
-details.drawer summary{padding:9px 14px;cursor:pointer;font-family:var(--m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);user-select:none;list-style:none;display:flex;align-items:center;gap:8px}
+details.drawer summary{padding:9px 14px;cursor:pointer;font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);user-select:none;list-style:none;display:flex;align-items:center;gap:8px}
 details.drawer summary::before{content:'▸';font-size:9px;transition:.15s}
 details.drawer[open] summary::before{transform:rotate(90deg)}
 details.drawer summary:hover{color:var(--ink)}
@@ -204,7 +210,7 @@ details.drawer .drawer-body{padding:4px 14px 14px;border-top:1px solid var(--hai
 
 /* tables */
 table.data{width:100%;border-collapse:collapse}
-table.data th{padding:7px 10px;font-family:var(--m);font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+table.data th{padding:7px 10px;font-family:var(--m);font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
 table.data td{padding:8px 10px;font-size:12px;color:var(--body);border-bottom:1px solid var(--hairline);vertical-align:top}
 table.data td.mono{font-family:var(--m);font-size:11.5px}
 table.data tr.sel td{background:var(--volt-tint)}
@@ -214,21 +220,21 @@ table.data tr.sel.clickable:hover td{background:var(--volt-tint)}
 td.pos{color:var(--ok-text);font-family:var(--m);font-size:11.5px}
 td.neg{color:var(--risk-text);font-family:var(--m);font-size:11.5px}
 td.dim{color:var(--faint)}
-.crit-flag{font-family:var(--m);font-size:9.5px;color:var(--risk-text);letter-spacing:.05em}
+.crit-flag{font-family:var(--m);font-size:10.5px;color:var(--risk-text);letter-spacing:.05em}
 
 /* economics */
 .assume-row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:12px 16px;margin-bottom:16px}
 .assume{display:flex;flex-direction:column;gap:4px}
-.assume label{font-size:10.5px;color:var(--muted);font-weight:500}
-.assume .in{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
-.assume input{width:74px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:12.5px;font-weight:500;color:var(--volt);text-align:right;background:var(--surface)}
+.assume label{font-size:11.5px;color:var(--muted);font-weight:500}
+.assume .in{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+.assume input{width:74px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-family:var(--m);font-size:13px;font-weight:500;color:var(--volt);text-align:right;background:var(--surface)}
 .assume input:focus{outline:none;border-color:var(--volt-vivid)}
 .metric-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .mtile{background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:12px 14px}
 .mtile-val{font-family:var(--disp);font-size:19px;font-weight:700;color:var(--ink);line-height:1.1}
 .mtile-val.accent{color:var(--volt)}
-.mtile-label{font-family:var(--m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.mtile-sub{font-size:10px;color:var(--faint);margin-top:1px}
+.mtile-label{font-family:var(--m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.mtile-sub{font-size:11px;color:var(--muted);margin-top:1px}
 
 /* open items */
 .open-items li{font-size:12px;color:var(--body);line-height:1.8;margin-left:16px}
@@ -237,19 +243,19 @@ td.dim{color:var(--faint)}
 .spec-rail-head{padding:16px 18px 12px;border-bottom:1px solid var(--hairline)}
 .spec-rail-head .eyebrow{display:block;margin-bottom:5px}
 .spec-rail-title{font-family:var(--disp);font-size:13.5px;font-weight:700;color:var(--ink)}
-.spec-rail-sub{font-size:10.5px;color:var(--faint);margin-top:3px;line-height:1.45}
+.spec-rail-sub{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.45}
 .spec-body{flex:1;overflow-y:auto;padding:6px 18px 14px}
 .spec-sec{padding:10px 0 6px}
-.spec-sec .eyebrow{display:block;margin-bottom:6px;color:var(--volt);font-size:9px}
+.spec-sec .eyebrow{display:block;margin-bottom:6px;color:var(--volt);font-size:10px}
 .spec-row{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--hairline)}
 .spec-row:last-child{border-bottom:none}
-.spec-k{font-size:10.5px;color:var(--muted)}
-.spec-v{font-family:var(--m);font-size:10.5px;color:var(--ink);text-align:right;transition:color .15s}
+.spec-k{font-size:11.5px;color:var(--muted)}
+.spec-v{font-family:var(--m);font-size:11.5px;color:var(--ink);text-align:right;transition:color .15s}
 .spec-v.pulse{animation:kflash .7s ease}
 .spec-rail-foot{padding:14px 18px;border-top:1px solid var(--hairline);display:flex;flex-direction:column;gap:8px}
 .spec-rail-foot .btn-primary{width:100%;padding:10px}
 .spec-rail-foot .btn-ghost{width:100%;text-align:center}
-.modeled-tag{font-family:var(--m);font-size:8.5px;letter-spacing:.08em;color:var(--faint);text-align:center}
+.modeled-tag{font-family:var(--m);font-size:9.5px;letter-spacing:.08em;color:var(--faint);text-align:center}
 
 /* ── SCREEN (MODE 1) DOCUMENT ─────────────────────────────────────────── */
 .doc-wrap{max-width:840px;margin:0 auto;padding:28px 24px 80px}
@@ -271,7 +277,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 .flag-dot{font-size:10px;padding-top:3px}
 .flag-dot.risk{color:var(--risk)} .flag-dot.warn{color:var(--warn-text)} .flag-dot.info{color:var(--volt)}
 .qlist li{font-size:12.5px;line-height:1.7;margin:0 0 9px 18px}
-.doc-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--hairline);font-size:10px;color:var(--faint);line-height:1.6}
+.doc-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--hairline);font-size:11px;color:var(--muted);line-height:1.6}
 
 /* ── DELIVERABLES OVERLAY ─────────────────────────────────────────────── */
 #deliverables{display:none;position:fixed;inset:0;z-index:200;background:var(--fill);flex-direction:column}
@@ -294,12 +300,12 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 .spec2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:6px;overflow:hidden;margin:10px 0 18px}
 .spec2-item{background:#fff;padding:12px 14px}
 .spec2-val{font-family:var(--m);font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.35}
-.spec2-label{font-size:10px;color:var(--muted);margin-top:3px}
-.risk-pill{display:inline-block;padding:2px 9px;border-radius:10px;font-family:var(--m);font-size:9.5px;font-weight:500}
+.spec2-label{font-size:11px;color:var(--muted);margin-top:3px}
+.risk-pill{display:inline-block;padding:2px 9px;border-radius:10px;font-family:var(--m);font-size:10.5px;font-weight:500}
 .risk-pill.high{background:var(--risk-tint);color:var(--risk-text)}
 .risk-pill.med{background:var(--warn-tint);color:var(--warn-text)}
 .risk-pill.low{background:var(--ok-tint);color:var(--ok-text)}
-.conf-stamp{margin-top:26px;border:1px solid var(--border);border-radius:6px;padding:13px 16px;font-family:var(--m);font-size:10px;letter-spacing:.05em;color:var(--muted);line-height:1.8}
+.conf-stamp{margin-top:26px;border:1px solid var(--border);border-radius:6px;padding:13px 16px;font-family:var(--m);font-size:10.5px;letter-spacing:.05em;color:var(--muted);line-height:1.8}
 
 /* toast */
 #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:6px;font-size:12px;z-index:400;opacity:0;transition:opacity .25s;pointer-events:none}
@@ -336,9 +342,11 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   <!-- left rail: study facts + product boundary + workload controls -->
   <div class="rail" id="design-rail">
     <div class="demo-chip" id="m2-demo-chip">
-      <span class="dot"></span>
-      <span>Demo — IID Imperial Valley feasibility study, May 2025 · <a href="example-feasibility-study.html" target="_blank" style="color:var(--volt)">see the example study ↗</a></span>
-      <button onclick="enterOwnStudy()">Enter yours</button>
+      <div class="demo-msg"><span class="dot"></span><span>Demo — IID Imperial Valley feasibility study, May 2025</span></div>
+      <div class="demo-actions">
+        <a href="example-feasibility-study.html" target="_blank">See the example study ↗</a>
+        <button onclick="enterOwnStudy()">Enter your own study</button>
+      </div>
     </div>
 
     <div class="rail-section" id="m2-facts-section">
@@ -465,11 +473,12 @@ const CHIPS = {
   MI300X: {n:'AMD MI300X OAM',       g:64, kw:110, kw_max:125, cool:'CDU', rate:1.75, cap:22000, smooth:0.00, mt:.38, mi:.55, tf:1307, hbm:7.68, ver:false, st:'ship', lead:'10–12 mo', leadHi:12, volt:'ac480'},
   GAUDI3: {n:'Intel Gaudi 3',        g:64, kw:90,  kw_max:110, cool:'CDU', rate:1.00, cap:18000, smooth:0.00, mt:.42, mi:.60, tf:800,  hbm:3.7,  ver:false, st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
 };
-// data-viz palette — Voltai DS spectral accents
+// data-viz palette — brand monochrome (black/grey) + Voltai red; every step ≥3:1 on white.
+// Identity is carried by the direct end-of-curve labels, not color alone.
 const CHIP_COLORS = {
-  GB300:'#AF0000',GB200:'#c92121',B200:'#5c5c5c',
-  H200:'#7d7d7d',H100:'#9e9e9e',
-  VERA:'#1a1a1a',MI355X:'#8a4a42',MI300X:'#bdbdbd',GAUDI3:'#d2d2d2'
+  GB300:'#AF0000',GB200:'#c92121',B200:'#1f1f1f',
+  H200:'#4d4d4d',H100:'#7a7a7a',
+  VERA:'#000000',MI355X:'#8a4a42',MI300X:'#5f5f5f',GAUDI3:'#8c8c8c'
 };
 const CLI = {cold_dry:[28,15,10,.88],temperate:[34,22,18,.62],hot_dry:[42,24,22,.42],hot_humid:[36,29,27,.18]};
 const BATCHES = [1,2,4,8,16,32,64,128,256,512];
@@ -606,7 +615,7 @@ function buildMfuSVG(chip, gpus, wl, modelB) {
   let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">`;
   [.3,.4,.5,.6,.7,.8].forEach(m=>{
     s+=`<line x1="${pL}" y1="${sy(m).toFixed(0)}" x2="${W-pR}" y2="${sy(m).toFixed(0)}" stroke="#e2e8ee" stroke-width="1"/>`;
-    s+=`<text x="${pL-7}" y="${sy(m)+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#d2d2d2">${(m*100).toFixed(0)}%</text>`;
+    s+=`<text x="${pL-7}" y="${sy(m)+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">${(m*100).toFixed(0)}%</text>`;
   });
   s+=`<line x1="${pL}" y1="${sy(nameplate).toFixed(1)}" x2="${W-pR}" y2="${sy(nameplate).toFixed(1)}" stroke="#d8a93a" stroke-width="1" stroke-dasharray="4 4"/>`;
   s+=`<text x="${W-pR}" y="${sy(nameplate)-5}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="#8a6a14">nameplate ${(nameplate*100).toFixed(0)}%</text>`;
@@ -615,8 +624,8 @@ function buildMfuSVG(chip, gpus, wl, modelB) {
   s+=`<circle cx="${sx(cg).toFixed(1)}" cy="${sy(thisMfu).toFixed(1)}" r="7" fill="none" stroke="#2fa37a" stroke-width="2.5"/>`;
   const lblX = Math.min(sx(cg), W-pR-8), lblAnchor = sx(cg) > W-110 ? 'end' : 'middle';
   s+=`<text x="${lblX.toFixed(1)}" y="${sy(thisMfu)-13}" text-anchor="${lblAnchor}" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#1e7a5a">this site · ${(thisMfu*100).toFixed(0)}%</text>`;
-  sz.forEach(n=>{s+=`<text x="${sx(n).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#d2d2d2">${n>=1000?Math.round(n/1000)+'K':n}</text>`;});
-  s+=`<text x="${(pL+W-pR)/2}" y="${H-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#68727d">cluster size (GPUs) — log scale</text>`;
+  sz.forEach(n=>{s+=`<text x="${sx(n).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">${n>=1000?Math.round(n/1000)+'K':n}</text>`;});
+  s+=`<text x="${(pL+W-pR)/2}" y="${H-6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">cluster size (GPUs) — log scale</text>`;
   s+=`</svg>`;
   return s;
 }
@@ -634,30 +643,42 @@ function buildParetoSVG(selChip, modelB, batch) {
   let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">`;
   s+=`<line x1="${pL}" y1="${pT-6}" x2="${pL}" y2="${H-pB}" stroke="#d2dae2" stroke-width="1.2"/>`;
   s+=`<line x1="${pL}" y1="${H-pB}" x2="${W-pR+40}" y2="${H-pB}" stroke="#d2dae2" stroke-width="1.2"/>`;
-  s+=`<text x="${W-pR+40}" y="${H-pB+20}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" fill="#68727d">→ tokens/sec/user (per-user speed)</text>`;
-  s+=`<text x="${pL}" y="${pT-13}" font-family="IBM Plex Mono" font-size="11" fill="#68727d">↑ tokens/sec/MW (fleet efficiency)</text>`;
-  s+=`<text x="${W-pR+40}" y="${pT-2}" text-anchor="end" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#1e7a5a">IDEAL →↑</text>`;
+  s+=`<text x="${W-pR+40}" y="${H-pB+22}" text-anchor="end" font-family="IBM Plex Mono" font-size="12" fill="#3c434b">→ tokens/sec/user (per-user speed)</text>`;
+  s+=`<text x="${pL}" y="${pT-13}" font-family="IBM Plex Mono" font-size="12" fill="#3c434b">↑ tokens/sec/MW (fleet efficiency)</text>`;
+  s+=`<text x="${W-pR+40}" y="${pT-2}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" font-weight="500" fill="#1e7a5a">IDEAL →↑</text>`;
   const order=[...allChips.filter(k=>k!==selChip),selChip];
+  const labels=[];
   order.forEach(k=>{
     const pts=getInfPareto(k,modelB);
     if(pts.length<2) return;
     const color=CHIP_COLORS[k]||'#888';
     const isSel=k===selChip;
-    const op=isSel?1:0.4;
+    const op=isSel?1:0.62;
     const d=pts.map((p,i)=>`${i===0?'M':'L'}${sx(p.user).toFixed(1)},${sy(p.mw).toFixed(1)}`).join(' ');
-    s+=`<path d="${d}" fill="none" stroke="${color}" stroke-width="${isSel?2.6:1.3}" stroke-linejoin="round" opacity="${op}"/>`;
+    s+=`<path d="${d}" fill="none" stroke="${color}" stroke-width="${isSel?3:1.8}" stroke-linejoin="round" opacity="${op}"/>`;
     pts.forEach(p=>{
-      s+=`<circle cx="${sx(p.user).toFixed(1)}" cy="${sy(p.mw).toFixed(1)}" r="${isSel?4:2.4}" fill="${color}" opacity="${op}"><title>${CHIPS[k].n} · batch ${p.b} · ${fc(p.user)} tok/s/user · ${fc(p.mw)} tok/s/MW</title></circle>`;
+      s+=`<circle cx="${sx(p.user).toFixed(1)}" cy="${sy(p.mw).toFixed(1)}" r="${isSel?4.5:3}" fill="${color}" opacity="${op}"><title>${CHIPS[k].n} · batch ${p.b} · ${fc(p.user)} tok/s/user · ${fc(p.mw)} tok/s/MW</title></circle>`;
     });
-    // end-of-curve label
-    const last=pts[pts.length-1];
-    s+=`<text x="${(sx(last.user)+8).toFixed(1)}" y="${(sy(last.mw)+3.5).toFixed(1)}" font-family="IBM Plex Mono" font-size="${isSel?10.5:9.5}" font-weight="${isSel?600:400}" fill="${color}" opacity="${isSel?1:.75}">${k}</text>`;
+    // direct label at the batch-1 end (bottom-right), where the curves are spread apart
+    const first=pts[0];
+    labels.push({k,color,isSel,x:sx(first.user)+7,y:sy(first.mw)+4});
     // operating point marker on selected chip
     if (isSel) {
       const opPt = pts.reduce((best,p)=>Math.abs(p.b-batch)<Math.abs(best.b-batch)?p:best,pts[0]);
       s+=`<circle cx="${sx(opPt.user).toFixed(1)}" cy="${sy(opPt.mw).toFixed(1)}" r="9" fill="none" stroke="#060a0e" stroke-width="2"/>`;
-      s+=`<text x="${sx(opPt.user).toFixed(1)}" y="${(sy(opPt.mw)-15).toFixed(1)}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" font-weight="600" fill="#060a0e">batch ${opPt.b}</text>`;
+      s+=`<text x="${sx(opPt.user).toFixed(1)}" y="${(sy(opPt.mw)-15).toFixed(1)}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" font-weight="600" fill="#060a0e">your operating point · batch ${opPt.b}</text>`;
     }
+  });
+  // collision pass: keep labels ≥14px apart vertically, inside the plot
+  labels.sort((a,b)=>a.y-b.y);
+  for(let i=1;i<labels.length;i++) if(labels[i].y-labels[i-1].y<14) labels[i].y=labels[i-1].y+14;
+  const yBot=H-pB-4;
+  for(let i=labels.length-1;i>=0;i--){
+    const cap=i===labels.length-1?yBot:labels[i+1].y-14;
+    if(labels[i].y>cap) labels[i].y=cap;
+  }
+  labels.forEach(l=>{
+    s+=`<text x="${Math.min(l.x,W-46).toFixed(1)}" y="${l.y.toFixed(1)}" font-family="IBM Plex Mono" font-size="${l.isSel?12:11}" font-weight="${l.isSel?600:500}" fill="${l.color}" opacity="${l.isSel?1:.9}">${l.k}</text>`;
   });
   s+=`</svg>`;
   return s;
@@ -875,7 +896,7 @@ function validationLink(val, wl) {
 // meter-power trace chart: raw + BESS-smoothed envelope, contracted line
 function buildTraceSVG(val) {
   const {sim,site} = val;
-  const W=1180,H=240,pL=52,pR=16,pT=18,pB=34;
+  const W=1180,H=250,pL=74,pR=16,pT=18,pB=36;
   const env=(p,buckets=240)=>{ const n=p.length,per=Math.max(1,Math.floor(n/buckets)),out=[];
     for(let i=0;i<n;i+=per){let mn=1e30,mx=-1e30;for(let j=i;j<Math.min(i+per,n);j++){const v=p[j];if(v<mn)mn=v;if(v>mx)mx=v;}out.push({t:sim.t[i]/60,mn,mx});} return out;};
   const e1=env(sim.pMeter), e2=env(sim.pMeterSm);
@@ -891,15 +912,16 @@ function buildTraceSVG(val) {
   const step=yMax>150?50:yMax>60?20:yMax>30?10:5;
   for(let g=0;g<=yMax;g+=step){
     s+=`<line x1="${pL}" y1="${sy(g).toFixed(0)}" x2="${W-pR}" y2="${sy(g).toFixed(0)}" stroke="#e2e8ee" stroke-width="1"/>`;
-    s+=`<text x="${pL-7}" y="${sy(g)+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#d2d2d2">${g}</text>`;
+    s+=`<text x="${pL-7}" y="${sy(g)+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">${g}</text>`;
   }
-  s+=`<path d="${band(e1)}" fill="rgba(45,134,189,.18)"/>`;
-  s+=`<path d="${band(e2)}" fill="rgba(175,0,0,.42)"/>`;
+  s+=`<text transform="rotate(-90)" x="${-(pT+(H-pT-pB)/2)}" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="#3c434b">power at meter (MW)</text>`;
+  s+=`<path d="${band(e1)}" fill="rgba(6,10,14,.16)"/>`;
+  s+=`<path d="${band(e2)}" fill="rgba(175,0,0,.45)"/>`;
   const cy=sy(site.contracted_mw);
   s+=`<line x1="${pL}" y1="${cy.toFixed(1)}" x2="${W-pR}" y2="${cy.toFixed(1)}" stroke="#ab4433" stroke-width="1.4" stroke-dasharray="6 4"/>`;
-  s+=`<text x="${W-pR}" y="${cy-6}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#ab4433">contracted ${site.contracted_mw} MW</text>`;
-  [0,5,10,15,20,25,30].forEach(m=>{ if(m<=tMax) s+=`<text x="${sx(m).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#d2d2d2">${m}</text>`;});
-  s+=`<text x="${(pL+W-pR)/2}" y="${H-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#68727d">minutes — light band: meter power raw · dark band: after BESS smoothing</text>`;
+  s+=`<text x="${W-pR}" y="${cy-6}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" font-weight="500" fill="#ab4433">contracted limit ${site.contracted_mw} MW</text>`;
+  [0,5,10,15,20,25,30].forEach(m=>{ if(m<=tMax) s+=`<text x="${sx(m).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">${m}</text>`;});
+  s+=`<text x="${(pL+W-pR)/2}" y="${H-4}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">time (minutes)</text>`;
   s+=`</svg>`;
   return s;
 }
@@ -930,11 +952,16 @@ function renderValidation(x) {
       <div class="assume"><label>Checkpoint every</label><div class="in"><input type="number" id="prof-ce" value="${m2Prof.ckptEvery}" min="60" step="60" oninput="setProf('ckptEvery',this.value)"> s</div></div>
       <div class="assume"><label>Checkpoint length</label><div class="in"><input type="number" id="prof-cd" value="${m2Prof.ckptDur}" min="1" step="5" oninput="setProf('ckptDur',this.value)"> s</div></div>
       <div class="assume"><label>Synchronized fleet</label><div class="in"><input type="number" id="prof-sync" value="${m2Prof.sync}" min="0" max="1" step="0.1" oninput="setProf('sync',this.value)"> ×</div></div>
-      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center;max-width:260px;text-align:right">Timing is the customer's data — framework, checkpoint policy, job schedule. Defaults are a conservative fully-synchronized archetype. Measured telemetry imports as CSV in the full bench.</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;max-width:260px;text-align:right">Timing is the customer's data — framework, checkpoint policy, job schedule. Defaults are a conservative fully-synchronized archetype. Measured telemetry imports as CSV in the full bench.</span>
     </div>`:''}
     <div class="chart-panel" style="margin-bottom:14px">
       <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · ${c.n} profile${val.prof.smooth?' · smoothing credited':''} · 30 min</div>
       <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
+      <div class="chart-legend" style="padding:2px 2px 10px">
+        <span class="chart-legend-item" style="cursor:default"><span class="legend-swatch" style="background:rgba(6,10,14,.16);border:1px solid rgba(6,10,14,.25)"></span>Raw meter power (before BESS)</span>
+        <span class="chart-legend-item" style="cursor:default"><span class="legend-swatch" style="background:rgba(175,0,0,.45)"></span>After BESS smoothing</span>
+        <span class="chart-legend-item" style="cursor:default"><span class="legend-dash"></span>Contracted limit</span>
+      </div>
       ${buildTraceSVG(val)}
     </div>
     <div class="pgrid" style="grid-template-columns:repeat(6,1fr);margin-bottom:14px">
@@ -975,7 +1002,7 @@ function renderValidation(x) {
       </div>`;})()}
     <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
       <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open full validation tool — prefilled with this design ↗</a>
-      <span style="font-size:10px;color:var(--faint);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
+      <span style="font-size:11px;color:var(--muted);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
     </div>`;
 }
 
@@ -1141,7 +1168,7 @@ function renderCompute(x) {
         <select id="m2-model" onchange="m2ModelB=parseFloat(this.value);renderDesign(true)" style="border:none;background:none;font-size:12px;outline:none">
           ${[[7,'7B — small'],[70,'70B — frontier open-weights'],[405,'405B — large frontier'],[1000,'1T-class — MoE frontier']].map(([v,l])=>`<option value="${v}"${m2ModelB===v?' selected':''}>${l}</option>`).join('')}
         </select></div></div>
-      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">Parallelism (TP/PP/DP) auto-selected per cluster scale · MFU modeled, not measured</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center">Parallelism (TP/PP/DP) auto-selected per cluster scale · MFU modeled, not measured</span>
     </div>
     <div class="chip-grid">${cards}</div>
     <div class="dsx-chips"><span class="eyebrow" style="align-self:center;margin-right:4px">NVIDIA DSX</span>${dsxChipsHTML}</div>
@@ -1163,7 +1190,7 @@ function renderCompute(x) {
         <div class="chart-title">Inference Pareto — per-user speed vs. per-MW efficiency · ${m2ModelB>=1000?'1T':m2ModelB+'B'} model · all chips @ 1 MW IT</div>
         <div class="chart-caption">The chip fastest for one user is often the worst per watt at scale — there is no single winner, and the ranking shifts with batch size. The black ring is your operating point.</div>
         <div class="range-row" style="max-width:340px;margin:6px 0 4px">
-          <span style="font-size:10.5px;color:var(--muted);white-space:nowrap">Batch size</span>
+          <span style="font-size:11.5px;color:var(--muted);white-space:nowrap">Batch size</span>
           <input type="range" id="m2-batch" min="0" max="9" value="${Math.max(0,BATCHES.indexOf(m2Batch))}"
             oninput="m2Batch=BATCHES[this.value];document.getElementById('m2-batch-val').textContent=m2Batch"
             onchange="renderDesign(true)">
@@ -1190,7 +1217,7 @@ function renderEcon(x) {
       <div class="assume"><label>Power cost</label><div class="in">$ <input type="number" id="pwr-econ" value="${m2PwrCost.toFixed(3)}" min="0.01" max="0.15" step="0.005" oninput="m2PwrCost=parseFloat(this.value)||.05;debounce()"> /kWh</div></div>
       <div class="assume"><label>Discount rate</label><div class="in"><input type="number" id="disc-econ" value="${Math.round(m2DiscR*100)}" min="5" max="25" oninput="m2DiscR=(parseFloat(this.value)||10)/100;debounce()"> %</div></div>
       <div class="assume"><label>EBITDA multiple</label><div class="in"><input type="number" id="mult-econ" value="${m2Mult}" min="10" max="30" oninput="m2Mult=parseFloat(this.value)||20;debounce()"> ×</div></div>
-      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">Scenario only · 80% billed utilization · GPU capex $${fc(CHIPS[m2SelChip].cap/1000)}K/GPU · rate erodes 8%/yr · GPU refresh yr 5 · operator perspective</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center">Scenario only · 80% billed utilization · GPU capex $${fc(CHIPS[m2SelChip].cap/1000)}K/GPU · rate erodes 8%/yr · GPU refresh yr 5 · operator perspective</span>
     </div>
     <div class="metric-tiles">
       <div class="mtile"><div class="mtile-val ${fin.npv>0?'accent':''}">${fm(fin.npv)}</div><div class="mtile-label">10-yr NPV</div><div class="mtile-sub">full operator, incl. GPU capex</div></div>
