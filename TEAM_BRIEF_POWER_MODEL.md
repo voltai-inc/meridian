@@ -10,9 +10,41 @@ it. Everything below starts from that.
 
 ## Part 1 · What actually moves the answer (measured)
 
+### First: the complete input inventory (nothing comes out of nowhere)
+
+The demand curve is generated from exactly nine numbers; the check adds the supply sizing and the
+utility terms. This is the whole list — every row in the sensitivity table below varies one of these.
+
+| # | Input | Source | Current basis |
+|---|---|---|---|
+| 1 | High-phase power (compute burst) | Chip profile | Literature estimate |
+| 2 | Low-phase power (all-reduce wait) | Chip profile | Literature estimate |
+| 3 | Checkpoint depth | Chip profile | Literature estimate |
+| 4 | **Smoothing credit** (rack energy storage) | Chip profile | Public NVIDIA material — needs source or bound |
+| 5 | Iteration period | Customer workload profile | Default 3 s, customer-editable |
+| 6 | Checkpoint cadence | Customer workload profile | Default 20 min, customer-editable |
+| 7 | Checkpoint length | Customer workload profile | Default 20 s, customer-editable |
+| 8 | **Synchronized fraction** of fleet | Customer workload profile | Default 100% (conservative), customer-editable |
+| 9 | IT MW (curve scale) | Site (MW ÷ PUE) | Site fact |
+| — | BESS / genset / UPS / chain sizing ratios | Facility design | Scaled from the 12 MW Helio block |
+| — | Contracted MW | Utility contract | Site fact |
+| — | Ramp + oscillation limits | Utility policy | **Assumed** — pending a real large-load study |
+
+("Swing amplitude" in the table below is not a tenth input — it is high-minus-low, #1–#2, swept
+together to test how wrong the chip estimates can be before it matters.) Effects **absent** from
+this list entirely — power factor under swing, inrush at checkpoint recovery, slew rates,
+harmonics — cannot be swept; whether any of them is first-order is discussion question B below.
+
+**How to read the outcomes:** each result is a verdict plus the count of hard-failing checks out
+of 19 — `FAIL · 4✗` means four checks hard-fail; `WARN · 0✗` means nothing hard-fails but some
+checks sit in the warning band (e.g. a component at 85% of rating, or "the BESS is load-bearing
+for the ramp limit").
+
+### The sweep
+
 Baseline: the 200 MW demo site, unsmoothed (H100-class) fully-synchronized training fleet →
 **FAIL, 4 failing checks**. Each row varies one input and reports the new outcome. (Script:
-engine sweep, reproducible; ranges chosen as plausible, not extreme.)
+`scripts_sensitivity_sweep.js`, reproducible; ranges chosen as plausible, not extreme.)
 
 | Input (one at a time) | Outcome | Read |
 |---|---|---|
@@ -50,57 +82,68 @@ ratio, and the oscillation threshold can stay rough for now.
 
 ---
 
-## Part 2 · The discussion — four questions per axis
+## Part 2 · The discussion
 
-These are conversation starters, not work assignments. The goal of each session is a shared
-judgment on four things: **significance, necessity, implementability, barrier.**
+Five steps, in the order the logic actually runs: *is the problem real → does our model capture
+it → can we get the numbers that matter → is there a business in it → what do we do next.* Each
+step is a short claim from Part 1 plus the questions that test it. Conversation, not task list.
 
-### A · Significance — is this a real, first-order problem?
+### 1 · The problem — do these failure modes exist outside our simulator?
 
-1. Have you seen (or heard of) an AI/HPC load that was curtailed, derated, delayed, or redesigned
-   because of *transient* behavior — not headline MW? At what scale does this become first-order:
-   10, 50, 200 MW?
-2. The published work (Microsoft/NVIDIA power-stabilization paper, arXiv 2508.14318) says
-   synchronized training swings are a grid problem at scale. Does that match your intuition, or is
-   this being over-indexed?
-3. Our model says an unsmoothed, fully-synchronized 168 MW fleet cannot be fixed by buying bigger
-   equipment — only by changing the demand shape (smoothing silicon, de-syncing, derating). Does
-   that conclusion feel physically right to you?
+*Our claim:* synchronized AI training makes the whole fleet's power swing together, and at hundreds
+of MW that's a grid event — published work (Microsoft/NVIDIA, arXiv 2508.14318) says the same.
 
-### B · Necessity — how much fidelity do we actually need?
+- Have you seen or heard of an AI/HPC load actually curtailed, derated, delayed, or redesigned
+  because of transient behavior rather than headline MW? At what scale does this start to bite —
+  10, 50, 200 MW?
+- Does anything in our framing feel over-indexed — a paper problem rather than a field problem?
 
-1. Given the sensitivity table: is a four-number chip profile (high, low, checkpoint, smoothing)
-   plus sizing ratios *enough* for a credible pre-engineering screen, or is something first-order
-   missing that would change pass/fail (not just precision)?
-2. The smoothing credit is the one number that flips verdicts, and ours is an estimate from public
-   NVIDIA material. What would you consider a *sufficient* basis for it — a citation, a physical
-   bound you could derive, or measurement only?
-3. What on this list can stay rough forever for a screening tool: power factor under swing,
-   inrush at checkpoint recovery, harmonics, protection coordination, cooling transients? Which
-   one, if any, could change a verdict rather than a decimal?
+### 2 · The model — does it capture what decides the outcome?
 
-### C · Implementability — can we build the credible version with what we have?
+*Our claim (measured, Part 1):* the verdict is decided by the demand shape — chip smoothing and
+fleet synchronization flip FAIL to survivable; nothing on the supply side can. Supply sizing is
+asymmetric: undersized BESS or switchgear is catastrophic, oversizing rescues nothing. Bigger
+equipment cannot fix an unsmoothed, fully-synchronized fleet.
 
-1. Can the amplitudes and the smoothing bound be *derived* — from specs, board/rack architecture,
-   component reasoning — by people in this room, without owning a GB300 rack? Roughly how long?
-2. If any of it is measurement-only: what's the cheapest credible measurement (one node? one
-   tray?), and does it scale to rack-level behavior, or does the rack (shared shelf, coolant loop)
-   behave differently?
-3. For the formal side: we currently sweep 96 timing scenarios and report the worst case with its
-   counterexample. The system is piecewise-linear with bounded inputs. Is turning the sweep into a
-   proof ("no admissible workload violates the limits") a weeks-scale prototype or a research
-   program — and which checks would you prove first?
+- Does that hierarchy feel physically right to you? Anything in it that contradicts your
+  experience?
+- The model omits power factor under swing, inrush at checkpoint recovery, slew rates, harmonics,
+  cooling transients. Could any of those *change a verdict* at this scale — or are they decimals
+  a screening tool can ignore?
 
-### D · Barrier — does any of this defend?
+### 3 · The numbers — can we get the few that matter?
 
-1. The simulator itself is textbook EE — any strong power engineer reproduces it. Do you agree the
-   only durable pieces are (a) calibrated chip/workload power data nobody publishes, and (b) a
-   proof layer with counterexamples that consultancies don't offer?
-2. NVIDIA DSX now spans facility design, power, and grid responsiveness. If NVIDIA ships transient
-   validation for its own racks, what's left for a neutral third party — cross-vendor comparison,
-   utility-side trust, formal guarantees, speed?
-3. Blunt version: knowing what's in this doc, would you invest further here, and what single proof
-   point would most change your answer?
+*From Part 1, only a handful of inputs deserve real scrutiny:* the smoothing credit (verdict-
+flipping, currently an estimate from public NVIDIA material), the synchronization a real fleet
+actually runs at, and the per-phase amplitudes.
+
+- Can these be derived or bounded from specs and rack architecture by people in this room, without
+  owning a GB300? Even a conservative min/max on smoothing would let us report verdict bands.
+- If it's measurement-only: what's the cheapest credible measurement — one node, one tray? — and
+  does node-level behavior even scale to a rack with a shared power shelf and coolant loop?
+- What does a real fleet's synchronized fraction look like in practice — is 100% sync a real
+  operating point or a theoretical worst case?
+
+### 4 · The business — what's worth paying for, and what defends?
+
+*Our claim:* the simulator is textbook EE and reproducible by anyone competent; the durable pieces
+are calibrated power data nobody publishes, and a proof layer ("no workload in this class breaks
+the design, or here's the one that does") that consultancies don't offer. Meanwhile NVIDIA DSX now
+spans facility design, power, and grid responsiveness.
+
+- Who pays for this verdict — developer, off-taker, utility, financier — and at which moment: LOI,
+  lease, interconnection?
+- If NVIDIA ships transient validation for its own racks, what's left for a neutral party —
+  cross-vendor comparison, utility-side trust, formal guarantees, speed?
+- On the proof layer specifically: the system is piecewise-linear with bounded inputs, and today we
+  sweep 96 scenarios. Is a real proof a weeks-scale prototype or a research program?
+
+### 5 · The decision — what next?
+
+- Knowing all of the above: what single proof point would most change your confidence — a bounded
+  smoothing number, one measured rack trace, a utility engineer validating the check list, or a
+  working proof prototype?
+- And the blunt version: is this worth more of our time, or is it a feature another company ships?
 
 ---
 
