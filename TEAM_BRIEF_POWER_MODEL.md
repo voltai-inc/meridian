@@ -40,6 +40,14 @@ territory, one level up. That's why we're talking to you.
 If the answers are roughly "derivable, scales, right, nothing fatal" — the model is worth
 calibrating and we plan the measurement/partner path. If not, we've learned that cheaply.
 
+**Realistic expectations (so "we don't own the hardware" doesn't end the meeting):** the high
+phase is effectively public (vendors publish rack max power); low phase and checkpoint depth
+should be *boundable* from component power budgets; smoothing — the verdict-flipper — probably
+needs a measurement of the firmware's actual behavior. Two outs: published 0.1-second H100 fleet
+measurements already exist in the literature (see primer refs) for calibrating the older
+generation, and a GB300 measurement is one rack + one day + a clamp meter via Vertiv's lab, the
+NVIDIA relationship, or an operator. Bounds alone are enough to ship verdict *bands*.
+
 ## The formal team — different job, later meeting
 
 Keep the roles straight: **EE derives the curve's numbers** (the meeting above). **The simulator
