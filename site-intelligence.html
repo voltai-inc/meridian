@@ -88,7 +88,7 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .seg{display:flex;gap:2px;background:var(--sunken);border:1px solid var(--hairline);border-radius:5px;padding:2px}
 .seg button{flex:1;padding:5px 4px;font-size:11px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;transition:.12s}
 .seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(6,10,14,.08)}
-.demo-chip{display:flex;align-items:center;gap:8px;background:var(--volt-tint);border:1px solid var(--volt-ring);border-radius:6px;padding:9px 12px;margin:14px 16px 0;font-size:11px;color:var(--volt);line-height:1.45}
+.demo-chip{display:flex;align-items:center;gap:8px;background:#f5f5f5;border:1px solid #e4e4e4;border-radius:6px;padding:9px 12px;margin:14px 16px 0;font-size:11px;color:#3a3a3a;line-height:1.45}
 .demo-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--volt-vivid);flex-shrink:0}
 .demo-chip button{margin-left:auto;background:none;border:none;color:var(--volt);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;white-space:nowrap}
 .study-facts{display:grid;gap:0}
@@ -272,9 +272,6 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 .flag-dot.risk{color:var(--risk)} .flag-dot.warn{color:var(--warn-text)} .flag-dot.info{color:var(--volt)}
 .qlist li{font-size:12.5px;line-height:1.7;margin:0 0 9px 18px}
 .doc-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--hairline);font-size:10px;color:var(--faint);line-height:1.6}
-.m1-cta{display:flex;align-items:center;gap:16px;background:var(--volt-tint);border:1px solid var(--volt-ring);border-radius:7px;padding:16px 20px;margin-top:24px}
-.m1-cta-text{flex:1;font-size:12.5px;color:var(--volt);line-height:1.55}
-.m1-cta-text strong{color:var(--ink)}
 
 /* ── DELIVERABLES OVERLAY ─────────────────────────────────────────────── */
 #deliverables{display:none;position:fixed;inset:0;z-index:200;background:var(--fill);flex-direction:column}
@@ -323,12 +320,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 <body>
 
 <nav>
-  <a class="brand" href="index.html" style="text-decoration:none" title="Back to the Voltai toolkit"><span class="wordmark">VOLTAI</span><span class="prod">MERIDIAN</span></a>
-  <div class="stages">
-    <button class="stage-btn active" id="stage-1" onclick="setView('screen')"><span class="idx">01</span><span class="lbl">Screen</span></button>
-    <span class="stage-sep">→</span>
-    <button class="stage-btn" id="stage-2" onclick="setView('design')"><span class="idx">02</span><span class="lbl">Design</span></button>
-  </div>
+  <a class="brand" href="index.html" style="text-decoration:none" title="Back to the Voltai toolkit"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:14px;width:auto;align-self:center"><span class="prod">MERIDIAN</span></a>
   <div class="nav-spacer"></div>
   <div class="nav-r">
     <a class="ref-link" href="power-signoff.html" target="_blank">Power Validation ↗</a>
@@ -338,61 +330,6 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   </div>
 </nav>
 
-<!-- ════════ STAGE 01 — SCREEN (pre-study site brief) ════════ -->
-<div class="view on" id="screen-view">
-  <div class="rail">
-    <div class="rail-section">
-      <span class="eyebrow">Site</span>
-      <div class="field">
-        <label>Address</label>
-        <div class="addr-row">
-          <input type="text" id="m1-addr" value="Calvert City, KY 42029" onkeydown="if(event.key==='Enter')m1Fetch()">
-          <button class="btn-mini" onclick="m1Fetch()">Detect</button>
-        </div>
-        <div class="detect-box"><span class="k">grid</span><span id="m1-go">PJM</span> &nbsp;<span class="k">climate</span><span id="m1-clim">Temperate</span> &nbsp;<span class="k">free-cool</span><span id="m1-fc">62%</span></div>
-      </div>
-    </div>
-    <div class="rail-section">
-      <span class="eyebrow">Seller claims</span>
-      <div class="field"><label>Claimed grid power (MW)</label><input type="number" id="m1-mw" value="20" min="1" max="500" oninput="debounce()"></div>
-      <div class="field"><label>Claimed delivery voltage</label>
-        <select id="m1-volt" onchange="debounce()">
-          <option value="13.8">13.8 kV — distribution</option>
-          <option value="34.5">34.5 kV — sub-transmission</option>
-          <option value="69" selected>69 kV — transmission</option>
-          <option value="115">115 kV — HV transmission</option>
-          <option value="230">230 kV — HV transmission</option>
-        </select>
-      </div>
-      <div class="field"><label>Land area (acres)</label><input type="number" id="m1-land" value="150" min="1" oninput="debounce()"></div>
-      <div class="field"><label>Quoted power cost ($/kWh)</label><input type="number" id="m1-pwr" value="0.05" step="0.005" min="0.01" oninput="debounce()"></div>
-    </div>
-    <div class="rail-section">
-      <span class="eyebrow">Plan</span>
-      <div class="field"><label>Power architecture</label>
-        <select id="m1-arch" onchange="buildM1Chips();syncM1Rate();debounce()">
-          <option value="both" selected>Both / Hybrid</option>
-          <option value="ac480">480V AC</option>
-          <option value="dc800">800V DC (GB300, Helios)</option>
-        </select>
-      </div>
-      <div class="field"><label>Target chip</label><select id="m1-chip" onchange="syncM1Rate();debounce()"></select></div>
-      <div class="field"><label>Assumed GPU rate ($/GPU-hr)</label><input type="number" id="m1-rate" value="5.00" step="0.25" min="0.1" oninput="m1RateInput(this.value)">
-        <div class="hint">Defaults per chip — market rental rate. Edit to override.</div></div>
-      <div class="field"><label>Primary workload</label>
-        <select id="m1-wl" onchange="debounce()">
-          <option value="train">Training</option>
-          <option value="infer">Inference</option>
-          <option value="mix" selected>Mixed</option>
-        </select>
-      </div>
-    </div>
-  </div>
-  <div class="main-scroll">
-    <div class="doc-wrap"><div id="m1-doc"></div></div>
-  </div>
-</div>
-
 <!-- ════════ STAGE 02 — DESIGN (study-verified workspace) ════════ -->
 <div class="view" id="design-view">
 
@@ -400,7 +337,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   <div class="rail" id="design-rail">
     <div class="demo-chip" id="m2-demo-chip">
       <span class="dot"></span>
-      <span>Demo — IID Imperial Valley feasibility study, May 2025</span>
+      <span>Demo — IID Imperial Valley feasibility study, May 2025 · <a href="example-feasibility-study.html" target="_blank" style="color:var(--volt)">see the example study ↗</a></span>
       <button onclick="enterOwnStudy()">Enter yours</button>
     </div>
 
@@ -579,7 +516,6 @@ const IID_DEMO = {
 // ─── STATE ───────────────────────────────────────────────────────────────
 let view = 'screen';
 let usingDemo = true;
-let m1Clim = 'temperate', m1GoKey = 'pjm';
 let m2SelChip='GB300', m2Wl='train', m2ModelB=70, m2Batch=32;
 let m2PwrCost=0.05, m2DiscR=0.10, m2Mult=20;
 // workload timing profile — the CUSTOMER'S data (framework, checkpoint policy, job schedule).
@@ -1370,13 +1306,9 @@ function setWl(w) {
   renderDesign(true);
 }
 function setView(v) {
-  view = v;
-  document.getElementById('screen-view').classList.toggle('on',v==='screen');
-  document.getElementById('design-view').classList.toggle('on',v==='design');
-  document.getElementById('stage-1').classList.toggle('active',v==='screen');
-  document.getElementById('stage-2').classList.toggle('active',v==='design');
-  document.getElementById('nav-cta').style.display = v==='design'?'':'none';
-  if (v==='design') renderDesign(false); else renderM1();
+  view = 'design';
+  document.getElementById('design-view').classList.add('on');
+  renderDesign(false);
 }
 function enterOwnStudy() {
   usingDemo = false;
@@ -1384,30 +1316,12 @@ function enterOwnStudy() {
   document.getElementById('m2-own-inputs').style.display='';
   renderDesign(false);
 }
-function debounce(){ clearTimeout(debTimer); debTimer=setTimeout(()=>{view==='design'?renderDesign(false):renderM1();},200); }
+function debounce(){ clearTimeout(debTimer); debTimer=setTimeout(()=>renderDesign(false),200); }
 function scrollToSec(e,id){
   e.preventDefault();
   const el=document.getElementById(id);
   el.scrollIntoView({behavior:'smooth',block:'start'});
   document.querySelectorAll('.section-tabs a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));
-}
-
-// carry Screen inputs into Design as an unverified pre-fill
-function promoteToDesign() {
-  usingDemo = false;
-  document.getElementById('m2-demo-chip').style.display='none';
-  document.getElementById('m2-own-inputs').style.display='';
-  document.getElementById('m2-location').value = document.getElementById('m1-addr').value;
-  document.getElementById('m2-mw').value = document.getElementById('m1-mw').value;
-  const v = document.getElementById('m1-volt').value;
-  const sel = document.getElementById('m2-poi-volt');
-  [...sel.options].forEach(o=>{if(o.value===v)sel.value=v;});
-  document.getElementById('m2-climate').value = m1Clim;
-  m2SelChip = document.getElementById('m1-chip').value||'GB300';
-  m2Wl = document.getElementById('m1-wl').value==='infer'?'infer':document.getElementById('m1-wl').value==='train'?'train':'mix';
-  document.querySelectorAll('#wl-seg button').forEach(b=>b.classList.toggle('on',b.dataset.wl===m2Wl));
-  setView('design');
-  showToast('Pre-filled from your Screen inputs — replace claims with study numbers as they confirm');
 }
 
 // ─── SHARE / TOAST ───────────────────────────────────────────────────────
@@ -1581,146 +1495,6 @@ function buildAdvisoryReport() {
   Based on ${d.utility} ${d.study_type} findings and Voltai's analytical models. Pre-engineering evaluation, not a construction specification. All performance and financial projections are modeled estimates.</div>`;
 }
 
-// ─── SCREEN (MODE 1) ─────────────────────────────────────────────────────
-function m1Fetch() {
-  const a = document.getElementById('m1-addr').value.toLowerCase();
-  m1Clim = /alberta|canada|washington|oregon|idaho/.test(a)?'cold_dry'
-    :/louisiana|mississippi|south carolina|georgia|florida|alabama/.test(a)?'hot_humid'
-    :/texas|nevada|arizona|california/.test(a)?'hot_dry':'temperate';
-  m1GoKey = /texas|tx\b/.test(a)?'ercot':/california|ca\b/.test(a)?'caiso'
-    :/louisiana|mississippi|michigan/.test(a)?'miso':/tennessee|georgia|alabama/.test(a)?'serc'
-    :/alberta|canada/.test(a)?'aeso':'pjm';
-  const [,,,fcx] = CLI[m1Clim];
-  document.getElementById('m1-go').textContent = m1GoKey.toUpperCase();
-  document.getElementById('m1-clim').textContent = climLabel(m1Clim);
-  document.getElementById('m1-fc').textContent = pct(fcx);
-  renderM1();
-}
-
-function buildM1Chips() {
-  const arch = document.getElementById('m1-arch').value;
-  const sel = document.getElementById('m1-chip');
-  const prev = sel.value;
-  sel.innerHTML = Object.entries(CHIPS).filter(([k])=>chipVisible(k,arch))
-    .map(([k,c])=>`<option value="${k}"${k===prev?' selected':''}>${c.n}</option>`).join('');
-}
-
-// keep the Screen-mode rate field in sync with the selected chip's assumed rate
-function syncM1Rate() {
-  const k = document.getElementById('m1-chip').value;
-  if (CHIPS[k]) document.getElementById('m1-rate').value = chipRates[k].toFixed(2);
-}
-function m1RateInput(v) {
-  const k = document.getElementById('m1-chip').value;
-  const n = parseFloat(v);
-  if (CHIPS[k] && n>0) chipRates[k] = n;
-  debounce();
-}
-
-function renderM1() {
-  const addr = document.getElementById('m1-addr').value || 'Site address not entered';
-  const mw = parseFloat(document.getElementById('m1-mw').value)||20;
-  const volt = parseFloat(document.getElementById('m1-volt').value)||69;
-  const land = parseFloat(document.getElementById('m1-land').value)||150;
-  const chip = document.getElementById('m1-chip').value||'GB300';
-  const wl = document.getElementById('m1-wl').value||'mix';
-  const gpuRate = parseFloat(document.getElementById('m1-rate').value)||chipRates[chip];
-  const pwrCost = parseFloat(document.getElementById('m1-pwr').value)||0.05;
-  const discR = 0.10; // fixed for the pre-study brief — tune it in Design
-  const c = CHIPS[chip];
-  const pue = getPUE(m1Clim);
-  const itMW = mw/pue;
-  const racks = Math.floor(itMW*1000/c.kw);
-  const gpus = racks*c.g;
-  const mfu = getMFU(chip,gpus,70,wl);
-  const mfuPct = (mfu*100).toFixed(0);
-  const sizeDesc = gpus<5000?'small training':gpus<20000?'mid-scale':gpus<50000?'large-scale':'hyperscale';
-  const mfuCtx = mfu>=.55?'in line with well-optimized production clusters'
-    :mfu>=.45?'below nameplate but within the typical range for large-scale deployments'
-    :mfu>=.35?'notably below nameplate spec — budget a 3–6 month software optimization period after energization. Large training clusters consistently launch well below nameplate before software co-optimization'
-    :'significantly below nameplate at this cluster size. All-reduce overhead at scale is a real constraint most operators discover after the build. Plan an extended optimization period';
-  let powerAdvisory;
-  if (mw<=10) powerAdvisory = `At ${mw} MW, this falls within standard distribution capacity. A utility upgrade is likely possible without a dedicated substation — typical cost $500K–$2M, timeline 7–12 months. The main risk is feeder capacity at the specific substation — only a utility feasibility study can confirm.`;
-  else if (mw<=20) powerAdvisory = `At ${mw} MW, you're at the upper edge of distribution capacity for most utilities. A dedicated substation may or may not be required — this depends entirely on what's available at the nearest substation. Without a feasibility study, this is unresolvable. If a substation is required, budget 24–36 months and $5–15M. If distribution upgrades suffice, 12–18 months and $1–5M.`;
-  else if (mw<=50) powerAdvisory = `At ${mw} MW, a dedicated customer substation and transmission interconnection study are almost certainly required. Realistic timeline: 24–48 months from study start. Full infrastructure cost could range $10–30M depending on proximity to transmission. Most utilities require the customer to bear the full cost. Do not commit capital without a completed feasibility study.`;
-  else powerAdvisory = `At ${mw} MW, this is a transmission-scale interconnection: a feasibility study ($50K), a full interconnection study ($200K+), and likely 36–48 months before energization. Sites marketed as "${mw} MW available" almost never have this confirmed — treat the claim as aspirational until a utility study says otherwise.`;
-  const upgCostEst = mw<=10?1e6:mw<=20?5e6:mw<=50?15e6:30e6;
-  const fin = calcFinancials(mw,chip,wl,gpuRate,pwrCost,discR,20,upgCostEst,m1Clim);
-  const flags = [];
-  if (mw>50) flags.push({dot:'risk',text:`${mw} MW is transmission-scale. No utility will guarantee this without a completed interconnection study. Treat as aspirational.`});
-  if (land < itMW*1.5) flags.push({dot:'warn',text:`${land} acres may be tight for ${itMW.toFixed(0)} MW IT. A cluster this size typically needs ${(itMW*1.8).toFixed(0)}–${(itMW*2.5).toFixed(0)} acres including cooling, substation, and staging.`});
-  if (volt<34.5 && mw>15) flags.push({dot:'risk',text:`${volt} kV distribution voltage at ${mw} MW is implausible without major upgrades. A broker quoting this at distribution should trigger additional scrutiny.`});
-  if (!c.ver) flags.push({dot:'info',text:`${c.n} specs are unverified estimates. Validate power draw, MFU, and rack count against chip team data before building.`});
-  if (mfu<.40) flags.push({dot:'warn',text:`Modeled training MFU of ${mfuPct}% at ${fc(gpus)} GPUs is well below nameplate. Software optimization budget and timeline must be in the pro forma.`});
-  const questions = [
-    `Does the nearest substation have ${mw} MW of available capacity today — not planned, not queued, available now?`,
-    `Is the available capacity firm or non-firm (interruptible)? What is your policy for data centers in this territory?`,
-    `What is the estimated cost and timeline for upgrades to serve ${mw} MW at this address?`,
-    `What do you need from us to begin a Class 5 feasibility study, and what is the fee?`,
-  ];
-  if (mw>15) questions.push(`Would ${mw} MW require a customer-dedicated substation, or can it be served from an existing feeder?`);
-  if (mw>50) questions.push(`Has a transmission study been performed for this area recently? What is the transmission upgrade cost estimate?`);
-  let rec;
-  if (mw<=10) rec = `Proceed to a utility feasibility study immediately. At ${mw} MW this is one of the more tractable interconnection scenarios. Budget $25–50K and 4–6 weeks. If the feeder has capacity, this site can move fast.`;
-  else if (mw<=30) rec = `Request a Class 5 feasibility study before spending any additional capital on this site. At ${mw} MW the power situation is materially uncertain — either direction significantly changes project economics. Cost to find out: $25–50K.`;
-  else rec = `Do not proceed without a completed feasibility study and a utility conversation. At ${mw} MW the probability of a long interconnection queue is high. Get the study result before any LOI or land commitment.`;
-
-  document.getElementById('m1-doc').innerHTML = `
-<div class="doc">
-  <div class="doc-header">
-    <span class="eyebrow">Stage 01 · Site Brief</span>
-    <span class="badge unverified">UNVERIFIED — PRE-STUDY</span>
-  </div>
-  <div class="doc-title">${addr}</div>
-  <div class="doc-subtitle">Generated ${today()} · ${mw} MW claimed · ${volt} kV delivery · ${m1GoKey.toUpperCase()} · ${climLabel(m1Clim)}</div>
-  <hr class="div">
-  <div class="conf-notice"><strong>Confidence: LOW.</strong> Based entirely on unverified broker-provided information — no utility study exists. Every number below is conditional on the claimed power being confirmed. The purpose of this brief is to identify the right questions before you spend $50K on the study, not to confirm the investment case.</div>
-  <div class="callout info" style="margin-bottom:22px"><strong>Boundary:</strong> Meridian does not confirm utility capacity. It turns the stated claim into compute-readiness implications and the questions needed for a utility study.</div>
-  <div class="dsec"><span class="eyebrow">Power situation</span><div class="dsec-text"><p>${powerAdvisory}</p></div></div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">What you could build — if power is confirmed</span>
-    <div class="dsec-text"><p>${mw} MW less PUE ${pue.toFixed(2)} gives ${itMW.toFixed(1)} MW of IT capacity. At ${c.kw} kW per rack, that supports <span class="hi">${fc(racks)} ${c.n}</span> racks carrying <span class="hi">${fc(gpus)} GPUs</span> — a <strong>${sizeDesc}</strong> cluster by current standards.</p></div>
-    <div class="mrow c4">
-      <div class="mtile"><div class="mtile-val accent">${fc(gpus)}</div><div class="mtile-label">GPUs</div><div class="mtile-sub">${fc(racks)} racks × ${c.g}/rack</div></div>
-      <div class="mtile"><div class="mtile-val">${itMW.toFixed(1)} MW</div><div class="mtile-label">IT load</div><div class="mtile-sub">PUE ${pue.toFixed(2)}</div></div>
-      <div class="mtile"><div class="mtile-val accent">${mfuPct}%</div><div class="mtile-label">Design MFU</div><div class="mtile-sub">modeled, not measured</div></div>
-      <div class="mtile"><div class="mtile-val">${c.cool}</div><div class="mtile-label">Cooling required</div><div class="mtile-sub">${c.kw} kW/rack</div></div>
-    </div>
-  </div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">Performance projection</span>
-    <div class="dsec-text"><p>At <span class="hi">${fc(gpus)} GPUs</span>, training MFU is modeled at <span class="hi">${mfuPct}%</span> — ${mfuCtx}.</p></div>
-  </div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">Internal commercial sensitivity</span>
-    <div class="dsec-text"><p>Scenario only: modeled at $${gpuRate.toFixed(2)}/GPU-hr, 80% utilization, $${pwrCost.toFixed(3)}/kWh, with estimated upgrade cost of ${fm(upgCostEst)}. This is not underwriting and assumes the claimed power is fully confirmed and delivered on schedule.</p></div>
-    <div class="mrow c3">
-      <div class="mtile"><div class="mtile-val ${fin.npv>0?'accent':''}">${fm(fin.npv)}</div><div class="mtile-label">10-yr NPV</div><div class="mtile-sub">rough estimate</div></div>
-      <div class="mtile"><div class="mtile-val">${fin.irr>0&&fin.irr<5?(fin.irr*100).toFixed(0)+'%':'N/A'}</div><div class="mtile-label">IRR</div><div class="mtile-sub">full operator</div></div>
-      <div class="mtile"><div class="mtile-val ${fin.y5ebitda>0?'accent':''}">${fm(fin.y5ebitda)}</div><div class="mtile-label">Yr-5 EBITDA</div><div class="mtile-sub">steady-state estimate</div></div>
-    </div>
-  </div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">Flags & watch items</span>
-    ${flags.length===0?'<div class="dsec-text"><p>No critical flags for this configuration at this MW level. Proceed to feasibility study.</p></div>'
-      :`<ul class="flags">${flags.map(f=>`<li><span class="flag-dot ${f.dot}">▲</span><span>${f.text}</span></li>`).join('')}</ul>`}
-  </div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">Before you spend $50K — questions for the utility</span>
-    <div class="dsec-text" style="margin-bottom:10px"><p>These resolve the material uncertainties. A utility will answer them in a preliminary call before you commit to a feasibility study.</p></div>
-    <ol class="qlist">${questions.map(q=>`<li>${q}</li>`).join('')}</ol>
-  </div>
-  <hr class="div">
-  <div class="dsec"><span class="eyebrow">Recommended next step</span><div class="dsec-text"><p>${rec}</p></div></div>
-  <div class="m1-cta">
-    <div class="m1-cta-text"><strong>Study came back?</strong> Carry these inputs into the Design workspace — replace claims with confirmed numbers and explore the full chip / performance / sensitivity space.</div>
-    <button class="btn-primary" onclick="promoteToDesign()">Continue to Design →</button>
-  </div>
-  <div class="doc-footer">Prepared by Voltai · Meridian DC Intelligence · ${today()}<br>
-  Based on unverified broker information and Voltai's analytical models. Pre-feasibility evaluation only — not for construction, financing, or investment decisions without a completed utility study.</div>
-</div>`;
-}
-
 // ─── SECTION TAB SCROLL-SPY ──────────────────────────────────────────────
 document.getElementById('design-scroll').addEventListener('scroll', () => {
   const secs=['sec-power','sec-compute','sec-valid','sec-econ','sec-build'];
@@ -1732,8 +1506,6 @@ document.getElementById('design-scroll').addEventListener('scroll', () => {
 },{passive:true});
 
 // ─── INIT ────────────────────────────────────────────────────────────────
-buildM1Chips();
-syncM1Rate();
 window.onload = function() {
   const hash = window.location.hash.replace('#','');
   if (hash && hash.includes('mode=2')) {
@@ -1770,8 +1542,7 @@ window.onload = function() {
       return;
     } catch(e){ console.warn('Hash restore failed:',e); }
   }
-  setView('screen');
-  m1Fetch();
+  setView('design');
 };
 </script>
 </body>
