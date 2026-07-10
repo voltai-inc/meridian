@@ -272,6 +272,11 @@ code changes — the numbers slot into the same interface.
 
 ## 9 · So what is Meridian, precisely?
 
+The one-sentence version (deck register): **simulation that stress-tests a facility against its AI
+workload — utilization at scale, power transients, cooling — before it's built.** It closes the
+ladder with Voltai's other lines: prove the chip before tape-out → navigate the system → stress-test
+the facility before ground breaks.
+
 **Meridian is design verification, and selection emerges from verifying all the alternatives.**
 
 For a given (site, workload), each chip card runs the full question:

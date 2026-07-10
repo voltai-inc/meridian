@@ -1,5 +1,10 @@
 # Voltai Meridian — AI Data Center Compute Readiness
 
+**Simulation that stress-tests a facility against its AI workload — utilization at scale, power
+transients, cooling — before it's built.** The industry designs facilities from static specs;
+Meridian simulates what the workload does to the building. It sits one level up from Voltai's
+existing verification stack: *prove the chip → navigate the system → stress-test the facility.*
+
 **Utility study in → compute-ready spec out.** Meridian takes a utility study or broker power claim
 and verifies what a site can actually carry: compute design per chip platform, workload-adjusted
 performance, whether the electrical design survives the workload's power behavior, and a 2-page

@@ -379,6 +379,10 @@ Meridian should be positioned as:
 
 > A pre-engineering intelligence layer for AI data center compute readiness.
 
+Deck one-liner (adopted July 2026, parallel to the semiconductor and electronics lines):
+
+> Simulation that stress-tests a facility against its AI workload — utilization at scale, power transients, cooling — before it's built.
+
 It should not be positioned as:
 
 > A utility power model, construction design tool, or investment underwriting platform.

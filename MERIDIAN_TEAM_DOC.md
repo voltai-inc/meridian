@@ -5,6 +5,11 @@
 
 ## What It Is
 
+**One-line positioning (deck register):** *Simulation that stress-tests a facility against its AI
+workload — utilization at scale, power transients, cooling — before it's built.* Parallel to the
+other Voltai lines: formal engines prove the chip before tape-out; agents navigate the system;
+Meridian stress-tests the facility. Same discipline, one level up.
+
 Meridian is a pre-engineering AI data center compute-readiness tool. You put in a utility study or site power claim — MW, voltage, service type, power factor, climate, land, and target workload — and it translates that input into a compute-ready specification: rack count, chip platform, cooling fit, workload performance expectations, build risks, and an off-taker-facing spec sheet.
 
 The emphasis on "actually" is the whole point. The market currently relies on nameplate specs: a chip does X TFLOPS, a rack draws Y kW, a broker says Z MW is available. None of these numbers reflect operational reality. xAI Colossus launched at ~20% MFU before months of optimization. Grok/Microsoft built a billion-dollar campus for the wrong GPU generation. These are not edge cases — they are the norm.
