@@ -132,6 +132,26 @@ Meridian supports these models by producing the technical artifact that makes th
 
 ---
 
+## Is This Worth the Effort? (assessed July 9)
+
+**The bear case, stated fairly:** NVIDIA now ships power smoothing in every GB300 rack (published:
+power-cap ramping + 65 J/GPU capacitor storage + GPU burn mode; claimed up to 30% peak reduction,
+operator-configurable via SMI/Redfish). If the vendor fixes demand shape at the source, the
+transient problem shrinks generationally — and so does a tool whose headline is catching it.
+
+**Why it's still not a 1% delta:** (1) NVIDIA sells the *mitigation*; nobody sells the neutral
+*verdict* — utilities and off-takers won't take "the vendor says 30%" on faith, and verifying a
+vendor claim is a different business from making it (it's this company's DNA). (2) The fix is
+*configurable* — someone has to specify and check ramp/burn settings per site and contract; that
+lease/interconnection artifact has no author today. (3) The installed H100/H200 base — which fails
+our checks hard — runs for years, and utilities have no standard way to evaluate AI transients in
+the large-load studies now flooding them.
+
+**The discipline:** staged kill-tests, each nearly free, before any deeper build — the EE meeting
+(physics + boundability; see `TEAM_BRIEF_POWER_MODEL.md`), one utility/operator conversation (has
+a load ever been curtailed for transients? what would a study accept?), and one measured rack
+trace via Vertiv / NVIDIA / an operator. Any of them can kill it for the price of a conversation.
+
 ## Immediate Next Steps
 
 1. Get chip team to review MFU assumptions — even a ballpark validation ("our GB300 clusters run 50–55% MFU") would let us label the number as verified and light up the "vendor-verified" rung of the confidence ladder

@@ -160,8 +160,13 @@ Everything from §1 becomes electrical:
 | Peak compute burst | The facility's true peak exceeds the *average* the PUE math sized — contracts are written on peak. |
 
 **The defense stack, in order:**
-1. **On-board smoothing** (GB300/Rubin-class): capacitor/battery energy inside the rack shaves each
-   rack's own swing before it ever leaves the rack. This is why chip choice changes the power verdict.
+1. **On-board smoothing** (GB300/Rubin-class): NVIDIA's published system is three mechanisms —
+   power-cap ramping at workload start, 65 J/GPU of capacitor storage in the power shelves (enough
+   for sub-second spikes only — do the math: ~0.1 s of a half-swing), and a "burn" mode that keeps
+   GPUs consuming through lulls and tapers gently at job end. Net effect: the low phase rises (at a
+   real energy cost) and the edges soften; the steady high phase is largely untouched. This is why
+   chip choice changes the power verdict — and why our symmetric-compression model needs the EE
+   review (see gap list).
 2. **BESS** (facility battery): absorbs the fast component of whatever still reaches the meter.
    When the checks say "BESS is load-bearing," it means the design only passes because of it.
 3. **Gensets**: carry the load if the utility drops. Diesel engines can only *step* ~40% of their
@@ -356,19 +361,24 @@ over it. Declared timing gives the *tight* answer; the envelope gives the *safe*
 
 An honest list of where the current model is weakest, so logic-checking starts in the right places:
 
-1. **Trace timing is declared, not measured.** Timing is now a customer input (workload profile,
+1. **Smoothing is modeled as symmetric swing compression; NVIDIA's published mechanisms say
+   otherwise.** Burn raises the low phase (consuming real energy our model treats as free) without
+   lowering the steady high phase, and the 65 J/GPU capacitors only cover sub-second spikes. A
+   corrected asymmetric profile would likely make GB300 verdicts *harsher* on contracted peak while
+   improving the job-end/startup ramp checks. Flagged for the EE review before we change code.
+2. **Trace timing is declared, not measured.** Timing is now a customer input (workload profile,
    §8) with conservative defaults — the right structure — but a declared profile is only as good as
    the off-taker's answers. The validating cross-check (one measured fleet trace) is still open.
    The hardware/EE side's contribution is the amplitudes: per-phase power levels, slew rates, and
    the on-board smoothing characterization.
-2. **MFU is a heuristic curve** (published benchmarks + overhead model), not calibrated telemetry.
-3. **The supply side is a template.** Scaled Helio ratios, not a site one-line. Fine for screening;
+3. **MFU is a heuristic curve** (published benchmarks + overhead model), not calibrated telemetry.
+4. **The supply side is a template.** Scaled Helio ratios, not a site one-line. Fine for screening;
    the bench exists for hand-tuning; a real study should replace it.
-4. **PUE is annualized** in the IT-sizing math while the power model works in peaks — deliberate
+5. **PUE is annualized** in the IT-sizing math while the power model works in peaks — deliberate
    (it's the trap the tool demonstrates) but worth keeping conscious.
-5. **Economics assume infinite demand** (80% billed utilization for 10 years, rate erosion aside).
+6. **Economics assume infinite demand** (80% billed utilization for 10 years, rate erosion aside).
    Demand risk is not modeled anywhere and is arguably the largest real-world risk.
-6. **Inference power is modeled benignly** — no thundering-herd events (viral load spikes),
+7. **Inference power is modeled benignly** — no thundering-herd events (viral load spikes),
    no prefill-heavy bursts. Probably fine, unverified.
 
 ---
