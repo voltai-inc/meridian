@@ -48,6 +48,23 @@ measurements already exist in the literature (see primer refs) for calibrating t
 generation, and a GB300 measurement is one rack + one day + a clamp meter via Vertiv's lab, the
 NVIDIA relationship, or an operator. Bounds alone are enough to ship verdict *bands*.
 
+## What NVIDIA has published — and where our model may be wrong
+
+NVIDIA's GB300 smoothing is **three mechanisms** (NVIDIA dev blog, "GB300 NVL72 steady power"):
+power-cap ramping at workload start, **65 J/GPU** of electrolytic-capacitor storage in the power
+shelves, and a **"burn" mode** that keeps GPUs consuming through lulls and tapers gently at job
+end. Public claim: up to **30% peak grid demand reduction**; ramp rates and idle timers are
+operator-configurable (SMI/Redfish).
+
+The arithmetic worth checking in the room: 65 J/GPU covers ~0.1 s of a ~770 W half-swing — the
+capacitors physically can't absorb the 3-second training oscillation; they shave sub-second
+spikes. The 3-second flattening must come mostly from **burn**, which *raises the low phase by
+consuming extra energy* (not free) and doesn't lower the steady high phase. Our model compresses
+the swing symmetrically (high 100→86%, low 45→59%) — **the high-side reduction may be wrong**,
+and burn's energy cost is unmodeled. On the other hand, their ramp caps and burn-taper directly
+fix the job-end cliff and startup ramp — the checks our model flags hardest. Question 1's real
+form: *given these published mechanisms, what does the effective profile actually look like?*
+
 ## The formal team — different job, later meeting
 
 Keep the roles straight: **EE derives the curve's numbers** (the meeting above). **The simulator
