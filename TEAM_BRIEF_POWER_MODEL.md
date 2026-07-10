@@ -28,8 +28,11 @@ territory, one level up. That's why we're talking to you.
    without owning the hardware? Days, weeks, or measurement-only?
 2. **Does node scale to rack?** If we measured one node or tray, does that predict rack behavior,
    or do the shared power shelf / coolant loop / firmware change the picture?
-3. **Is our headline physically right?** "You can't buy your way out of a synchronized fleet with
-   bigger equipment — only the demand shape fixes it." True in your experience with fast load steps?
+3. **Is our headline physically right?** A synchronized fleet's problem is how fast the load
+   *moves*, not how big it is — transformers and switchgear carry a bigger peak but do nothing to
+   slow the swing, and even doubling the battery absorbs only part of it. So our model says only
+   the demand shape (smoothing, de-syncing, derating) fixes it. True in your experience with fast
+   load steps?
 4. **What did we ignore that matters?** We model no power factor swing, no inrush after
    checkpoints, no slew limits, no harmonics. Is any of those first-order at MW scale, or are they
    decimals a screening tool can ignore?
