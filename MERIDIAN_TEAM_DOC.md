@@ -40,9 +40,9 @@ The deliverable is a **Spec Sheet**: a structured pre-build summary that an off-
 
 Layers 2+3 together are "the power simulation." The chip picker is not the product — it is one input to the design whose power behavior gets simulated and validated.
 
-**The supply template is not load-bearing** (sensitivity-tested July 9): ±20% on transformers/switchgear/PDU leaves the verdict unchanged; it is decided by the contract (peak vs contracted MW), BESS, gensets, and the chip's demand shape. With unsmoothed H100-class demand, upgrading BESS+gensets+UPS simultaneously *still* fails on the contract — the fix is demand-side. Full table and the hardware-team feasibility questions: `MERIDIAN_PRIMER.md` §7–8.
+**Supply sensitivity is asymmetric** (sensitivity-tested July 9, corrected): the verdict *class* is decided by the demand shape — chip smoothing and fleet synchronization are the only inputs that flip FAIL to survivable. Supply sizing sets the margins and cuts one way: *oversizing* transformers/switchgear/BESS barely helps (upgrading BESS+gensets+UPS together still fails an unsmoothed fleet on the contract), but *undersizing* the BESS or the passive chain by 20–50% doubles the failure count. Standard ratios sit near the edge. The invented ramp-limit assumption turns out not to bind while the BESS is healthy. Full sweep: `TEAM_BRIEF_POWER_MODEL.md` + `scripts_sensitivity_sweep.js`.
 
-**Two models, one set of inputs.** The same left-rail workload inputs (training/mixed/inference, model size, batch) drive two separate models: the **performance model** (MFU at scale, tokens/sec, inference Pareto — "how much compute do you get," shown in Compute Design) and the **power model** (layers 2+3 — "does the electrical design survive," shown in Workload Power). Demand vs supply in the power model: the **demand** is the workload trace at the site's IT MW shaped by the chip's power profile; the **supply** is the Helio 2N reference block scaled to the site — a template, because no site-specific one-line exists at pre-engineering. A FAIL verdict therefore reads: *our reference design, sized this way, would not survive this workload* — not a claim about the site.
+**Two models, one set of inputs.** The same workload inputs (training/mixed/inference and model size at the top of Compute Design; batch on the Pareto chart) drive two separate models: the **performance model** (MFU at scale, tokens/sec, inference Pareto — "how much compute do you get," shown in Compute Design) and the **power model** (layers 2+3 — "does the electrical design survive," shown in Workload Power). Demand vs supply in the power model: the **demand** is the workload trace at the site's IT MW shaped by the chip's power profile; the **supply** is the Helio 2N reference block scaled to the site — a template, because no site-specific one-line exists at pre-engineering. A FAIL verdict therefore reads: *our reference design, sized this way, would not survive this workload* — not a claim about the site.
 
 **Chip choice now changes the verdict** (added July 9): on the 200 MW demo with a fully synchronized training fleet, GB300 and Vera Rubin come out **WARN** (on-board smoothing keeps the peak inside the contract and the BESS bridges the islanded step), while H100/H200/B200-class platforms **FAIL** (raw synchronized swing breaks contracted peak, UPS N-1, and genset checks). Every chip card shows its own power verdict.
 
@@ -50,7 +50,7 @@ Layers 2+3 together are "the power simulation." The chip picker is not the produ
 
 ## Current State
 
-The tool is a working prototype deployed at `meridian-web-swart.vercel.app`. It is a static web app — no backend, no database, runs entirely in the browser.
+The tool is a working prototype deployed at `meridian-web-swart.vercel.app` (repo: `github.com/voltai-inc/meridian`, deploys on push to main). It is a static web app — no backend, no database, runs entirely in the browser.
 
 **What's modeled:**
 - Site inputs auto-detect climate zone and grid operator from address
@@ -78,12 +78,14 @@ Every assumption is surfaced explicitly — "modeled, not measured" tags inline,
 
 ## Product Structure (rebuilt July 8, 2026)
 
-Two stages, framed as a pipeline — the same site at two confidence levels:
+A single **Design workspace** (the separate "Screen" pre-study mode was retired July 9 — the
+example feasibility study now does its educational job, and the Enter-yours flow covers manual
+input):
 
-| Stage | What it does |
+| Piece | What it does |
 |-------|-------------|
-| **01 Screen** | Pre-study site brief from broker claims: power situation advisory, what you could build if power is confirmed, internal commercial sensitivity, flags, and questions for the utility before spending $50K on the study. Everything labeled UNVERIFIED. Ends with "Continue to Design," carrying inputs forward. |
-| **02 Design** | Study-input workspace. Left rail: study facts + **confidence ladder** (broker-claimed → study-verified → vendor-verified → telemetry-calibrated; last two are roadmap rungs) + workload controls. Sticky KPI strip: GPUs · nameplate→at-scale MFU · usable IT load · capex per sustained PFLOPS · time-to-first-training-run · **live workload-power verdict** (click-through). Five sections: **Power** (study facts, confidence boundary, interruptible/expansion warnings), **Compute design** (design alternatives with per-chip scenario rates, MFU-vs-scale, inference Pareto, NVIDIA DSX 6-point check), **Workload power** (simulated meter-power trace with BESS smoothing, transient stats, all 19 checks, verdict, deep link to the full bench), **Sensitivity** (internal commercial scenario, NPV/IRR/EBITDA/CapEx), **Build** (BOM with critical path, open items before LOI). |
+| **Left rail** | Study facts + **confidence ladder** (broker-claimed → study-verified → vendor-verified → telemetry-calibrated; last two roadmap) + a link to the downloadable example feasibility study. Workload and financial controls live in the sections that use them, not the rail. |
+| **Workspace** | Sticky KPI strip (GPUs · MFU nameplate→at-scale · usable IT load · capex/sust-PFLOPS · first-training-run · **live workload-power verdict**) over five sections: **Power** (study inputs + boundary), **Compute design** (workload toggle + model size + design alternatives with per-chip scenario rates and power verdicts, MFU-vs-scale, inference Pareto with its batch slider, DSX check), **Workload power** (customer workload profile, simulated meter trace, 19 checks, envelope check, deep link to the bench), **Sensitivity** (internal commercial scenario), **Build** (BOM, critical path, open items). |
 | **Deliverables** | Full-screen takeover, two separate documents: the **2-page Off-Taker Spec Sheet** (technical readiness deliverable — no NPV/IRR hero metrics) and the **Advisory Report** (internal: full narrative, DSX table, commercial sensitivity, risk matrix). Both printable; shareable URL reproduces exact state. |
 
 Modeled-vs-measured honesty is surfaced inline ("modeled, not measured" tags on MFU and performance figures) and in the spec sheet's Open Items section, rather than a separate Data Gaps tab.

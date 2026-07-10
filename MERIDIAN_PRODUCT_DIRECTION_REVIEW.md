@@ -55,7 +55,7 @@ Current role: the main product wedge.
 
 What it does today:
 
-- Screen mode: turns broker/site claims into an unverified site brief.
+- ~~Screen mode: turns broker/site claims into an unverified site brief.~~ *(Retired July 9 — the product opens directly in the Design workspace; the downloadable example feasibility study and the confidence ladder now carry the "know what a study gives you" job.)*
 - Design mode: takes confirmed study-style inputs and calculates IT load, GPU/rack count, MFU, PUE, economics, DSX checks, BOM, critical path, and deliverables.
 - Generates two outputs: an off-taker spec sheet and an internal advisory report.
 

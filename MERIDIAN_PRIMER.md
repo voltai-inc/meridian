@@ -52,8 +52,8 @@ Inference has two internal phases with *different bottlenecks*:
 | Efficiency metric | MFU (§2) | tokens/sec/user vs tokens/sec/MW (§5) |
 | Grid risk | High (oscillation, ramps, dips) | Low |
 
-That one toggle in the left rail is legitimately a global input: it changes the performance model,
-the power model, and the economics simultaneously. That's why it lives in the rail and not inside a section.
+That one toggle is legitimately a global input: it changes the performance model, the power model,
+and the economics simultaneously. It lives at the top of Compute Design, next to the design it shapes.
 
 ---
 
@@ -144,8 +144,7 @@ a bandwidth-rich chip (GB300, 8 TB/s HBM) holds user-speed at high batch far bet
 (3.35 TB/s). The chip that's fastest for one user is usually not the most efficient per MW — that's
 why the chart exists: the "best inference chip" depends on which end of the curve your SLA sits at.
 
-*(Fair UI note: the batch slider only moves the operating point on this one chart — it arguably
-belongs next to the chart, not in the global rail. Flagged for cleanup.)*
+*(The batch slider lives inside this chart's panel — it only moves the operating point here.)*
 
 ---
 
@@ -215,10 +214,10 @@ We ran the sensitivity directly (200 MW demo site, training fleet):
 
 Three conclusions, and they are the answer to the objection:
 
-1. **The passive chain barely moves the verdict.** Sized at standard ratios, ±20% on transformers,
-   switchgear, feed, or PDU leaves the conclusion intact. These are linear ratings checks — the
-   template is a standard-practice stand-in (Tier III 2N ratios everyone builds), and the verdict
-   does not hinge on it.
+1. **The passive chain is asymmetric, not insignificant.** Oversizing transformers, switchgear,
+   feed, or PDU by 20% barely changes anything — but *undersizing* them by 20% doubles the failure
+   count (see the −20% row). Standard ratios sit near the edge: the supply model's job is catching
+   undersizing, not rescuing demand.
 2. **The verdict lives in four places:** the **contract** (peak vs contracted MW — a site fact),
    the **BESS**, the **gensets**, and the **demand shape** (chip smoothing × synchronization).
    Those are exactly the knobs Meridian exposes (chip cards, service type) and the bench lets you
@@ -371,7 +370,6 @@ An honest list of where the current model is weakest, so logic-checking starts i
    Demand risk is not modeled anywhere and is arguably the largest real-world risk.
 6. **Inference power is modeled benignly** — no thundering-herd events (viral load spikes),
    no prefill-heavy bursts. Probably fine, unverified.
-7. **Batch-size slider placement** — drives only the Pareto operating point; belongs next to that chart.
 
 ---
 

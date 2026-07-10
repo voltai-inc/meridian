@@ -16,13 +16,14 @@ Live: `meridian-web-swart.vercel.app` · Static HTML/JS, no backend, no build st
 
 | Page | What it is |
 |------|-----------|
-| `index.html` | Landing — the toolkit hub |
-| `site-intelligence.html` | **Meridian** (the product): Screen → Design pipeline, per-chip power verdicts, inline workload power validation, deliverables |
+| `index.html` | Dashboard — sidebar landing (main-platform style) with a Claude-powered chat and the tool grid |
+| `example-feasibility-study.html` | Printable illustrative utility feasibility study — the input document Meridian expects |
+| `site-intelligence.html` | **Meridian** (the product): single Design workspace — per-chip power verdicts, inline workload power validation, envelope check, deliverables |
 | `power-signoff.html` | **Workload Power Validation** — the full bench behind Meridian's inline verdict, every design knob exposed; Meridian deep-links in prefilled |
 | `helio.html` | **Helio** — the 2N reference architecture (10→100 MW pod block) whose scaled ratios Meridian validates against |
 | `power-validation.js` | Shared DOM-free simulation engine (traces, chain loads, BESS, 19 checks) — used by both pages, unit-testable under node |
 
-External: Digital Twin (separate app) at `http://51.21.243.237:5173/`.
+External: Digital Twin at `http://51.21.243.237:5173/` · Compliance Agent at `http://13.61.152.27/quick-check`. Procurement (BOM → RFQ → PO) is a placeholder in build.
 
 ## The model in one paragraph
 
@@ -42,7 +43,9 @@ and the chip's demand shape.
 | `MERIDIAN_PRIMER.md` | First-principles education: training vs inference, MFU, parallelism, topology, supply/demand, sensitivity results, hardware-team feasibility questions, known gaps |
 | `MERIDIAN_TEAM_DOC.md` | Internal product brief: what it is, current state, what we still need, business context |
 | `MERIDIAN_PRODUCT_DIRECTION_REVIEW.md` | Positioning: product boundary, recommended story, roadmap |
+| `TEAM_BRIEF_POWER_MODEL.md` | One-page brief for the EE conversation (context, the measured finding, four questions) |
 | `VERTIV_ASK.md` | Draft technical ask to Vertiv (cooling transient data) |
+| `scripts_sensitivity_sweep.js` | Reproducible input-sensitivity sweep behind the team brief |
 
 ## Working on this repo
 
