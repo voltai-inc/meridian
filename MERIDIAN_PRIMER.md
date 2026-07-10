@@ -235,7 +235,14 @@ nobody else has the data."*
 
 ---
 
-## 8 · Feasibility review with the formal / EE team
+## 8 · Feasibility review with the hardware team
+
+**Who owns what — this matters.** Formal verification people prove *logic* correct (RTL, properties,
+model checking); power draw curves are **power/system EE** territory (power delivery, power
+integrity, board and rack transients). The formal connection to Meridian is methodological — the 19
+checks are assertion-checking against a model, which is the narrative bridge — but the amplitude
+characterization questions below are for whoever does power/hardware EE. One exception marked (Q1b)
+is genuinely a digital-design question.
 
 The chip power profile Meridian consumes has two ingredient types — **amplitudes** (how much power
 in each state) and **timing** (when states change). Timing is the customer's data (see below).
@@ -246,9 +253,13 @@ them realistic and buildable for us?** Frame it as a feasibility review, not a d
      checkpoint fraction, smoothing credit) driving a facility-level transient simulation. From an
      EE standpoint, is that abstraction defensible, or is something first-order missing
      (power-factor behavior under swing, recovery inrush, pump/fan transients)?
+  1b. **(For a digital designer.)** The low-phase amplitude is set by what the silicon does between
+     compute bursts — clock/power gating on the tensor units while NVLink and HBM stay active during
+     all-reduce. From your knowledge of these architectures, what fraction of peak dynamic power
+     remains in that phase? (We assume 45%.)
   2. **Can the amplitudes be derived without owning the hardware?** We don't have a GB300 NVL72 to
      instrument. Can per-phase draw and slew be derived analytically — from vendor power specs,
-     board/PDN design data, component power states — the way you already reason about power at the
+     board/PDN design data, component power states — the way power EEs reason at the
      silicon/board level? Or is this measurement-only?
   3. **The smoothing number specifically:** we credit GB300-class on-board energy storage with
      damping ~50% of the 3-second training-step swing (from public NVIDIA material). From what you
@@ -309,9 +320,9 @@ there is no real one-line diagram yet. A FAIL verdict therefore reads precisely:
 *"the design we would build, sized the obvious way, does not survive this workload."*
 That sentence is the product.
 
-### Relationship to the formal / EE team
+### Relationship to the hardware and formal teams
 The chip power profile Meridian consumes — per-phase draw levels, checkpoint depth, smoothing
-credit — is structurally the same artifact the EE/formal team produces when characterizing hardware:
+credit — is structurally the same artifact a power/hardware EE produces when characterizing hardware:
 a per-state transient power model, one abstraction level up (rack instead of board). Today the
 numbers are literature estimates; their measured versions slot into the same interface and move the
 confidence ladder from "modeled" to "vendor-verified." And the verdict machinery itself —
@@ -334,7 +345,7 @@ An honest list of where the current model is weakest, so logic-checking starts i
 1. **Trace timing is declared, not measured.** Timing is now a customer input (workload profile,
    §8) with conservative defaults — the right structure — but a declared profile is only as good as
    the off-taker's answers. The validating cross-check (one measured fleet trace) is still open.
-   The formal team's contribution is the amplitude side: per-phase power levels, slew rates, and
+   The hardware/EE side's contribution is the amplitudes: per-phase power levels, slew rates, and
    the on-board smoothing characterization.
 2. **MFU is a heuristic curve** (published benchmarks + overhead model), not calibrated telemetry.
 3. **The supply side is a template.** Scaled Helio ratios, not a site one-line. Fine for screening;
