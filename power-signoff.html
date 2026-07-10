@@ -6,7 +6,7 @@
 <title>Workload Power Validation · Voltai</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root { --blue:#2E75B6; --green:#1E8449; --amber:#D9A400; --red:#C0392B; --ink:#1a1a1a; }
+  :root { --blue:#3a3a3a; --green:#1E8449; --amber:#D9A400; --red:#C0392B; --ink:#1a1a1a; }
   * { box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; color: var(--ink); margin: 0;
          background: #f4f6f8; }
@@ -256,8 +256,8 @@ function drawTimeline(sim, site) {
   charts.timeline = new Chart($("chartTimeline"), {
     type: "line",
     data: { labels: e1.xs.map(v => v.toFixed(1)), datasets: [
-      { label: "Meter max (no BESS)", data: e1.maxs, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: "rgba(46,117,182,0.25)" },
-      { label: "Meter min (no BESS)", data: e1.mins, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 },
+      { label: "Meter max (no BESS)", data: e1.maxs, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: "rgba(46,117,182,0.25)" },
+      { label: "Meter min (no BESS)", data: e1.mins, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 },
       { label: "Meter (BESS-smoothed)", data: e2.means, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
       { label: `Contracted ${site.contracted_mw} MW`, data: e1.xs.map(() => site.contracted_mw), borderColor: "#C0392B", borderDash: [6, 4], borderWidth: 1.2, pointRadius: 0 },
     ]},
@@ -278,7 +278,7 @@ function drawZoom(sim) {
   charts.zoom = new Chart($("chartZoom"), {
     type: "line",
     data: { labels: xs, datasets: [
-      { label: "Meter (no BESS)", data: raw, borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 },
+      { label: "Meter (no BESS)", data: raw, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 },
       { label: "Meter (BESS-smoothed)", data: sm, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
     ]},
     options: { animation: false, maintainAspectRatio: false,
@@ -307,7 +307,7 @@ function drawLoading(sim) {
   charts.loading = new Chart($("chartLoading"), {
     type: "bar",
     data: { labels: names, datasets: [
-      { label: "Normal 2N (per path)", data: normal, backgroundColor: "#2E75B6" },
+      { label: "Normal 2N (per path)", data: normal, backgroundColor: "#3a3a3a" },
       { label: "N-1 (single path)", data: n1, backgroundColor: "#D9A400" },
     ]},
     options: { indexAxis: "y", animation: false, maintainAspectRatio: false,
@@ -342,7 +342,7 @@ function drawSpectrum(sim, rep) {
   charts.spectrum = new Chart($("chartSpectrum"), {
     type: "line",
     data: { datasets: [{ label: "amplitude (MW)", data: xs.map((x, i) => ({ x, y: ys[i] })),
-      borderColor: "#2E75B6", borderWidth: 1, pointRadius: 0 }]},
+      borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 }]},
     options: { animation: false, maintainAspectRatio: false, parsing: false,
       scales: { x: { type: "logarithmic", min: 0.002, max: 5,
                      title: { display: true, text: `Hz — shaded 0.05–1 Hz band is grid-critical; dominant ~${rep.oscRaw.domFreq.toFixed(2)} Hz, ${rep.oscRaw.p2p.toFixed(1)} MW p2p` } },
@@ -438,7 +438,7 @@ function applyQueryPrefill() {
   if (q.get("from") === "meridian") {
     const note = document.createElement("div");
     note.className = "hint";
-    note.style.cssText = "margin-bottom:10px;padding:8px 10px;border:1px solid #2E75B6;border-radius:6px;color:#2E75B6";
+    note.style.cssText = "margin-bottom:10px;padding:8px 10px;border:1px solid #3a3a3a;border-radius:6px;color:#3a3a3a";
     note.textContent = "Prefilled from Meridian — design sized from the selected site, chip, and workload. Adjust anything and re-run.";
     document.querySelector("aside.panel").prepend(note);
   }
