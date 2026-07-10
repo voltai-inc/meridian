@@ -386,33 +386,6 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     </div>
 
     <div class="rail-section">
-      <span class="eyebrow">Workload</span>
-      <div class="field"><label>Primary workload</label>
-        <div class="seg" id="wl-seg">
-          <button data-wl="train" class="on" onclick="setWl('train')">Training</button>
-          <button data-wl="mix" onclick="setWl('mix')">Mixed</button>
-          <button data-wl="infer" onclick="setWl('infer')">Inference</button>
-        </div>
-      </div>
-      <div class="field"><label>Model size (parameters)</label>
-        <select id="m2-model" onchange="m2ModelB=parseFloat(this.value);renderDesign(true)">
-          <option value="7">7B — small</option>
-          <option value="70" selected>70B — frontier open-weights</option>
-          <option value="405">405B — large frontier</option>
-          <option value="1000">1T-class — MoE frontier</option>
-        </select>
-      </div>
-      <div class="field"><label>Inference batch size</label>
-        <div class="range-row">
-          <input type="range" id="m2-batch" min="0" max="9" value="5" oninput="m2Batch=BATCHES[this.value];renderDesign(true)">
-          <span class="range-val" id="m2-batch-val">32</span>
-        </div>
-        <div class="hint">Moves the operating point on the Pareto frontier — per-user speed vs. per-MW efficiency</div>
-      </div>
-      <div class="hint" style="margin-top:8px">Parallelism (TP/PP/DP) auto-selected per cluster scale. MFU is modeled, not measured.</div>
-    </div>
-
-    <div class="rail-section">
       <div class="hint">Commercial numbers are internal sensitivities. The off-taker spec sheet leads with power confidence, compute design, workload readiness, and open items.</div>
     </div>
   </div>
@@ -1157,6 +1130,19 @@ function renderCompute(x) {
 
   document.getElementById('sec-compute').innerHTML = `
     <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">COMPUTE DESIGN</span><span class="ws-sub">site-ready design alternatives — click a platform, the spec updates</span></div>
+    <div class="assume-row" style="margin-bottom:14px">
+      <span class="eyebrow" style="align-self:center;margin-right:4px">Workload</span>
+      <div class="seg" id="wl-seg">
+        <button data-wl="train" class="${m2Wl==='train'?'on':''}" onclick="setWl('train')">Training</button>
+        <button data-wl="mix" class="${m2Wl==='mix'?'on':''}" onclick="setWl('mix')">Mixed</button>
+        <button data-wl="infer" class="${m2Wl==='infer'?'on':''}" onclick="setWl('infer')">Inference</button>
+      </div>
+      <div class="assume"><label>Model size</label><div class="in">
+        <select id="m2-model" onchange="m2ModelB=parseFloat(this.value);renderDesign(true)" style="border:none;background:none;font-size:12px;outline:none">
+          ${[[7,'7B — small'],[70,'70B — frontier open-weights'],[405,'405B — large frontier'],[1000,'1T-class — MoE frontier']].map(([v,l])=>`<option value="${v}"${m2ModelB===v?' selected':''}>${l}</option>`).join('')}
+        </select></div></div>
+      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center">Parallelism (TP/PP/DP) auto-selected per cluster scale · MFU modeled, not measured</span>
+    </div>
     <div class="chip-grid">${cards}</div>
     <div class="dsx-chips"><span class="eyebrow" style="align-self:center;margin-right:4px">NVIDIA DSX</span>${dsxChipsHTML}</div>
     <div class="chart-duo">
@@ -1176,6 +1162,13 @@ function renderCompute(x) {
       <div class="chart-panel full">
         <div class="chart-title">Inference Pareto — per-user speed vs. per-MW efficiency · ${m2ModelB>=1000?'1T':m2ModelB+'B'} model · all chips @ 1 MW IT</div>
         <div class="chart-caption">The chip fastest for one user is often the worst per watt at scale — there is no single winner, and the ranking shifts with batch size. The black ring is your operating point.</div>
+        <div class="range-row" style="max-width:340px;margin:6px 0 4px">
+          <span style="font-size:10.5px;color:var(--muted);white-space:nowrap">Batch size</span>
+          <input type="range" id="m2-batch" min="0" max="9" value="${Math.max(0,BATCHES.indexOf(m2Batch))}"
+            oninput="m2Batch=BATCHES[this.value];document.getElementById('m2-batch-val').textContent=m2Batch"
+            onchange="renderDesign(true)">
+          <span class="range-val" id="m2-batch-val">${m2Batch}</span>
+        </div>
         ${buildParetoSVG(m2SelChip,m2ModelB,m2Batch)}
         <div class="chart-legend">${Object.keys(CHIPS).map(k=>`<span class="chart-legend-item${k===m2SelChip?' sel':''}" onclick="${voltCompat(CHIPS[k],d.poi_voltage)?`selectChip('${k}')`:''}"><span class="legend-dot" style="background:${CHIP_COLORS[k]}"></span>${CHIPS[k].n}</span>`).join('')}</div>
       </div>
@@ -1302,8 +1295,7 @@ function selectChip(k) {
 }
 function setWl(w) {
   m2Wl = w;
-  document.querySelectorAll('#wl-seg button').forEach(b=>b.classList.toggle('on',b.dataset.wl===w));
-  renderDesign(true);
+  renderDesign(true); // the workload controls render from state inside Compute Design
 }
 function setView(v) {
   view = 'design';
@@ -1525,9 +1517,7 @@ window.onload = function() {
       m2DiscR = (parseFloat(p.get('disc'))||10)/100;
       m2Mult = parseFloat(p.get('mult'))||20;
       usingDemo = p.get('demo')!=='0';
-      document.getElementById('m2-model').value = String(m2ModelB);
-      document.getElementById('m2-batch').value = Math.max(0,BATCHES.indexOf(m2Batch));
-      document.querySelectorAll('#wl-seg button').forEach(b=>b.classList.toggle('on',b.dataset.wl===m2Wl));
+      // workload controls render from state inside Compute Design — no DOM writes needed here
       if (!usingDemo) {
         const set=(id,k)=>{const v=p.get(k);if(v!==null&&v!=='')document.getElementById(id).value=v;};
         set('m2-mw','mw');set('m2-poi-volt','volt');set('m2-service','service');set('m2-pf','pf');
