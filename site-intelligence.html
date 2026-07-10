@@ -504,6 +504,7 @@ let m2PwrCost=0.05, m2DiscR=0.10, m2Mult=20;
 // Defaults = conservative fully-synchronized training archetype; ask the off-taker for theirs.
 const WLPROF_DEFAULT = {iter:3.0, ckptEvery:1200, ckptDur:20, sync:1.0};
 let m2Prof = {...WLPROF_DEFAULT};
+let m2TrainShare = 0.6; // mixed-fleet training share — draggable in Compute Design
 function setProf(k,v){ const n=parseFloat(v); if (isFinite(n) && (k==='sync' ? n>=0&&n<=1 : n>0)) m2Prof[k]=n; debounce(); }
 // per-chip assumed rental rates ($/GPU-hr) — seeded from CHIPS, editable under each chip card
 const chipRates = Object.fromEntries(Object.entries(CHIPS).map(([k,c])=>[k,c.rate]));
@@ -818,14 +819,14 @@ function chipPowerProfile(chip) {
 const valCacheMap = new Map();
 function runValidation(itMW, d, wl, chip) {
   const prof = chipPowerProfile(chip);
-  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio,m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync].join('|');
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio,m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync,m2TrainShare].join('|');
   if (valCacheMap.has(key)) return valCacheMap.get(key);
   const {design,site} = buildValidationModel(itMW,d);
   design.mech_cooling_ratio = prof.coolRatio;
   const tOpts = {duration_s:1800, job_end_at_s:1530, high_frac:prof.high_frac, low_frac:prof.low_frac, checkpoint_frac:prof.checkpoint_frac, noise_frac:prof.noise_frac,
                  iteration_period_s:m2Prof.iter, checkpoint_every_s:m2Prof.ckptEvery, checkpoint_dur_s:m2Prof.ckptDur, sync_fraction:m2Prof.sync};
   const trace = wl==='infer' ? inferenceTrace(design.critical_it_mw,{duration_s:1800})
-              : wl==='mix'   ? mixedTrace(design.critical_it_mw,{...tOpts,training_share:0.6})
+              : wl==='mix'   ? mixedTrace(design.critical_it_mw,{...tOpts,training_share:m2TrainShare})
               :                trainingTrace(design.critical_it_mw,tOpts);
   const sim = simulate(design,trace,30);
   const rep = runChecks(sim,site);
@@ -888,7 +889,7 @@ function validationLink(val, wl) {
     contracted:s0.contracted_mw, ramp:s0.ramp_limit_mw_per_s,
     wl: wl==='infer'?'inference':wl==='mix'?'mixed':'training',
     iter:m2Prof.iter, ckptevery:m2Prof.ckptEvery, ckptdur:m2Prof.ckptDur, sync:m2Prof.sync,
-    trainshare:0.6, from:'meridian',
+    trainshare:m2TrainShare, from:'meridian',
   });
   return 'power-signoff.html?'+p.toString();
 }
@@ -935,12 +936,12 @@ function renderValidation(x) {
     : rep.verdict==='WARN'
     ? 'Survivable with conditions — review the warned checks below before locking the electrical design.'
     : 'This design does not survive this workload as-sized. Sizing IT from annualized PUE leaves no headroom for peak transients — the fixes are some combination of derating IT below the PUE-average figure, more BESS power, larger gensets, or de-synchronizing the training fleet. This is the failure mode operators typically discover after energization; here it costs a design iteration instead.';
-  const worst = rep.checks.filter(c=>c.status!=='PASS').slice(0,6);
-  const rows = rep.checks.map(ch=>`<tr>
+  const findings = rep.checks.filter(c=>c.status!=='PASS');
+  const rows = findings.map(ch=>`<tr>
+    <td>${ch.status==='WARN'?'<span style="color:var(--warn-text);font-weight:600">! Warn</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td>
     <td style="font-weight:600;color:var(--ink)">${ch.name}</td>
     <td class="mono" style="font-size:11px">${ch.value}</td>
-    <td class="mono" style="font-size:11px">${ch.limit}</td>
-    <td>${ch.status==='PASS'?'<span style="color:var(--ok-text);font-weight:600">✓ Pass</span>':ch.status==='WARN'?'<span style="color:var(--warn-text);font-weight:600">! Warn</span>':'<span style="color:var(--risk-text);font-weight:600">✗ Fail</span>'}</td></tr>`).join('');
+    <td class="mono" style="font-size:11px">${ch.limit}</td></tr>`).join('');
   const c = CHIPS[m2SelChip];
   document.getElementById('sec-valid').innerHTML = `
     <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">stress-testing the design against the workload's power draw — before it's built</span>
@@ -973,10 +974,10 @@ function renderValidation(x) {
       <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${vClass}-text)">${rep.verdict}</div><div class="pgrid-label">${rep.counts.FAIL} fail · ${rep.counts.WARN} warn · ${rep.counts.PASS} pass</div></div>
     </div>
     <div class="callout ${vClass==='ok'?'info':vClass}">${vText} Electrical chain modeled as the Helio 2N reference block scaled to ${itMW.toFixed(1)} MW IT; ramp/oscillation limits are assumptions pending ${d.utility}'s large-load study.</div>
-    ${worst.length?`<div style="margin-top:10px"></div>`:''}
-    <details class="drawer" ${rep.verdict!=='PASS'?'open':''}><summary>All ${rep.checks.length} checks — component loading (2N + N-1), grid limits, islanded genset</summary>
-      <div class="drawer-body" style="overflow-x:auto"><table class="data"><thead><tr><th>Check</th><th>Simulated</th><th>Limit</th><th style="width:80px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
-    </details>
+    ${findings.length?`<div style="margin-top:14px"><span class="eyebrow" style="display:block;margin-bottom:8px">Findings — ${findings.length} of ${rep.checks.length} checks need attention</span>
+      <div style="overflow-x:auto"><table class="data"><thead><tr><th style="width:70px">Status</th><th>Check</th><th>Simulated</th><th>Limit</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">WARN — survivable, but the margin is thin or the BESS is doing load-bearing work. FAIL — a hard limit (rating, contract, ramp) is exceeded. The ${rep.counts.PASS} passing checks and every design knob are in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Design Review ↗</a>.</div></div>`
+    :`<div class="callout info" style="margin-top:14px">All ${rep.checks.length} checks pass — every component inside its rating, every grid commitment held with margin. Full evidence in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Design Review ↗</a>.</div>`}
     ${(()=>{ // formal envelope check: worst case over ALL admissible workload timings
       const env = envCache.get(envKeyOf(itMW,d,m2SelChip));
       if (!env) return `<div class="chart-panel" style="margin-top:14px">
@@ -1001,7 +1002,7 @@ function renderValidation(x) {
           : 'The envelope contains workloads that break this design. Either constrain the off-taker contract to exclude the counterexample pattern (e.g. cap synchronized fraction), or resize the design until the whole envelope passes.'}</div>
       </div>`;})()}
     <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
-      <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open full validation tool — prefilled with this design ↗</a>
+      <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open Design Review — prefilled with this design ↗</a>
       <span style="font-size:11px;color:var(--muted);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
     </div>`;
 }
@@ -1164,6 +1165,13 @@ function renderCompute(x) {
         <button data-wl="mix" class="${m2Wl==='mix'?'on':''}" onclick="setWl('mix')">Mixed</button>
         <button data-wl="infer" class="${m2Wl==='infer'?'on':''}" onclick="setWl('infer')">Inference</button>
       </div>
+      ${m2Wl==='mix'?`<div class="assume"><label>Training share of fleet</label>
+        <div class="range-row" style="width:170px">
+          <input type="range" min="10" max="90" step="5" value="${Math.round(m2TrainShare*100)}"
+            oninput="m2TrainShare=this.value/100;document.getElementById('m2-ts-val').textContent=this.value+'%'"
+            onchange="renderDesign(true)">
+          <span class="range-val" id="m2-ts-val">${Math.round(m2TrainShare*100)}%</span>
+        </div></div>`:''}
       <div class="assume"><label>Model size</label><div class="in">
         <select id="m2-model" onchange="m2ModelB=parseFloat(this.value);renderDesign(true)" style="border:none;background:none;font-size:12px;outline:none">
           ${[[7,'7B — small'],[70,'70B — frontier open-weights'],[405,'405B — large frontier'],[1000,'1T-class — MoE frontier']].map(([v,l])=>`<option value="${v}"${m2ModelB===v?' selected':''}>${l}</option>`).join('')}
@@ -1366,6 +1374,7 @@ function shareHash(extra) {
   const rateOverrides = Object.entries(chipRates).filter(([k,v])=>v!==CHIPS[k].rate).map(([k,v])=>k+':'+v).join('|');
   if (rateOverrides) p.set('rates',rateOverrides);
   if (JSON.stringify(m2Prof)!==JSON.stringify(WLPROF_DEFAULT)) p.set('prof',[m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync].join(':'));
+  if (m2TrainShare!==0.6) p.set('tshare',m2TrainShare);
   p.set('pwr',m2PwrCost); p.set('disc',Math.round(m2DiscR*100)); p.set('mult',m2Mult);
   if (!usingDemo) {
     p.set('mw',document.getElementById('m2-mw').value); p.set('volt',document.getElementById('m2-poi-volt').value);
@@ -1555,6 +1564,7 @@ window.onload = function() {
       else if (p.get('rate')) { const r=parseFloat(p.get('rate')); if (r>0) chipRates[m2SelChip]=r; } // legacy links
       if (p.get('prof')) { const [i,ce,cd,s]=p.get('prof').split(':').map(parseFloat);
         if (i>0) m2Prof.iter=i; if (ce>0) m2Prof.ckptEvery=ce; if (cd>0) m2Prof.ckptDur=cd; if (s>=0&&s<=1) m2Prof.sync=s; }
+      const ts=parseFloat(p.get('tshare')); if (ts>=0.1&&ts<=0.9) m2TrainShare=ts;
       m2PwrCost = parseFloat(p.get('pwr'))||0.05;
       m2DiscR = (parseFloat(p.get('disc'))||10)/100;
       m2Mult = parseFloat(p.get('mult'))||20;

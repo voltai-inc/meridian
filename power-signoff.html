@@ -47,6 +47,16 @@ nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(-
 .seg{display:flex;gap:2px;background:var(--sunken);border:1px solid var(--hairline);border-radius:5px;padding:2px;flex-wrap:wrap}
 .seg button{flex:1;padding:6px 4px;font-size:11.5px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;font-family:var(--f);white-space:nowrap;transition:.12s}
 .seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(6,10,14,.08)}
+.upload-btn{width:100%;background:var(--surface);border:1px dashed var(--border-strong);color:var(--body);border-radius:6px;padding:9px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--f);transition:.12s;margin-bottom:8px}
+.upload-btn:hover{border-color:var(--volt);color:var(--volt)}
+.csv-chip{display:flex;align-items:center;gap:8px;background:var(--volt-tint);border:1px solid #f0cbcb;border-radius:5px;padding:7px 10px;margin-bottom:8px;font-family:var(--m);font-size:11px;color:var(--volt);cursor:pointer}
+.csv-chip.inactive{background:var(--sunken);border-color:var(--border);color:var(--muted)}
+.csv-chip .x{margin-left:auto;font-weight:700;cursor:pointer;padding:0 3px}
+.range-wrap{display:flex;align-items:center;gap:8px;width:150px}
+.range-wrap input[type=range]{flex:1;accent-color:var(--volt)}
+.range-val{font-family:var(--m);font-size:11.5px;font-weight:500;color:var(--volt);min-width:38px;text-align:right}
+.verdict-explain{border-radius:6px;padding:11px 14px;font-size:12.5px;line-height:1.6;margin-top:14px;background:#f5f5f5;border:1px solid #e4e4e4;color:#3a3a3a}
+.verdict-legend{font-family:var(--m);font-size:10.5px;color:var(--muted);margin-top:8px;letter-spacing:.02em}
 button.run{width:calc(100% - 36px);margin:16px 18px 0;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);transition:.12s}
 button.run:hover{background:#26323d}
 #spinner{display:none;font-family:var(--m);font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
@@ -106,7 +116,14 @@ table.data td{padding:8px 10px;font-size:12.5px;color:var(--body);border-bottom:
 <div class="app">
 <aside class="rail">
   <div class="rail-note" id="meridian-note" style="display:none"></div>
-  <div class="rail-note"><strong>The design import surface.</strong> A facility electrical design goes in — the scaled Helio reference block, or the EPC's actual one-line values typed below — and gets stress-tested against the workload envelope. Nothing leaves your browser.</div>
+
+  <div class="rail-section">
+    <span class="eyebrow">Measured telemetry</span>
+    <button class="upload-btn" id="csvBtn">⤒ &nbsp;Upload measured trace (CSV)</button>
+    <input type="file" id="csvFile" accept=".csv" style="display:none">
+    <div class="csv-chip" id="csvChip" style="display:none"></div>
+    <div class="hint">Columns <span style="font-family:var(--m)">time_s, power_mw</span>. Replaces the synthetic workload below with the customer's real trace — the calibrated version of this review.</div>
+  </div>
 
   <div class="rail-section">
     <span class="eyebrow">Workload under review</span>
@@ -114,14 +131,13 @@ table.data td{padding:8px 10px;font-size:12.5px;color:var(--body);border-bottom:
       <button class="on" data-preset="training">Training</button>
       <button data-preset="mixed">Mixed</button>
       <button data-preset="inference">Inference</button>
-      <button data-preset="csv">CSV…</button>
     </div>
-    <input type="file" id="csvFile" accept=".csv" style="display:none">
-    <div class="hint" id="csvInfo">Training = worst case (fully synchronized fleet). CSV imports measured telemetry (time_s, power_mw) for calibrated review.</div>
+    <div class="hint" id="csvInfo">Training = worst case (fully synchronized fleet). Synthetic traces reproduce published fluctuation characteristics.</div>
   </div>
 
   <div class="rail-section">
     <span class="eyebrow">Design under review — 2N block</span>
+    <div class="hint" style="margin:0 0 8px">The design import surface: the scaled Helio reference block, or the EPC's actual one-line values typed here. Nothing leaves your browser.</div>
     <div class="row"><label>Critical IT load (MW)</label><input type="number" id="itMw" value="12" step="0.5"></div>
     <div class="row"><label>Per-path capacity: feed/MV/TX/LV (MW)</label><input type="number" id="pathMw" value="17.1" step="0.1"></div>
     <div class="row"><label>UPS rating per path (MW)</label><input type="number" id="upsMw" value="12" step="0.5"></div>
@@ -150,11 +166,11 @@ table.data td{padding:8px 10px;font-size:12.5px;color:var(--body);border-bottom:
     <div class="row wl-train"><label>Iteration period (s)</label><input type="number" id="iterPeriod" value="3" step="0.5"></div>
     <div class="row wl-train"><label>Duty cycle (high phase)</label><input type="number" id="duty" value="0.70" step="0.05"></div>
     <div class="row wl-train"><label>Low phase (× TDP)</label><input type="number" id="lowFrac" value="0.45" step="0.05"></div>
-    <div class="row wl-train"><label>Synchronized fraction of fleet</label><input type="number" id="syncFrac" value="1.0" step="0.1"></div>
+    <div class="row wl-train"><label>Synchronized fleet</label><span class="range-wrap"><input type="range" id="syncFrac" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('syncVal').textContent=Math.round(this.value*100)+'%'"><span class="range-val" id="syncVal">100%</span></span></div>
     <div class="row wl-train"><label>Checkpoint every (s)</label><input type="number" id="ckptEvery" value="1200" step="100"></div>
     <div class="row wl-train"><label>Checkpoint duration (s)</label><input type="number" id="ckptDur" value="20" step="5"></div>
     <div class="row wl-train"><label>Job ends at (fraction of run)</label><input type="number" id="jobEnd" value="0.85" step="0.05"></div>
-    <div class="row wl-mixed" style="display:none"><label>Training share of fleet</label><input type="number" id="trainShare" value="0.6" step="0.1"></div>
+    <div class="row wl-mixed" style="display:none"><label>Training share of fleet</label><span class="range-wrap"><input type="range" id="trainShare" min="0.1" max="0.9" step="0.05" value="0.6" oninput="document.getElementById('tsVal').textContent=Math.round(this.value*100)+'%'"><span class="range-val" id="tsVal">60%</span></span></div>
   </div>
 
   <button class="run" id="runBtn">Run the review</button>
@@ -166,6 +182,8 @@ table.data td{padding:8px 10px;font-size:12.5px;color:var(--body);border-bottom:
     <div class="ws-head"><span class="ws-idx">01</span><span class="ws-title">VERDICT</span><span class="ws-sub">does this design survive this workload?</span>
       <span class="right"><button class="dl" id="dlJson">Download results JSON</button></span></div>
     <div class="verdict-row"><span class="verdict-badge" id="verdictBadge">—</span></div>
+    <div class="verdict-explain" id="verdictExplain"></div>
+    <div class="verdict-legend">PASS — every limit holds with margin &nbsp;·&nbsp; WARN — survivable, but a margin is thin or a mitigation (BESS) is load-bearing &nbsp;·&nbsp; FAIL — a hard limit is exceeded (rating, contract, ramp, oscillation, genset step)</div>
     <div class="stat-tiles">
       <div class="stat"><b id="stCounts">—</b><span>checks pass / warn / fail</span></div>
       <div class="stat"><b id="stPeak">—</b><span>facility peak at meter</span></div>
@@ -230,13 +248,25 @@ let csvTrace = null;
 let lastResults = null;
 const charts = {};
 
-document.querySelectorAll("#preset-seg button").forEach(ch => ch.addEventListener("click", () => {
-  if (ch.dataset.preset === "csv") { $("csvFile").click(); return; }
-  preset = ch.dataset.preset;
-  document.querySelectorAll("#preset-seg button").forEach(c => c.classList.toggle("on", c === ch));
-  document.querySelectorAll(".wl-train").forEach(r => r.style.display = preset === "inference" ? "none" : "flex");
-  document.querySelectorAll(".wl-mixed").forEach(r => r.style.display = preset === "mixed" ? "flex" : "none");
-}));
+function setCsvChip() {
+  const chip = $("csvChip");
+  if (!csvTrace) { chip.style.display = "none"; return; }
+  const active = preset === "csv";
+  chip.style.display = "flex";
+  chip.className = "csv-chip" + (active ? "" : " inactive");
+  chip.innerHTML = `${active ? "USING" : "LOADED"} · ${csvTrace.name} · ${csvTrace.p.length} samples <span class="x" title="Remove trace">✕</span>`;
+  chip.querySelector(".x").onclick = (e) => { e.stopPropagation(); csvTrace = null; if (preset === "csv") setPreset("training"); setCsvChip(); };
+  chip.onclick = () => { preset = "csv"; document.querySelectorAll("#preset-seg button").forEach(c => c.classList.remove("on")); setCsvChip(); };
+}
+function setPreset(name) {
+  preset = name;
+  document.querySelectorAll("#preset-seg button").forEach(c => c.classList.toggle("on", c.dataset.preset === name));
+  document.querySelectorAll(".wl-train").forEach(r => r.style.display = name === "inference" ? "none" : "flex");
+  document.querySelectorAll(".wl-mixed").forEach(r => r.style.display = name === "mixed" ? "flex" : "none");
+  setCsvChip();
+}
+document.querySelectorAll("#preset-seg button").forEach(ch => ch.addEventListener("click", () => setPreset(ch.dataset.preset)));
+$("csvBtn").addEventListener("click", () => $("csvFile").click());
 
 $("csvFile").addEventListener("change", (ev) => {
   const f = ev.target.files[0];
@@ -255,9 +285,8 @@ $("csvFile").addEventListener("change", (ev) => {
     const dt = t[1] - t[0];
     csvTrace = { t: Float64Array.from(t), p: Float64Array.from(p), dt, name: f.name, params: { source: f.name } };
     preset = "csv";
-    document.querySelectorAll("#preset-seg button").forEach(c => c.classList.toggle("on", c.dataset.preset === "csv"));
-    $("csvInfo").textContent = `Loaded ${f.name}: ${p.length} samples, dt ${dt.toFixed(3)} s, ` +
-      `mean ${(p.reduce((a,b)=>a+b,0)/p.length).toFixed(2)} MW`;
+    document.querySelectorAll("#preset-seg button").forEach(c => c.classList.remove("on"));
+    setCsvChip();
   };
   rd.readAsText(f);
 });
@@ -461,6 +490,14 @@ $("runBtn").addEventListener("click", () => {
                       FAIL: "FAIL — redesign required" }[rep.verdict];
       badge.textContent = label;
       badge.className = "verdict-badge " + { PASS: "v-pass", WARN: "v-warn", FAIL: "v-fail" }[rep.verdict];
+      const cap = (arr) => arr.length > 6 ? arr.slice(0,6).join(" · ") + ` — and ${arr.length-6} more (table below)` : arr.join(" · ");
+      const fails = cap(rep.checks.filter(c => c.status === "FAIL").map(c => c.name));
+      const warns = cap(rep.checks.filter(c => c.status === "WARN").map(c => c.name));
+      $("verdictExplain").innerHTML = rep.verdict === "PASS"
+        ? "<strong>What this means:</strong> every component stays inside its continuous rating and every grid commitment (contracted MW, ramp, oscillation, islanded genset) holds with margin. This design absorbs this workload — the sign-off question is answered for this trace; run the timing envelope in Meridian for the stronger any-workload claim."
+        : rep.verdict === "WARN"
+        ? `<strong>What this means:</strong> nothing exceeds a hard limit, but the design only works with thin margin or a mitigation doing load-bearing work: <strong>${warns}</strong>. Typically loading above the 80–90% watch threshold, or a check that fails raw and only passes because of the BESS. The fix is margin — more BESS, larger gensets, a higher contract, or derated IT — not a redesign.`
+        : `<strong>What this means:</strong> a hard limit is exceeded — <strong>${fails}</strong>. Sized this way, this design would trip equipment or breach its utility commitments under this workload; this is the failure operators typically discover after energization. Resize (derate IT, more BESS power, larger gensets, higher contracted MW) or constrain the workload (cap the synchronized fraction), then re-run.${warns ? ` Also thin: ${warns}.` : ""}`;
       $("stCounts").textContent = `${rep.counts.PASS} / ${rep.counts.WARN} / ${rep.counts.FAIL}`;
       $("stPeak").textContent = `${rep.peakMeter.toFixed(2)} MW`;
       $("stHeadroom").textContent = `${rep.headroomMw.toFixed(2)} MW (${(100 * rep.headroomFrac).toFixed(0)}%)`;
@@ -501,6 +538,8 @@ function applyQueryPrefill() {
   setIf("mechBase","mechbase"); setIf("coolRatio","cool");
   setIf("contracted","contracted"); setIf("rampLim","ramp"); setIf("trainShare","trainshare");
   setIf("iterPeriod","iter"); setIf("ckptEvery","ckptevery"); setIf("ckptDur","ckptdur"); setIf("syncFrac","sync");
+  $("syncVal").textContent = Math.round(parseFloat($("syncFrac").value)*100)+"%";
+  $("tsVal").textContent = Math.round(parseFloat($("trainShare").value)*100)+"%";
   const wl = q.get("wl");
   if (["training","mixed","inference"].includes(wl)) {
     const btn = document.querySelector(`#preset-seg button[data-preset="${wl}"]`);
