@@ -44,6 +44,7 @@ and the chip's demand shape.
 
 | Doc | Read it for |
 |-----|------------|
+| `PRODUCT_PICTURE.md` | **Start here for the story**: the pipeline, who authors vs. reviews what, the spec→design→review loop (why it isn't circular), the wedge/barrier, what "design partner" gates |
 | `MERIDIAN_PRIMER.md` | First-principles education: training vs inference, MFU, parallelism, topology, supply/demand, sensitivity results, hardware-team feasibility questions, known gaps |
 | `MERIDIAN_TEAM_DOC.md` | Internal product brief: what it is, current state, what we still need, business context |
 | `MERIDIAN_PRODUCT_DIRECTION_REVIEW.md` | Positioning: product boundary, recommended story, roadmap |
