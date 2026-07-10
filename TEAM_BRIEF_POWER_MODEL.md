@@ -96,6 +96,24 @@ tensor cores are clock-gated while NVLink and HBM run hot — what fraction of p
 (That's our "low phase"; we assume 45%, and it sets the swing everything depends on.)
 
 ---
+
+## First EE conversation — outcome (July 9, Mark Tuckwell)
+
+[Notes (Granola)](https://notes.granola.ai/t/3483f43c-b5a4-4366-be48-7aeebade741e-008umkv4) — brief, but it set the direction:
+
+- **Supply side treated as fixed** (the power provider's trade — hence the DC-power hire
+  search); the in-discipline opportunity is **demand-side**: model GPU power as a nonlinear
+  function of *temperature × workload*, then optimize workload placement across the fleet
+  inside a fixed MW envelope. Meridian stays the verifier; this would be the optimizer.
+- **Example of how an EE probes this space** (useful calibration for future conversations):
+  rack-level losses — voltage drop vs. distance from the power entry point, whether to place
+  work closer to it, copper losses "small in practice, non-trivial at scale," and loss
+  profiles per rack design variant. Concrete, component-level, data-hungry.
+- **The honest concern to resolve first:** is nonlinear GPU power optimization a real gap, or
+  already solved inside NVIDIA / Supermicro? Needs GPU power-curve data (chip-team or partner
+  route) before it's a committed direction.
+
+---
 *Field questions (has a load ever been curtailed for transients? what do real large-load studies
 specify?) are for utility/operator contacts, not either team. Business questions (who pays, NVIDIA
 DSX threat) are ours. Background and references: `MERIDIAN_PRIMER.md` §6–8.*

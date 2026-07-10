@@ -168,7 +168,7 @@ us how the load behaves; their design tells us whether the building survives it.
 
 ## The wedge, and the honest barrier
 
-The July 2026 EE conversations are the evidence for both:
+The July 2026 EE conversations ([Mark Tuckwell, July 9 — notes](https://notes.granola.ai/t/3483f43c-b5a4-4366-be48-7aeebade741e-008umkv4)) are the evidence for both:
 
 - **The wedge is the knowledge gap.** Facility EEs don't know AI workload behavior
   (synchronized training transients, checkpoint cliffs, on-board smoothing); AI/compute people
