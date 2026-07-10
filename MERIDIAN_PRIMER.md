@@ -253,12 +253,17 @@ in each state) and **timing** (when states change). They come from different pla
      checkpoint_frac / smoothing) as a rack-level power model — is anything first-order missing
      (e.g., power-factor behavior under swing, inrush at recovery)?
   5. Do our chain-loss assumptions (UPS 96%, transformer 99%, PDU 99.5%) match what you'd use?
-- **Timing — software/workload territory. NOT derivable from silicon:**
-  Iteration period (~3 s), checkpoint cadence (~20 min) and duration (~20 s), job-end behavior are
-  set by the training framework, model size, and storage bandwidth — they require **cluster
-  telemetry** (a real job's power trace or scheduler logs), not lab characterization. Ask: does the
-  chip team or any partner have measured fleet-level power/utilization traces from a real training
-  run, at any scale? Even one validated trace converts our synthesized shapes into calibrated ones.
+- **Timing — the CUSTOMER'S data, not derivable from silicon (and now an input in the product):**
+  Iteration period (~3 s), checkpoint cadence (~20 min) and duration (~20 s), synchronized fraction
+  are set by the off-taker's training framework, model size, checkpoint policy, and storage
+  bandwidth. The product treats them accordingly — three tiers of input fidelity:
+  1. **No off-taker yet:** conservative fully-synchronized archetype (the defaults).
+  2. **Off-taker in hand:** their declared profile — the "Workload profile · from your off-taker"
+     inputs in Meridian's Workload Power section (iteration period, checkpoint cadence/length,
+     synchronized fraction), which flow into the verdict and the deep link to the bench.
+  3. **Live customer:** measured telemetry — CSV import in the full validation bench.
+  The remaining ask for the chip team is a cross-check: one measured fleet-level power trace from a
+  real training run, to validate that a declared profile + our amplitudes reproduces reality.
 
 If the answers to 1–3 are yes, the confidence ladder's "vendor-verified" rung lights up with no
 code changes — the numbers slot into the same interface.
@@ -310,10 +315,11 @@ a facility. From die to data center is one discipline, which is the expansion st
 
 An honest list of where the current model is weakest, so logic-checking starts in the right places:
 
-1. **Trace timing is workload-level, not chip-level.** Iteration period and checkpoint cadence are
-   set by software (framework, model, storage), so the formal team *cannot* derive them from
-   silicon — they need real cluster telemetry (§8). What the formal team *can* deliver is the
-   amplitude side: per-phase power levels, slew rates, and the on-board smoothing characterization.
+1. **Trace timing is declared, not measured.** Timing is now a customer input (workload profile,
+   §8) with conservative defaults — the right structure — but a declared profile is only as good as
+   the off-taker's answers. The validating cross-check (one measured fleet trace) is still open.
+   The formal team's contribution is the amplitude side: per-phase power levels, slew rates, and
+   the on-board smoothing characterization.
 2. **MFU is a heuristic curve** (published benchmarks + overhead model), not calibrated telemetry.
 3. **The supply side is a template.** Scaled Helio ratios, not a site one-line. Fine for screening;
    the bench exists for hand-tuning; a real study should replace it.

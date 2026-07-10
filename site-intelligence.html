@@ -582,6 +582,11 @@ let usingDemo = true;
 let m1Clim = 'temperate', m1GoKey = 'pjm';
 let m2SelChip='GB300', m2Wl='train', m2ModelB=70, m2Batch=32;
 let m2PwrCost=0.05, m2DiscR=0.10, m2Mult=20;
+// workload timing profile — the CUSTOMER'S data (framework, checkpoint policy, job schedule).
+// Defaults = conservative fully-synchronized training archetype; ask the off-taker for theirs.
+const WLPROF_DEFAULT = {iter:3.0, ckptEvery:1200, ckptDur:20, sync:1.0};
+let m2Prof = {...WLPROF_DEFAULT};
+function setProf(k,v){ const n=parseFloat(v); if (isFinite(n) && (k==='sync' ? n>=0&&n<=1 : n>0)) m2Prof[k]=n; debounce(); }
 // per-chip assumed rental rates ($/GPU-hr) — seeded from CHIPS, editable under each chip card
 const chipRates = Object.fromEntries(Object.entries(CHIPS).map(([k,c])=>[k,c.rate]));
 const curRate = () => chipRates[m2SelChip];
@@ -883,11 +888,12 @@ function chipPowerProfile(chip) {
 const valCacheMap = new Map();
 function runValidation(itMW, d, wl, chip) {
   const prof = chipPowerProfile(chip);
-  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio].join('|');
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio,m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync].join('|');
   if (valCacheMap.has(key)) return valCacheMap.get(key);
   const {design,site} = buildValidationModel(itMW,d);
   design.mech_cooling_ratio = prof.coolRatio;
-  const tOpts = {duration_s:1800, job_end_at_s:1530, high_frac:prof.high_frac, low_frac:prof.low_frac, checkpoint_frac:prof.checkpoint_frac, noise_frac:prof.noise_frac};
+  const tOpts = {duration_s:1800, job_end_at_s:1530, high_frac:prof.high_frac, low_frac:prof.low_frac, checkpoint_frac:prof.checkpoint_frac, noise_frac:prof.noise_frac,
+                 iteration_period_s:m2Prof.iter, checkpoint_every_s:m2Prof.ckptEvery, checkpoint_dur_s:m2Prof.ckptDur, sync_fraction:m2Prof.sync};
   const trace = wl==='infer' ? inferenceTrace(design.critical_it_mw,{duration_s:1800})
               : wl==='mix'   ? mixedTrace(design.critical_it_mw,{...tOpts,training_share:0.6})
               :                trainingTrace(design.critical_it_mw,tOpts);
@@ -909,6 +915,7 @@ function validationLink(val, wl) {
     mechbase:d0.mech_base_mw, cool:d0.mech_cooling_ratio,
     contracted:s0.contracted_mw, ramp:s0.ramp_limit_mw_per_s,
     wl: wl==='infer'?'inference':wl==='mix'?'mixed':'training',
+    iter:m2Prof.iter, ckptevery:m2Prof.ckptEvery, ckptdur:m2Prof.ckptDur, sync:m2Prof.sync,
     trainshare:0.6, from:'meridian',
   });
   return 'power-signoff.html?'+p.toString();
@@ -966,6 +973,14 @@ function renderValidation(x) {
     <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">demand curve vs. electrical chain — does the design survive the draw?</span>
       <span class="badge ${rep.verdict==='PASS'?'verified':'unverified'}">${rep.verdict} · ${rep.counts.PASS}✓ ${rep.counts.WARN}! ${rep.counts.FAIL}✗</span></div>
     <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>How to read this.</strong> The curve is the <strong>demand</strong>: what a ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT actually pulls, shaped by the ${c.n} power profile${val.prof.smooth?` (on-board smoothing damps ${(val.prof.smooth*100).toFixed(0)}% of the training-step swing)`:` (no on-board smoothing — the synchronized swing hits the facility raw)`} and ${c.cool} cooling. The chain it is tested against is the <strong>supply</strong>: the Helio 2N reference block scaled to this site — a template, since no site-specific one-line exists pre-engineering. The template is not load-bearing: ±20% on transformers, switchgear or PDU leaves the verdict unchanged — it is decided by the contract, the BESS, the gensets, and the chip's demand shape, which are exactly the knobs exposed here and in the full bench. A FAIL means <em>our reference design, sized this way, would not survive this workload</em>. Compute performance (MFU, tokens/sec) is the separate model in Compute Design; both run off the same workload inputs in the left rail.</div>
+    ${m2Wl!=='infer'?`<div class="assume-row" style="margin-bottom:14px">
+      <span class="eyebrow" style="align-self:center;margin-right:6px">Workload profile · from your off-taker</span>
+      <div class="assume"><label>Iteration period</label><div class="in"><input type="number" id="prof-iter" value="${m2Prof.iter}" min="0.5" max="60" step="0.5" oninput="setProf('iter',this.value)"> s</div></div>
+      <div class="assume"><label>Checkpoint every</label><div class="in"><input type="number" id="prof-ce" value="${m2Prof.ckptEvery}" min="60" step="60" oninput="setProf('ckptEvery',this.value)"> s</div></div>
+      <div class="assume"><label>Checkpoint length</label><div class="in"><input type="number" id="prof-cd" value="${m2Prof.ckptDur}" min="1" step="5" oninput="setProf('ckptDur',this.value)"> s</div></div>
+      <div class="assume"><label>Synchronized fleet</label><div class="in"><input type="number" id="prof-sync" value="${m2Prof.sync}" min="0" max="1" step="0.1" oninput="setProf('sync',this.value)"> ×</div></div>
+      <span style="font-size:10px;color:var(--faint);margin-left:auto;align-self:center;max-width:260px;text-align:right">Timing is the customer's data — framework, checkpoint policy, job schedule. Defaults are a conservative fully-synchronized archetype. Measured telemetry imports as CSV in the full bench.</span>
+    </div>`:''}
     <div class="chart-panel" style="margin-bottom:14px">
       <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · ${c.n} profile${val.prof.smooth?' · smoothing credited':''} · 30 min</div>
       <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
@@ -1337,6 +1352,7 @@ function shareHash(extra) {
   p.set('chip',m2SelChip); p.set('wl',m2Wl); p.set('model',m2ModelB); p.set('batch',m2Batch);
   const rateOverrides = Object.entries(chipRates).filter(([k,v])=>v!==CHIPS[k].rate).map(([k,v])=>k+':'+v).join('|');
   if (rateOverrides) p.set('rates',rateOverrides);
+  if (JSON.stringify(m2Prof)!==JSON.stringify(WLPROF_DEFAULT)) p.set('prof',[m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync].join(':'));
   p.set('pwr',m2PwrCost); p.set('disc',Math.round(m2DiscR*100)); p.set('mult',m2Mult);
   if (!usingDemo) {
     p.set('mw',document.getElementById('m2-mw').value); p.set('volt',document.getElementById('m2-poi-volt').value);
@@ -1666,6 +1682,8 @@ window.onload = function() {
         const [k,v]=pair.split(':'); if (CHIPS[k]&&parseFloat(v)>0) chipRates[k]=parseFloat(v);
       });
       else if (p.get('rate')) { const r=parseFloat(p.get('rate')); if (r>0) chipRates[m2SelChip]=r; } // legacy links
+      if (p.get('prof')) { const [i,ce,cd,s]=p.get('prof').split(':').map(parseFloat);
+        if (i>0) m2Prof.iter=i; if (ce>0) m2Prof.ckptEvery=ce; if (cd>0) m2Prof.ckptDur=cd; if (s>=0&&s<=1) m2Prof.sync=s; }
       m2PwrCost = parseFloat(p.get('pwr'))||0.05;
       m2DiscR = (parseFloat(p.get('disc'))||10)/100;
       m2Mult = parseFloat(p.get('mult'))||20;

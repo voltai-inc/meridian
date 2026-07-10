@@ -429,6 +429,7 @@ function applyQueryPrefill() {
   setIf("genMw","gen"); setIf("bessMw","bessp"); setIf("bessMwh","besse");
   setIf("mechBase","mechbase"); setIf("coolRatio","cool");
   setIf("contracted","contracted"); setIf("rampLim","ramp"); setIf("trainShare","trainshare");
+  setIf("iterPeriod","iter"); setIf("ckptEvery","ckptevery"); setIf("ckptDur","ckptdur"); setIf("syncFrac","sync");
   const wl = q.get("wl");
   if (["training","mixed","inference"].includes(wl)) {
     const chip = document.querySelector(`.chip[data-preset="${wl}"]`);
