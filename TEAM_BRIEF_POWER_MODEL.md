@@ -1,4 +1,4 @@
-# Power Model — One-Page Brief for the EE Conversation
+# Power Model — One-Page Brief: EE First, Formal After
 **July 2026 · everything deeper: `MERIDIAN_PRIMER.md`**
 
 ## What we built (3 sentences)
@@ -37,7 +37,28 @@ territory, one level up. That's why we're talking to you.
 If the answers are roughly "derivable, scales, right, nothing fatal" — the model is worth
 calibrating and we plan the measurement/partner path. If not, we've learned that cheaply.
 
+## The formal team — different job, later meeting
+
+Keep the roles straight: **EE derives the curve's numbers** (the meeting above). **The simulator
+diagnoses one scenario at a time** — pass/warn/fail, where *which* check fails tells you the fix
+(contract breach → derate or renegotiate; ramp → BESS; genset step → bigger gensets or bridge).
+**Formal makes the claim universal**: instead of "the scenarios we tried passed," it's *"no
+workload within these bounds can break this design — proven — or here is the exact one that
+does."* Same shape as pre-tape-out verification: prove a property over all inputs, don't test some.
+
+Sequencing: formal comes **after** EE says the model is sound — proving theorems about an
+unblessed model is wasted effort. When that lands, it's a 30-minute conversation with one
+question:
+
+> The checker is piecewise-linear with bounded inputs; today we brute-force 96 scenarios and
+> report the worst case with its counterexample. Turning that into a real proof — is it a
+> weeks-scale prototype or a research program, and which checks would you prove first?
+
+One thing the formal/digital side can answer **now**, no meeting needed: during all-reduce the
+tensor cores are clock-gated while NVLink and HBM run hot — what fraction of peak power remains?
+(That's our "low phase"; we assume 45%, and it sets the swing everything depends on.)
+
 ---
 *Field questions (has a load ever been curtailed for transients? what do real large-load studies
-specify?) are for utility/operator contacts, not this room. Business questions (who pays, NVIDIA
+specify?) are for utility/operator contacts, not either team. Business questions (who pays, NVIDIA
 DSX threat) are ours. Background and references: `MERIDIAN_PRIMER.md` §6–8.*
