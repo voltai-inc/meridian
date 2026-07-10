@@ -23,6 +23,105 @@ possible before any real design exists, and the template the RFQ quantities deri
 
 ---
 
+## The walkthrough — demo script, with where we play at each step
+
+Everything below is live at the deployed site; each step hands its output to the next.
+
+### 0 · Dashboard — the story in one screen
+
+![Dashboard](docs/img/dashboard.png)
+
+Open on the pipeline: *find a site, evaluate it, procure the build* — with the review modules
+underneath. One sentence: **"VoltAI doesn't design boards or buildings — it verifies them.
+This is the schematic-review posture, one level up."**
+
+### 1 · Site Selection — where deals come from *(we play: the tracker + screen)*
+
+![Site Selection](docs/img/site-selection.png)
+
+The live deal pipeline from the team's tracker sheet — 17 sites, red = active pipeline,
+grey = prospecting, dashed = location approximate. The talking point is the utility reality:
+every one of these needs a ~$50K non-refundable study per load scenario, so *choosing which
+sites are worth the study, and at what MW to file,* is the first paid question. Click a site →
+**Evaluate in Meridian** (MW, location, utility, climate carry over).
+
+### 2 · Meridian — the evaluation *(we play: the whole surface)*
+
+![Meridian workspace](docs/img/meridian-workspace.png)
+
+Utility study in (left rail, with the confidence ladder making the verification level
+unavoidable) → compute readiness out: usable IT MW, chip/rack design alternatives with
+per-chip **power verdicts**, MFU at scale, the inference Pareto. The chip cards are design
+alternatives, not chip shopping — the question on screen is *"what AI infrastructure promise
+can this site credibly support?"*
+
+### 3 · Workload Power — the demand-side model *(we play: the thing nobody else has)*
+
+![Workload power](docs/img/meridian-workload-power.png)
+
+The simulated meter trace of a synchronized AI fleet — training oscillation, checkpoint dips,
+the job-end cliff — against the contracted envelope. Findings only at this level (full evidence
+lives in Design Review). The **envelope check** is the differentiator sentence: *"not just
+'does this workload pass' — can ANY admissible workload break this design?"* That's the
+pre-tape-out sign-off shape applied to a facility.
+
+### 4 · Design Review — the review agent *(we play: review, never authoring)*
+
+![Design Review](docs/img/design-review.png)
+
+The deep-dive bench. Left rail = the design import surface: today the Helio-scaled block or
+the EPC's actual one-line values typed in; measured telemetry uploads as CSV (the calibrated
+version). Verdict in plain language — WARN = thin margin or the BESS doing load-bearing work,
+FAIL = a named hard limit exceeded. Power sign-off is the first review dimension; cooling
+transients and network readiness are visible roadmap tabs.
+
+### 5 · Deliverables — what the customer holds
+
+![Spec sheet](docs/img/spec-sheet.png)
+
+The two-page off-taker spec sheet (technical readiness, no NPV/IRR hero metrics) and the
+internal advisory report. Every figure carries its confidence level; share links reproduce
+exact state.
+
+### 6 · Procurement — the handoff *(teammate's build; we play: the BOM seam)*
+
+![Procurement](docs/img/procurement.png)
+
+Meridian's Build tab sends the modeled BOM here; lines match against the equipment library,
+RFQs draft per line, status tracks BOM → RFQ → quoted → PO. Demo today — the production,
+library-data-backed version is in build. The seam is the point: evaluation ends at a
+structured BOM, procurement owns the market.
+
+---
+
+## The boundary (what we model, what we never claim)
+
+**Inputs we accept:** confirmed/claimed site power (MW, voltage, service type, PF, upgrades,
+timeline), site context (climate, grid operator), target workload (train/infer/mix, model
+size, batch, timing), candidate platform, optional engineering data (power quality, CDU
+curves, measured traces).
+
+**We model:** usable IT after PUE/climate; rack/GPU count per platform; cooling + rack-power
+architecture fit; DSX-style readiness checks; modeled MFU and inference trade-offs; equipment
+BOM, lead times, critical path; workload-driven electrical transients and the envelope check;
+the spec sheet and advisory report.
+
+**We never claim to model:** utility capacity or interconnection availability, queue position,
+substation/interconnection design, construction-ready MEP, investment-grade underwriting,
+off-taker demand or credit. Utility capacity is always an input — the confidence ladder exists
+to keep that honest.
+
+## Open questions still live for the team
+
+1. Primary buyer: developer, off-taker, financier, engineering firm, or Voltai internal BD?
+2. First paid deliverable: tech pack, owner-rep package, or internal site-screening report?
+3. Should the off-taker spec sheet include financials at all? (Current answer: no — internal
+   advisory report only.)
+4. Easiest first proof point to validate: MFU, cooling transients, or power transients?
+5. Non-NVIDIA platforms: support explicitly, or lead with NVIDIA/DSX credibility?
+
+---
+
 ## The design loop — why it looks circular and isn't
 
 The confusion: *"Meridian outputs a design spec to the engineering firm, but then we also

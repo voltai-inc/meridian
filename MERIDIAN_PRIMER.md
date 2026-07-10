@@ -384,4 +384,4 @@ An honest list of where the current model is weakest, so logic-checking starts i
 ---
 
 *Written July 2026. Companion docs: `MERIDIAN_TEAM_DOC.md` (product brief),
-`MERIDIAN_PRODUCT_DIRECTION_REVIEW.md` (positioning), `DESIGN_HANDOFF.md` (UI system).*
+`PRODUCT_PICTURE.md` (pipeline, roles, positioning).*

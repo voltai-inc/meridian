@@ -44,10 +44,9 @@ and the chip's demand shape.
 
 | Doc | Read it for |
 |-----|------------|
-| `PRODUCT_PICTURE.md` | **Start here for the story**: the pipeline, who authors vs. reviews what, the spec→design→review loop (why it isn't circular), the wedge/barrier, what "design partner" gates |
+| `PRODUCT_PICTURE.md` | **Start here — the team walkthrough**: the pipeline with screenshots and a demo script, who authors vs. reviews what, the spec→design→review loop, the boundary, wedge/barrier, business model, roadmap (absorbed the July direction review, now deleted) |
 | `MERIDIAN_PRIMER.md` | First-principles education: training vs inference, MFU, parallelism, topology, supply/demand, sensitivity results, hardware-team feasibility questions, known gaps |
 | `MERIDIAN_TEAM_DOC.md` | Internal product brief: what it is, current state, what we still need, business context |
-| `MERIDIAN_PRODUCT_DIRECTION_REVIEW.md` | Positioning: product boundary, recommended story, roadmap |
 | `TEAM_BRIEF_POWER_MODEL.md` | One-page brief for the EE conversation (context, the measured finding, four questions) |
 | `VERTIV_ASK.md` | Draft technical ask to Vertiv (cooling transient data) |
 | `scripts_sensitivity_sweep.js` | Reproducible input-sensitivity sweep behind the team brief |

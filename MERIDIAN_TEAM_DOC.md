@@ -78,6 +78,10 @@ Every assumption is surfaced explicitly — "modeled, not measured" tags inline,
 
 ## Product Structure (rebuilt July 8, 2026)
 
+> Meridian is now step 02 of a pipeline (Site Selection → Meridian → Procurement, with Design
+> Review / Helio as modules). The pipeline, roles, and walkthrough live in `PRODUCT_PICTURE.md`;
+> this section describes the Meridian workspace itself.
+
 A single **Design workspace** (the separate "Screen" pre-study mode was retired July 9 — the
 example feasibility study now does its educational job, and the Enter-yours flow covers manual
 input):
