@@ -178,7 +178,94 @@ the demo site falls into.
 
 ---
 
-## 7 · So what is Meridian, precisely?
+## 7 · Supply and demand — the full picture
+
+```
+DEMAND (what the compute pulls)              SUPPLY (what delivers the power)
+─────────────────────────────                ─────────────────────────────────
+chip power behavior                          utility feed at contracted MW
+  × racks × synchronization                    → transformers → switchgear
+  + cooling load (follows IT with lag)         → UPS → PDU → racks
+  = the power draw curve                     + gensets (carry load when islanded)
+                                             + BESS (absorbs the fast swings)
+        └──────────── 19 checks: does supply survive demand? ────────────┘
+```
+
+Note carefully which side cooling is on: CDUs and dry coolers **consume** power that follows the
+IT load — cooling is demand. The supply side is only the delivery chain: things with ratings that
+can be exceeded.
+
+### Does the supply template actually matter? (measured, not asserted)
+
+The natural objection: *"your supply side is a made-up reference block — why would anyone trust a
+verdict built on it? Wouldn't different transformers/switchgear/UPS/PDU change the answer?"*
+We ran the sensitivity directly (200 MW demo site, training fleet):
+
+| Change to the supply side | H100-class demand (raw swing) | GB300-class demand (smoothed) |
+|---|---|---|
+| Baseline template | **FAIL** · 4✗ | **WARN** · 0✗ |
+| Transformers / switchgear / feed **+20%** | FAIL · 4✗ (unchanged) | — |
+| Transformers / switchgear / feed **−20%** | FAIL · 8✗ (worse) | WARN · 0✗ (unchanged!) |
+| UPS +20% | FAIL · 3✗ | — |
+| PDU +20% | FAIL · 4✗ (unchanged) | — |
+| BESS **+50%** | FAIL · 3✗ | — |
+| BESS **−50%** | FAIL · 8✗ | **FAIL** · 5✗ (flips!) |
+| Gensets +20% | FAIL · 2✗ | — |
+| BESS+50% **and** gensets+20% **and** UPS+20% | **still FAIL** · 1✗ (the contract itself) | — |
+
+Three conclusions, and they are the answer to the objection:
+
+1. **The passive chain barely moves the verdict.** Sized at standard ratios, ±20% on transformers,
+   switchgear, feed, or PDU leaves the conclusion intact. These are linear ratings checks — the
+   template is a standard-practice stand-in (Tier III 2N ratios everyone builds), and the verdict
+   does not hinge on it.
+2. **The verdict lives in four places:** the **contract** (peak vs contracted MW — a site fact),
+   the **BESS**, the **gensets**, and the **demand shape** (chip smoothing × synchronization).
+   Those are exactly the knobs Meridian exposes (chip cards, service type) and the bench lets you
+   turn (BESS/genset sizing).
+3. **With unsmoothed demand, you cannot buy your way out with equipment.** Upgrading BESS, gensets
+   and UPS *simultaneously* still fails — the remaining violation is the contracted peak. The fixes
+   are demand-side: smoothing silicon, derating IT, de-synchronizing, or renegotiating the contract.
+   That is a *finding*, and it's why the demand side (where our data advantage is) is the product's
+   center of gravity, not the supply template.
+
+So the honest pitch line: *"the supply side is standard practice — we show the verdict is
+insensitive to the parts we templated and expose the few that matter; the demand side is where
+nobody else has the data."*
+
+---
+
+## 8 · Questions for the formal / EE team
+
+The chip power profile Meridian consumes has two ingredient types — **amplitudes** (how much power
+in each state) and **timing** (when states change). They come from different places:
+
+- **Amplitudes and dynamics — silicon/board territory. The formal/EE team's home turf:**
+  1. Can you produce per-phase power levels for a GB300 NVL72 rack (and an H100 HGX node) —
+     compute burst, communication/all-reduce phase, checkpoint idle, true idle — as fractions of TDP,
+     with error bars?
+  2. Can you characterize the **slew rate** — how fast a rack's draw actually transitions between
+     those states (ms-scale)? (Our square-wave assumption is the conservative extreme.)
+  3. Can you characterize GB300-class **on-board energy storage**: usable energy, response time, and
+     the effective damping percentage of a 3-second training-step swing? (We currently credit 50%
+     as an estimate — this number moves the verdict more than any other single input.)
+  4. Can you validate or correct our four-number profile abstraction (high_frac / low_frac /
+     checkpoint_frac / smoothing) as a rack-level power model — is anything first-order missing
+     (e.g., power-factor behavior under swing, inrush at recovery)?
+  5. Do our chain-loss assumptions (UPS 96%, transformer 99%, PDU 99.5%) match what you'd use?
+- **Timing — software/workload territory. NOT derivable from silicon:**
+  Iteration period (~3 s), checkpoint cadence (~20 min) and duration (~20 s), job-end behavior are
+  set by the training framework, model size, and storage bandwidth — they require **cluster
+  telemetry** (a real job's power trace or scheduler logs), not lab characterization. Ask: does the
+  chip team or any partner have measured fleet-level power/utilization traces from a real training
+  run, at any scale? Even one validated trace converts our synthesized shapes into calibrated ones.
+
+If the answers to 1–3 are yes, the confidence ladder's "vendor-verified" rung lights up with no
+code changes — the numbers slot into the same interface.
+
+---
+
+## 9 · So what is Meridian, precisely?
 
 **Meridian is design verification, and selection emerges from verifying all the alternatives.**
 
@@ -219,13 +306,14 @@ a facility. From die to data center is one discipline, which is the expansion st
 
 ---
 
-## 8 · Known gaps — poke here
+## 10 · Known gaps — poke here
 
 An honest list of where the current model is weakest, so logic-checking starts in the right places:
 
-1. **Trace timing is workload-level, not chip-level.** Iteration period, checkpoint cadence are the
-   same for all chips; only swing amplitude/smoothing/cooling differ per chip. Chip-measured traces
-   are the single highest-value data acquisition.
+1. **Trace timing is workload-level, not chip-level.** Iteration period and checkpoint cadence are
+   set by software (framework, model, storage), so the formal team *cannot* derive them from
+   silicon — they need real cluster telemetry (§8). What the formal team *can* deliver is the
+   amplitude side: per-phase power levels, slew rates, and the on-board smoothing characterization.
 2. **MFU is a heuristic curve** (published benchmarks + overhead model), not calibrated telemetry.
 3. **The supply side is a template.** Scaled Helio ratios, not a site one-line. Fine for screening;
    the bench exists for hand-tuning; a real study should replace it.
