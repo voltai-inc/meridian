@@ -22,6 +22,7 @@ The dashboard presents the tools as a pipeline — **01 Find (Site Selection) �
 | `site-selection.html` | **Site Selection** (pipeline step 01): map + tracker of candidate sites, synced from the team's site sheet (pipeline vs prospecting, approx-location flags); each site deep-links into Meridian with MW/location/utility/climate prefilled |
 | `example-feasibility-study.html` | Printable illustrative utility feasibility study — the input document Meridian expects |
 | `site-intelligence.html` | **Meridian** (pipeline step 02, the product): single Design workspace — per-chip power verdicts, inline workload power validation, envelope check, deliverables |
+| `procurement.html` | **Procurement** (pipeline step 03, demo): receives Meridian's Build-tab BOM via URL hash, matches lines against a demo vendor library, drafts printable RFQs, tracks BOM → RFQ → quoted → PO. The production, library-data-backed version is a teammate's build; this page demos the seam |
 | `power-signoff.html` | **Workload Power Validation** — the full bench behind Meridian's inline verdict, every design knob exposed; Meridian deep-links in prefilled |
 | `helio.html` | **Helio** — the 2N reference architecture (10→100 MW pod block) whose scaled ratios Meridian validates against |
 | `power-validation.js` | Shared DOM-free simulation engine (traces, chain loads, BESS, 19 checks) — used by both pages, unit-testable under node |

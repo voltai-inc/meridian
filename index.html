@@ -114,7 +114,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
     <span class="sep">Pipeline</span>
     <a href="site-selection.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"/><circle cx="8" cy="6" r="1.6"/></svg>Site Selection</a>
     <a href="site-intelligence.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13 3.5 3.5 12 2.5l1.5 3-1 8z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg>Meridian</a>
-    <a class="soon"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12v9H2z"/><path d="M5.5 5V3.5a2.5 2.5 0 0 1 5 0V5"/></svg>Procurement<span class="ext">soon</span></a>
+    <a href="procurement.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12v9H2z"/><path d="M5.5 5V3.5a2.5 2.5 0 0 1 5 0V5"/></svg>Procurement<span class="ext">demo</span></a>
     <span class="sep">Modules</span>
     <a href="power-signoff.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 1.5 3.5 9h4l-1 5.5 5-7.5h-4z"/></svg>Workload Power</a>
     <a href="helio.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="4" width="5.5" height="3.5"/><rect x="9" y="4" width="5.5" height="3.5"/><rect x="1.5" y="9.5" width="5.5" height="3.5"/><rect x="9" y="9.5" width="5.5" height="3.5"/><path d="M8 1.5v13" stroke-dasharray="2 2"/></svg>Helio Reference</a>
@@ -181,7 +181,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
         <h2>Meridian</h2>
       </a>
 
-      <div class="tool soon">
+      <a class="tool" href="procurement.html">
         <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
           <rect x="14" y="40" width="44" height="28" rx="3"/>
           <rect x="88" y="40" width="44" height="28" rx="3"/>
@@ -195,8 +195,8 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
         </svg></div>
         <span class="step"><b>03</b> · Procure</span>
         <h2>Procurement</h2>
-        <span class="tag-soon">In build — BOM → RFQ → PO</span>
-      </div>
+        <span class="tag-soon">Demo — BOM → RFQ → PO · production in build</span>
+      </a>
     </div>
 
     <div class="grid-sep">Modules &amp; reference — what backs the evaluation</div>
@@ -261,7 +261,7 @@ const SYSTEM = `You are the assistant on Voltai's Data Center dashboard — an i
 Pipeline (relative links work):
 - Site Selection (site-selection.html): map + tracker of candidate powered sites (pipeline and prospecting, synced from the team's site sheet). Click a site to evaluate it in Meridian.
 - Meridian (site-intelligence.html): the core product — takes a utility study or site power claim and evaluates compute readiness: per-chip compute design, MFU at scale, workload power verdicts, envelope check, economics sensitivity, off-taker spec sheet.
-- Procurement: in build — consumes Meridian's BOM (Build tab) as BOM → RFQ → PO.
+- Procurement (procurement.html): demo of the BOM → RFQ → PO flow — receives Meridian's Build-tab BOM, matches lines to a vendor library, drafts printable RFQs. Production version (equipment-library backed) is in build.
 Modules & reference:
 - Workload Power (power-signoff.html): full stress-test bench behind Meridian's inline verdict — electrical design vs AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail.
 - Helio Reference (helio.html): the 2N reference architecture (10→100 MW block) Meridian validates against.

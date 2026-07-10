@@ -1270,6 +1270,17 @@ function openItems(x) {
   ];
 }
 
+function procurementLink(x, bom) {
+  const {d,c,itMW} = x;
+  const p = new URLSearchParams({
+    site: d.name, study: `${d.study_type} · ${d.study_date}`,
+    mw: `${d.confirmed_mw} MW · ${itMW.toFixed(1)} MW IT`, chip: c.n,
+  });
+  const rows = bom.map(({qty,item,spec,lead,crit})=>({qty,item,spec,lead,crit}));
+  p.set('bom', btoa(unescape(encodeURIComponent(JSON.stringify(rows)))));
+  return 'procurement.html#'+p.toString();
+}
+
 function renderBuild(x) {
   const {d} = x;
   const bom = buildBOM(x);
@@ -1286,6 +1297,10 @@ function renderBuild(x) {
         <td>${b.crit?'<span class="crit-flag">● CRITICAL</span>':'<span style="color:var(--faint)">—</span>'}</td></tr>`).join('')}</tbody>
     </table></div>
     <div class="callout info" style="margin-top:14px">${critPath}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+      <a class="btn-ghost" style="text-decoration:none" href="${procurementLink(x,bom)}">Send BOM to Procurement →</a>
+      <span style="font-size:11px;color:var(--muted)">Hands this modeled equipment list to the procurement tool (BOM → RFQ → PO). Quantities confirm at engineering design.</span>
+    </div>
     <div style="margin-top:16px"><span class="eyebrow" style="display:block;margin-bottom:8px">Open items before off-taker LOI</span>
       <ul class="open-items">${openItems(x).map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
 }

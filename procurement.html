@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Procurement — Voltai Data Center</title>
+<style>
+@font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-700.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-500.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:600;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-600.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-500.woff2') format('woff2')}
+:root{
+  --bg:#f6f8fb; --surface:#ffffff; --sunken:#eef2f6;
+  --ink:#060a0e; --body:#141d26; --muted:#5b646e; --faint:#8a929b;
+  --border:#d2dae2; --hairline:rgba(6,10,14,.08); --border-strong:#bfc6ce;
+  --volt:#AF0000; --volt-vivid:#c92121; --volt-tint:#fbeeee;
+  --ok-text:#1e7a5a; --ok-tint:#edf7f3; --warn-text:#8a6a14; --warn-tint:#fbf6e9; --risk-text:#ab4433;
+  --disp:'Space Grotesk',sans-serif; --f:'IBM Plex Sans',-apple-system,sans-serif; --m:'IBM Plex Mono',monospace;
+  --nav-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f);font-size:13.5px;line-height:1.55}
+.eyebrow{font-family:var(--m);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;padding:0 20px;z-index:100;gap:14px}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.brand .prod{font-family:var(--m);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.demo-tag{font-family:var(--m);font-size:9.5px;letter-spacing:.1em;padding:3px 8px;border-radius:3px;background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
+.nav-spacer{flex:1}
+.ref-link{font-size:11.5px;color:var(--muted);text-decoration:none;padding:6px 11px;border:1px solid var(--border);border-radius:5px;background:var(--surface);transition:.12s}
+.ref-link:hover{color:var(--ink);border-color:var(--border-strong)}
+
+.app{display:grid;grid-template-columns:320px 1fr;margin-top:var(--nav-h);height:calc(100vh - var(--nav-h))}
+.rail{background:var(--surface);border-right:1px solid var(--hairline);overflow-y:auto}
+.rail-section{border-bottom:1px solid var(--hairline);padding:16px 18px}
+.rail-section .eyebrow{display:block;margin-bottom:10px}
+.fact-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--hairline)}
+.fact-row:last-child{border-bottom:none}
+.fact-k{font-size:12px;color:var(--muted)}
+.fact-v{font-family:var(--m);font-size:12px;color:var(--ink);text-align:right}
+.stat-row{display:flex;gap:8px}
+.stat{flex:1;background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:9px 11px}
+.stat-val{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--ink);line-height:1.1}
+.stat-label{font-size:10.5px;color:var(--muted);margin-top:2px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.5}
+.main{overflow-y:auto;padding:22px 28px 80px}
+.ws-section{background:var(--surface);border:1px solid var(--hairline);border-radius:8px;padding:22px 24px;margin-bottom:18px}
+.ws-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.ws-idx{font-family:var(--m);font-size:11px;color:var(--volt);letter-spacing:.08em}
+.ws-title{font-family:var(--disp);font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.02em}
+.ws-sub{font-size:12.5px;color:var(--muted)}
+.callout{border-radius:6px;padding:11px 14px;font-size:12px;line-height:1.6;background:#f5f5f5;border:1px solid #e4e4e4;color:#3a3a3a;margin-bottom:14px}
+
+table.data{width:100%;border-collapse:collapse}
+table.data th{padding:7px 10px;font-family:var(--m);font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+table.data td{padding:9px 10px;font-size:12.5px;color:var(--body);border-bottom:1px solid var(--hairline);vertical-align:top}
+td.mono{font-family:var(--m);font-size:12px}
+.crit-flag{font-family:var(--m);font-size:10.5px;color:var(--risk-text);letter-spacing:.05em;white-space:nowrap}
+.vendor-chip{display:inline-block;font-size:11px;padding:2.5px 8px;border-radius:4px;background:var(--sunken);border:1px solid var(--hairline);color:var(--body);margin:1.5px 3px 1.5px 0;white-space:nowrap}
+.vendor-chip.sel{background:var(--volt-tint);border-color:#f0cbcb;color:var(--volt);font-weight:600}
+.status-pill{display:inline-block;font-family:var(--m);font-size:10.5px;font-weight:500;letter-spacing:.05em;padding:3px 9px;border-radius:10px;white-space:nowrap;cursor:pointer;user-select:none}
+.st-bom{background:var(--sunken);color:var(--muted);border:1px solid var(--border)}
+.st-rfq{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
+.st-quoted{background:#eef4fb;color:#2b5e8c;border:1px solid #cfe0ef}
+.st-po{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
+.btn-mini{background:var(--ink);border:none;color:#fff;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11.5px;font-weight:600;white-space:nowrap;font-family:var(--f)}
+.btn-mini:hover{background:#26323d}
+.btn-mini:disabled{background:#c3c9cf;cursor:default}
+
+/* RFQ takeover */
+#rfq-overlay{display:none;position:fixed;inset:0;z-index:200;background:#e2e8ee;flex-direction:column}
+#rfq-overlay.on{display:flex}
+.del-bar{height:var(--nav-h);background:var(--ink);display:flex;align-items:center;gap:16px;padding:0 20px;flex-shrink:0}
+.del-back{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 13px;border-radius:5px;font-size:11.5px;cursor:pointer}
+.del-back:hover{border-color:rgba(255,255,255,.5)}
+.del-bar .eyebrow{color:rgba(255,255,255,.55)}
+.del-actions{margin-left:auto;display:flex;gap:8px}
+.del-act{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 13px;border-radius:5px;font-size:11.5px;cursor:pointer}
+.del-act:hover{background:rgba(255,255,255,.18)}
+.del-scroll{flex:1;overflow-y:auto;padding:34px 24px 70px}
+.del-doc{max-width:860px;margin:0 auto;background:#fff;border-radius:4px;box-shadow:0 4px 30px rgba(6,10,14,.18);padding:52px 58px}
+.doc-brand{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.doc-brand .cls{font-family:var(--m);font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.doc-title{font-family:var(--disp);font-size:22px;font-weight:700;color:var(--ink);margin:6px 0 4px}
+.doc-sub{font-size:12.5px;color:var(--muted);margin-bottom:20px}
+.dsec{margin:18px 0}
+.dsec .eyebrow{display:block;margin-bottom:8px}
+.dsec p{font-size:13px;line-height:1.7;margin-bottom:8px}
+.doc-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--hairline);font-size:11px;color:var(--muted);line-height:1.6}
+@media print{
+  nav.top,.app{display:none!important}
+  #rfq-overlay{position:static;background:#fff}
+  .del-bar{display:none}
+  .del-scroll{padding:0;overflow:visible}
+  .del-doc{box-shadow:none;max-width:none;padding:10px}
+}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <a class="brand" href="index.html" title="Back to the dashboard"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:14px;width:auto;align-self:center"><span class="prod">PROCUREMENT</span></a>
+  <span class="demo-tag">DEMO — PRODUCTION BUILD IN PROGRESS</span>
+  <div class="nav-spacer"></div>
+  <a class="ref-link" href="site-intelligence.html">← Meridian</a>
+</nav>
+
+<div class="app">
+  <div class="rail">
+    <div class="rail-section">
+      <span class="eyebrow">BOM source</span>
+      <div id="src-facts"></div>
+    </div>
+    <div class="rail-section">
+      <span class="eyebrow">Status</span>
+      <div class="stat-row" id="stats"></div>
+    </div>
+    <div class="rail-section">
+      <div class="hint"><strong>Demo build.</strong> The production version matches BOM lines against an equipment library (specs, vendors, lead-time data) and manages the RFQ → quote → PO lifecycle. This page demonstrates the flow on Meridian's modeled BOM: pick vendors, draft an RFQ, advance the status.</div>
+    </div>
+    <div class="rail-section">
+      <div class="hint">The BOM arrives from Meridian's Build tab ("Send BOM to Procurement"). Quantities and specs are modeled, pre-engineering — the RFQ marks them "confirm at award".</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ws-section">
+      <div class="ws-head"><span class="ws-idx">01</span><span class="ws-title">BILL OF MATERIALS</span><span class="ws-sub">modeled equipment list — click vendors to shortlist, then draft the RFQ</span></div>
+      <div class="callout"><strong>Flow:</strong> BOM line → shortlist vendors from the library → <em>Draft RFQ</em> (printable, per line) → mark <em>Sent</em> → <em>Quoted</em> → <em>PO issued</em>. Click a status pill to advance it. Long-lead critical-path items (MV switchgear, transformers) should go out first.</div>
+      <div style="overflow-x:auto"><table class="data">
+        <thead><tr><th style="width:40px">Qty</th><th>Item</th><th>Spec</th><th>Lead</th><th>Vendor shortlist — from library</th><th style="width:106px">Status</th><th style="width:96px"></th></tr></thead>
+        <tbody id="bom-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div id="rfq-overlay">
+  <div class="del-bar">
+    <button class="del-back" onclick="closeRfq()">← Procurement</button>
+    <span class="eyebrow">Procurement · Request for Quotation</span>
+    <div class="del-actions"><button class="del-act" onclick="window.print()">Print / PDF</button></div>
+  </div>
+  <div class="del-scroll"><div class="del-doc" id="rfq-doc"></div></div>
+</div>
+
+<script>
+// ─── Equipment library (demo slice) — keyword → vendor shortlist ─────────
+// The production build replaces this with the library-data backed catalog.
+const LIBRARY = [
+  {match:/transformer/i,       vendors:['Hitachi Energy','Siemens Energy','Eaton'],        note:'cast-resin, IEC 60076-11'},
+  {match:/MV switchgear/i,     vendors:['ABB','Schneider Electric','Powell'],              note:'SF6-free preferred'},
+  {match:/UPS/i,               vendors:['Vertiv','Eaton','Schneider Electric'],            note:'Li-ion, 5-min ride-through'},
+  {match:/CDU/i,               vendors:['Vertiv','Motivair','Boyd'],                       note:'NVIDIA DSX CDU list'},
+  {match:/trim|dry cooler/i,   vendors:['Güntner','Vertiv','SPX Cooling'],                 note:'free-cooling capable'},
+  {match:/generator/i,         vendors:['Caterpillar','Cummins','Kohler'],                 note:'ISO 8528, continuous'},
+  {match:/BESS/i,              vendors:['Fluence','Tesla','Sungrow'],                      note:'grid-scale Li-ion'},
+  {match:/IB spine|switch/i,   vendors:['NVIDIA'],                                         note:'direct / via OEM'},
+  {match:/GPU rack/i,          vendors:['NVIDIA','Supermicro','Dell'],                     note:'per allocation'},
+];
+// Default demo BOM — Meridian's Build output for the IID demo (200 MW · GB300).
+const DEMO = {
+  site:'Imperial Valley Data Center Campus', study:'IID Feasibility Study · May 2025', mw:'200 MW · 168.1 MW IT', chip:'NVIDIA GB300 NVL72',
+  bom:[
+    {qty:122, item:'Power transformers',      spec:'3.15 MVA cast-resin IEC 60076-11 · step-down from 230 kV', lead:'52–78 wks', crit:true},
+    {qty:81,  item:'CDUs (CDU)',              spec:'Tier 1 CDU · 1,200–1,350 kW · 1,600–1,800 L/min',          lead:'10–16 wks', crit:false},
+    {qty:81,  item:'Trim coolers / dry coolers', spec:'Up to 3 MW per unit · free cooling capable',            lead:'14–22 wks', crit:false},
+    {qty:34,  item:'MV switchgear',           spec:'SF6-free · 230 kV / 15 kV',                                lead:'78–130 wks', crit:true},
+    {qty:61,  item:'UPS modules',             spec:'2.5–3.0 MW · Li-ion · 5-min ride-through',                 lead:'16–24 wks', crit:false},
+    {qty:34,  item:'Standby generators',      spec:'~3 MW · ISO 8528 · 24-hr fuel',                            lead:'20–28 wks', crit:false},
+    {qty:41,  item:'IB spine switches',       spec:'800G NVIDIA Quantum-X / InfiniBand HDR',                   lead:'12–20 wks', crit:false},
+    {qty:1292,item:'GPU racks (NVIDIA GB300 NVL72)', spec:'72 GPUs/rack · 142 kW max · CDU required',          lead:'Per allocation · 12–14 mo', crit:true},
+  ],
+};
+const STATUSES = [['bom','BOM'],['rfq','RFQ SENT'],['quoted','QUOTED'],['po','PO ISSUED']];
+
+// ─── State: BOM from Meridian hash if present, else the demo ─────────────
+let DATA = DEMO;
+try {
+  const h = new URLSearchParams(location.hash.replace('#',''));
+  if (h.get('bom')) {
+    const rows = JSON.parse(decodeURIComponent(escape(atob(h.get('bom')))));
+    DATA = {site:h.get('site')||'Data Center Campus', study:h.get('study')||'Study on file',
+            mw:h.get('mw')||'—', chip:h.get('chip')||'—', bom:rows};
+  }
+} catch(e){ console.warn('BOM hash parse failed — using demo BOM', e); }
+const state = DATA.bom.map((b,i)=>({...b, id:i, status:'bom',
+  vendors:(LIBRARY.find(l=>l.match.test(b.item))||{vendors:[]}).vendors,
+  libNote:(LIBRARY.find(l=>l.match.test(b.item))||{}).note||'',
+  sel:[]}));
+
+// ─── Render ──────────────────────────────────────────────────────────────
+function renderFacts(){
+  document.getElementById('src-facts').innerHTML = `
+    <div class="fact-row"><span class="fact-k">Site</span><span class="fact-v" style="font-size:11px">${DATA.site}</span></div>
+    <div class="fact-row"><span class="fact-k">Basis</span><span class="fact-v" style="font-size:11px">${DATA.study}</span></div>
+    <div class="fact-row"><span class="fact-k">Power</span><span class="fact-v">${DATA.mw}</span></div>
+    <div class="fact-row"><span class="fact-k">Platform</span><span class="fact-v" style="font-size:11px">${DATA.chip}</span></div>
+    <div class="fact-row"><span class="fact-k">BOM lines</span><span class="fact-v">${state.length}</span></div>`;
+}
+function renderStats(){
+  const n=k=>state.filter(s=>s.status===k).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-val">${n('bom')}</div><div class="stat-label">Awaiting RFQ</div></div>
+    <div class="stat"><div class="stat-val">${n('rfq')+n('quoted')}</div><div class="stat-label">In market</div></div>
+    <div class="stat"><div class="stat-val">${n('po')}</div><div class="stat-label">PO issued</div></div>`;
+}
+function pill(s){
+  const [k,label] = STATUSES.find(([k])=>k===s.status);
+  return `<span class="status-pill st-${k}" onclick="advance(${s.id})" title="Click to advance">${label}</span>`;
+}
+function renderBom(){
+  document.getElementById('bom-body').innerHTML = state.map(s=>`<tr>
+    <td class="mono">${s.qty}</td>
+    <td style="font-weight:600;color:var(--ink);white-space:nowrap">${s.item}${s.crit?'<br><span class="crit-flag">● CRITICAL PATH</span>':''}</td>
+    <td style="color:var(--muted);font-size:11.5px">${s.spec}</td>
+    <td class="mono" style="color:var(--warn-text);white-space:nowrap">${s.lead}</td>
+    <td>${s.vendors.map(v=>`<span class="vendor-chip${s.sel.includes(v)?' sel':''}" onclick="toggleVendor(${s.id},'${v}')">${v}</span>`).join('')}
+        ${s.libNote?`<div style="font-size:10.5px;color:var(--faint);margin-top:3px;font-family:var(--m)">${s.libNote}</div>`:''}</td>
+    <td>${pill(s)}</td>
+    <td><button class="btn-mini" onclick="openRfq(${s.id})" ${s.sel.length?'':'disabled'} title="${s.sel.length?'':'Shortlist at least one vendor first'}">Draft RFQ</button></td>
+  </tr>`).join('');
+  renderStats();
+}
+function toggleVendor(id,v){
+  const s=state[id];
+  s.sel = s.sel.includes(v) ? s.sel.filter(x=>x!==v) : [...s.sel,v];
+  renderBom();
+}
+function advance(id){
+  const s=state[id];
+  const i=STATUSES.findIndex(([k])=>k===s.status);
+  s.status=STATUSES[(i+1)%STATUSES.length][0];
+  renderBom();
+}
+function openRfq(id){
+  const s=state[id];
+  const today=new Date(); const due=new Date(today); due.setDate(due.getDate()+14);
+  const fmt=d=>d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('rfq-doc').innerHTML=`
+    <div class="doc-brand"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:16px;width:auto"><span class="cls">PROCUREMENT · RFQ ${String(1000+s.id)} · ${fmt(today).toUpperCase()}</span></div>
+    <span class="eyebrow">Request for Quotation</span>
+    <div class="doc-title">${s.item}</div>
+    <div class="doc-sub">To: ${s.sel.join(' · ')} &nbsp;·&nbsp; From: Voltai Inc. — Data Center Procurement</div>
+    <div class="dsec"><span class="eyebrow">1 · Scope</span>
+      <p>Voltai requests a firm quotation for <strong>${s.qty} × ${s.item}</strong> per the following specification: ${s.spec}. Quantities derive from a pre-engineering compute-readiness evaluation (Meridian) for <strong>${DATA.site}</strong> (${DATA.mw}, ${DATA.chip}); final quantities to be confirmed at award following engineering design.</p></div>
+    <div class="dsec"><span class="eyebrow">2 · Delivery &amp; schedule</span>
+      <p>Delivery to site: ${DATA.site}. Indicative lead time carried in our plan: <strong>${s.lead}</strong>.${s.crit?' This item is on the project critical path — please quote both standard and expedited programs, and state firm production slot availability.':''}</p></div>
+    <div class="dsec"><span class="eyebrow">3 · Quotation requirements</span>
+      <p>Please provide: unit and extended pricing (Incoterms stated), firm lead time from PO, production slot reservation terms, compliance/certification documentation, warranty terms, and payment schedule. Alternates meeting the functional spec are welcome if clearly identified.</p></div>
+    <div class="dsec"><span class="eyebrow">4 · Response</span>
+      <p>Quotations are requested by <strong>${fmt(due)}</strong> to procurement@voltai.com, referencing RFQ ${String(1000+s.id)}.</p></div>
+    <div class="doc-footer">DEMO DOCUMENT — generated by the Voltai Data Center toolkit from a modeled, pre-engineering BOM. Not a purchase commitment. · Voltai Inc.</div>`;
+  document.getElementById('rfq-overlay').classList.add('on');
+  if(s.status==='bom'){ s.status='rfq'; renderBom(); }
+}
+function closeRfq(){ document.getElementById('rfq-overlay').classList.remove('on'); }
+renderFacts(); renderBom();
+</script>
+</body>
+</html>
