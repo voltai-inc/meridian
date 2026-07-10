@@ -1,6 +1,15 @@
 # Power Model — One-Page Brief: EE First, Formal After
 **July 2026 · everything deeper: `MERIDIAN_PRIMER.md`**
 
+> **Outcome of the first EE conversation (July 9, informal):** (1) Facility-side power is a
+> different trade — "heavy electrical plumbing" — the going-up-the-stack story does not extend the
+> chip/board team there; **hire someone with real DC power experience** (search started). (2) The
+> demand side landed: the EE member proposed a **nonlinear GPU power model (temperature ×
+> workload)** plus **workload optimization under a fixed power envelope** (incl. rack-position
+> voltage-drop effects) — chip-adjacent, in-discipline, needs GPU power data (Vertiv collab could
+> supply rack data). Meridian = verifier; this = optimizer; they compose. Open worry to test:
+> "is it too simple / can everyone get it?" — the standing defensibility question.
+
 ## What we built (3 sentences)
 
 We simulate the power draw curve an AI training fleet produces — the whole fleet swings together

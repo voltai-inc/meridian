@@ -147,13 +147,22 @@ lease/interconnection artifact has no author today. (3) The installed H100/H200 
 our checks hard — runs for years, and utilities have no standard way to evaluate AI transients in
 the large-load studies now flooding them.
 
-**The discipline:** staged kill-tests, each nearly free, before any deeper build — the EE meeting
-(physics + boundability; see `TEAM_BRIEF_POWER_MODEL.md`), one utility/operator conversation (has
-a load ever been curtailed for transients? what would a study accept?), and one measured rack
-trace via Vertiv / NVIDIA / an operator. Any of them can kill it for the price of a conversation.
+**The discipline:** staged kill-tests, each nearly free, before any deeper build. **Kill-test 1
+(EE conversation) ran July 9:** facility-side power is out of the chip/board team's discipline —
+the fix is a **DC power hire** (search started), not a stretch assignment; the demand side
+produced a new in-discipline direction — a **nonlinear GPU power model (temperature × workload) +
+workload optimization under a fixed power envelope** — needing GPU power data (Vertiv collab is
+the likely source). Remaining kill-tests: one utility/operator conversation (has a load ever been
+curtailed for transients? what would a study accept?), and one measured rack trace via Vertiv /
+NVIDIA / an operator.
 
 ## Immediate Next Steps
 
+0. **Hire a DC power / electrical systems person** — facility-side supply modeling needs the real
+   trade (July 9 EE conversation); the chip/board team owns the demand side. Search underway.
+0b. **Scope the demand-side optimizer** with the EE team: nonlinear GPU power model (temp ×
+   workload) + workload placement/throttling under a fixed MW envelope. Data needed: GPU power vs
+   temperature curves, rack thermal/electrical layout (Vertiv).
 1. Get chip team to review MFU assumptions — even a ballpark validation ("our GB300 clusters run 50–55% MFU") would let us label the number as verified and light up the "vendor-verified" rung of the confidence ladder
 2. Send Vertiv technical ask (see separate document)
 3. ~~Connect a selected Meridian design into Workload Power Validation~~ **Done July 9** — validation runs inline; the standalone bench is the deep-linked full version
