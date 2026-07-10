@@ -235,24 +235,33 @@ nobody else has the data."*
 
 ---
 
-## 8 · Questions for the formal / EE team
+## 8 · Feasibility review with the formal / EE team
 
 The chip power profile Meridian consumes has two ingredient types — **amplitudes** (how much power
-in each state) and **timing** (when states change). They come from different places:
+in each state) and **timing** (when states change). Timing is the customer's data (see below).
+Amplitudes are hardware characterization — which raises the real internal question: **is producing
+them realistic and buildable for us?** Frame it as a feasibility review, not a data request:
 
-- **Amplitudes and dynamics — silicon/board territory. The formal/EE team's home turf:**
-  1. Can you produce per-phase power levels for a GB300 NVL72 rack (and an H100 HGX node) —
-     compute burst, communication/all-reduce phase, checkpoint idle, true idle — as fractions of TDP,
-     with error bars?
-  2. Can you characterize the **slew rate** — how fast a rack's draw actually transitions between
-     those states (ms-scale)? (Our square-wave assumption is the conservative extreme.)
-  3. Can you characterize GB300-class **on-board energy storage**: usable energy, response time, and
-     the effective damping percentage of a 3-second training-step swing? (We currently credit 50%
-     as an estimate — this number moves the verdict more than any other single input.)
-  4. Can you validate or correct our four-number profile abstraction (high_frac / low_frac /
-     checkpoint_frac / smoothing) as a rack-level power model — is anything first-order missing
-     (e.g., power-factor behavior under swing, inrush at recovery)?
-  5. Do our chain-loss assumptions (UPS 96%, transformer 99%, PDU 99.5%) match what you'd use?
+  1. **Is the model sound?** Our rack power model is four numbers (high-phase, low-phase,
+     checkpoint fraction, smoothing credit) driving a facility-level transient simulation. From an
+     EE standpoint, is that abstraction defensible, or is something first-order missing
+     (power-factor behavior under swing, recovery inrush, pump/fan transients)?
+  2. **Can the amplitudes be derived without owning the hardware?** We don't have a GB300 NVL72 to
+     instrument. Can per-phase draw and slew be derived analytically — from vendor power specs,
+     board/PDN design data, component power states — the way you already reason about power at the
+     silicon/board level? Or is this measurement-only?
+  3. **The smoothing number specifically:** we credit GB300-class on-board energy storage with
+     damping ~50% of the 3-second training-step swing (from public NVIDIA material). From what you
+     know of that power architecture, is 50% plausible? Could you bound it (worst/best case)
+     analytically? This single number moves our pass/fail verdict more than any other input.
+  4. **If measurement is unavoidable,** what would it actually take — equipment, access to a
+     partner's rack, time, cost? Is there a lighter path (single node or single tray instead of a
+     full rack, scaled up)?
+  5. **Is this a natural extension of our stack or a different discipline?** The pitch is "prove
+     the chip → navigate the system → stress-test the facility." Does modeling rack-to-facility
+     power transients feel adjacent to our existing engines to you, or would we be faking expertise
+     we don't have? What would you consider the minimum *credible* version?
+  6. Chain-loss sanity: UPS 96% / transformer 99% / PDU 99.5% — reasonable defaults?
 - **Timing — the CUSTOMER'S data, not derivable from silicon (and now an input in the product):**
   Iteration period (~3 s), checkpoint cadence (~20 min) and duration (~20 s), synchronized fraction
   are set by the off-taker's training framework, model size, checkpoint policy, and storage
@@ -265,8 +274,10 @@ in each state) and **timing** (when states change). They come from different pla
   The remaining ask for the chip team is a cross-check: one measured fleet-level power trace from a
   real training run, to validate that a declared profile + our amplitudes reproduces reality.
 
-If the answers to 1–3 are yes, the confidence ladder's "vendor-verified" rung lights up with no
-code changes — the numbers slot into the same interface.
+If the review lands on "sound, and derivable analytically" (Q1–3), the confidence ladder's
+"vendor-verified" rung lights up with no code changes — the numbers slot into the same interface.
+If it lands on "measurement-only and we lack access," that's equally valuable: it converts the
+roadmap item into a partnership requirement (NVIDIA/Vertiv/operator) instead of an internal task.
 
 ---
 
