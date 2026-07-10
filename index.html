@@ -71,8 +71,16 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
 .keyrow .hint{font-size:11px;color:var(--faint)}
 
 /* tool grid — graphic + title only */
-.tools{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:900px){.tools{grid-template-columns:repeat(2,1fr)}}
+.grid-sep{font-family:var(--m);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin:36px 0 12px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tools.mods{grid-template-columns:repeat(4,1fr)}
+.tools.mods .tool{padding:16px 16px 13px}
+.tools.mods .tool svg{max-height:74px}
+.tools.mods .tool h2{font-size:14px}
+@media(max-width:900px){.tools,.tools.mods{grid-template-columns:repeat(2,1fr)}}
+.tool .step{font-family:var(--m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.tool .step b{color:var(--red);font-weight:500}
+.tool.soon .step b{color:var(--faint)}
 .tool{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:20px 20px 16px;text-decoration:none;color:var(--body);transition:border-color .13s,box-shadow .13s,transform .13s}
 .tool:hover{border-color:var(--border-strong);box-shadow:0 4px 18px rgba(0,0,0,.06);transform:translateY(-2px)}
 .tool .motif{color:#b9b9b9;margin-bottom:14px;transition:color .13s}
@@ -99,17 +107,19 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
 <aside>
   <div class="logo">
     <img src="_ds/voltai-logo-red.png" alt="Voltai">
-    <span class="sub">Meridian · Data Center</span>
+    <span class="sub">Data Center</span>
   </div>
   <nav>
     <a class="on" href="index.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1"/><rect x="9" y="9" width="5.5" height="5.5" rx="1"/></svg>Dashboard</a>
-    <span class="sep">Tools</span>
-    <a href="site-intelligence.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13 3.5 3.5 12 2.5l1.5 3-1 8z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg>Site Intelligence</a>
+    <span class="sep">Pipeline</span>
+    <a href="site-selection.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"/><circle cx="8" cy="6" r="1.6"/></svg>Site Selection</a>
+    <a href="site-intelligence.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13 3.5 3.5 12 2.5l1.5 3-1 8z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg>Meridian</a>
+    <a class="soon"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12v9H2z"/><path d="M5.5 5V3.5a2.5 2.5 0 0 1 5 0V5"/></svg>Procurement<span class="ext">soon</span></a>
+    <span class="sep">Modules</span>
     <a href="power-signoff.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 1.5 3.5 9h4l-1 5.5 5-7.5h-4z"/></svg>Workload Power</a>
     <a href="helio.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="4" width="5.5" height="3.5"/><rect x="9" y="4" width="5.5" height="3.5"/><rect x="1.5" y="9.5" width="5.5" height="3.5"/><rect x="9" y="9.5" width="5.5" height="3.5"/><path d="M8 1.5v13" stroke-dasharray="2 2"/></svg>Helio Reference</a>
     <a href="http://51.21.243.237:5173/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M8 8 14 5M8 8 2 5M8 8v6.5"/></svg>Digital Twin<span class="ext">↗</span></a>
     <a href="http://13.61.152.27/quick-check" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5 13.5 3.5v4c0 3.5-2.5 6-5.5 7-3-1-5.5-3.5-5.5-7v-4z"/><path d="m5.5 8 1.8 1.8L10.8 6"/></svg>Compliance Agent<span class="ext">↗</span></a>
-    <a class="soon"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12v9H2z"/><path d="M5.5 5V3.5a2.5 2.5 0 0 1 5 0V5"/></svg>Procurement<span class="ext">soon</span></a>
   </nav>
   <div class="user"><span class="dot">E</span>eric@voltai.com</div>
 </aside>
@@ -137,7 +147,25 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
       </div>
     </div>
 
+    <div class="grid-sep">Pipeline — find a site, evaluate it, procure the build</div>
     <div class="tools">
+      <a class="tool" href="site-selection.html">
+        <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M16 90 L28 26 L92 12 L158 22 L206 16 L198 84 L118 100 Z"/>
+          <path d="M28 26 L96 58 L198 84" stroke-width=".7" opacity=".45"/>
+          <path d="M12 44 H58 M72 40 H128" stroke-dasharray="4 3" stroke-width=".9" opacity=".8"/>
+          <path d="M56 52 c0 -6 10 -6 10 0 c0 5 -5 7 -5 11 c0 -4 -5 -6 -5 -11 Z"/>
+          <circle cx="61" cy="52" r="1.2" fill="currentColor" stroke="none"/>
+          <path d="M116 32 c0 -6 10 -6 10 0 c0 5 -5 7 -5 11 c0 -4 -5 -6 -5 -11 Z"/>
+          <circle cx="121" cy="32" r="1.2" fill="currentColor" stroke="none"/>
+          <path d="M156 56 c0 -7 12 -7 12 0 c0 6 -6 8 -6 13 c0 -5 -6 -7 -6 -13 Z" stroke-width="1.6"/>
+          <circle cx="162" cy="56" r="1.6" fill="currentColor" stroke="none"/>
+          <circle cx="162" cy="62" r="13" stroke-dasharray="3 3" stroke-width=".8"/>
+        </svg></div>
+        <span class="step"><b>01</b> · Find</span>
+        <h2>Site Selection</h2>
+      </a>
+
       <a class="tool" href="site-intelligence.html">
         <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
           <path d="M18 88 L34 26 L108 14 L150 34 L146 92 L60 100 Z"/>
@@ -149,9 +177,30 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
           <path d="M70 46 c0 -7 12 -7 12 0 c0 6 -6 8 -6 13 c0 -5 -6 -7 -6 -13 Z"/>
           <circle cx="76" cy="46" r="1.4" fill="currentColor" stroke="none"/>
         </svg></div>
-        <h2>Site Intelligence</h2>
+        <span class="step"><b>02</b> · Evaluate</span>
+        <h2>Meridian</h2>
       </a>
 
+      <div class="tool soon">
+        <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="14" y="40" width="44" height="28" rx="3"/>
+          <rect x="88" y="40" width="44" height="28" rx="3"/>
+          <rect x="162" y="40" width="44" height="28" rx="3"/>
+          <path d="M58 54 H88 M132 54 H162" stroke-dasharray="4 3"/>
+          <path d="M84 50 l4 4 -4 4 M158 50 l4 4 -4 4" stroke-width="1"/>
+          <path d="M22 50 h28 M22 57 h18" stroke-width=".8" opacity=".7"/>
+          <path d="M96 50 h28 M96 57 h18" stroke-width=".8" opacity=".7"/>
+          <path d="M170 50 h28 M170 57 h18" stroke-width=".8" opacity=".7"/>
+          <path d="M30 40 V30 h160 v10" stroke-width=".7" opacity=".4" stroke-dasharray="3 3"/>
+        </svg></div>
+        <span class="step"><b>03</b> · Procure</span>
+        <h2>Procurement</h2>
+        <span class="tag-soon">In build — BOM → RFQ → PO</span>
+      </div>
+    </div>
+
+    <div class="grid-sep">Modules &amp; reference — what backs the evaluation</div>
+    <div class="tools mods">
       <a class="tool" href="power-signoff.html">
         <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
           <path d="M12 30 H208" stroke-dasharray="5 4" stroke-width=".9" opacity=".8"/>
@@ -199,22 +248,6 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
         </svg></div>
         <h2>Compliance Agent <span class="ext">↗</span></h2>
       </a>
-
-      <div class="tool soon">
-        <div class="motif"><svg viewBox="0 0 220 110" fill="none" stroke="currentColor" stroke-width="1.3">
-          <rect x="14" y="40" width="44" height="28" rx="3"/>
-          <rect x="88" y="40" width="44" height="28" rx="3"/>
-          <rect x="162" y="40" width="44" height="28" rx="3"/>
-          <path d="M58 54 H88 M132 54 H162" stroke-dasharray="4 3"/>
-          <path d="M84 50 l4 4 -4 4 M158 50 l4 4 -4 4" stroke-width="1"/>
-          <path d="M22 50 h28 M22 57 h18" stroke-width=".8" opacity=".7"/>
-          <path d="M96 50 h28 M96 57 h18" stroke-width=".8" opacity=".7"/>
-          <path d="M170 50 h28 M170 57 h18" stroke-width=".8" opacity=".7"/>
-          <path d="M30 40 V30 h160 v10" stroke-width=".7" opacity=".4" stroke-dasharray="3 3"/>
-        </svg></div>
-        <h2>Procurement</h2>
-        <span class="tag-soon">In build — BOM → RFQ → PO</span>
-      </div>
     </div>
   </div>
 </main>
@@ -224,13 +257,16 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
 // Calls the Anthropic API directly from the browser. The API key is entered
 // by the user and kept in localStorage only — never committed, never sent
 // anywhere except api.anthropic.com.
-const SYSTEM = `You are the assistant on Voltai Meridian's dashboard — an internal toolkit for AI data center evaluation. Be concise and direct. The toolkit's tools (relative links work):
-- Site Intelligence (site-intelligence.html): screen a site claim or utility study; per-chip compute design, MFU at scale, workload power verdicts, economics, off-taker spec sheet.
-- Workload Power (power-signoff.html): full stress-test bench — electrical design vs AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail.
-- Helio Reference (helio.html): the 2N reference architecture, 10 MW pod hall scaling to 100 MW.
+const SYSTEM = `You are the assistant on Voltai's Data Center dashboard — an internal toolkit organized as a pipeline: find a site, evaluate it, procure the build. Be concise and direct.
+Pipeline (relative links work):
+- Site Selection (site-selection.html): map + tracker of candidate powered sites (pipeline and prospecting, synced from the team's site sheet). Click a site to evaluate it in Meridian.
+- Meridian (site-intelligence.html): the core product — takes a utility study or site power claim and evaluates compute readiness: per-chip compute design, MFU at scale, workload power verdicts, envelope check, economics sensitivity, off-taker spec sheet.
+- Procurement: in build — consumes Meridian's BOM (Build tab) as BOM → RFQ → PO.
+Modules & reference:
+- Workload Power (power-signoff.html): full stress-test bench behind Meridian's inline verdict — electrical design vs AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail.
+- Helio Reference (helio.html): the 2N reference architecture (10→100 MW block) Meridian validates against.
 - Digital Twin (http://51.21.243.237:5173/): interactive 3D facility simulator.
 - Compliance Agent (http://13.61.152.27/quick-check): upload documents, run compliance checks against frameworks (ASHRAE TC9.9, NVIDIA DSX CDU, IEC).
-- Procurement: in build.
 Key concepts you can explain: training vs inference power behavior, MFU, synchronized fleet transients, chip power profiles (GB300 on-board smoothing), the envelope check, supply vs demand. When a question is better answered inside a tool, say which tool and why.`;
 
 const chatMessages = [];

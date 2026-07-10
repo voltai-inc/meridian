@@ -14,11 +14,14 @@ Live: `meridian-web-swart.vercel.app` · Static HTML/JS, no backend, no build st
 
 ## Pages
 
+The dashboard presents the tools as a pipeline — **01 Find (Site Selection) → 02 Evaluate (Meridian) → 03 Procure (Procurement, in build)** — with Workload Power, Helio, Digital Twin, and Compliance as modules/reference behind the evaluation.
+
 | Page | What it is |
 |------|-----------|
-| `index.html` | Dashboard — sidebar landing (main-platform style) with a Claude-powered chat and the tool grid |
+| `index.html` | Dashboard — sidebar landing (main-platform style) with a Claude-powered chat, the pipeline row, and the modules grid |
+| `site-selection.html` | **Site Selection** (pipeline step 01): map + tracker of candidate sites, synced from the team's site sheet (pipeline vs prospecting, approx-location flags); each site deep-links into Meridian with MW/location/utility/climate prefilled |
 | `example-feasibility-study.html` | Printable illustrative utility feasibility study — the input document Meridian expects |
-| `site-intelligence.html` | **Meridian** (the product): single Design workspace — per-chip power verdicts, inline workload power validation, envelope check, deliverables |
+| `site-intelligence.html` | **Meridian** (pipeline step 02, the product): single Design workspace — per-chip power verdicts, inline workload power validation, envelope check, deliverables |
 | `power-signoff.html` | **Workload Power Validation** — the full bench behind Meridian's inline verdict, every design knob exposed; Meridian deep-links in prefilled |
 | `helio.html` | **Helio** — the 2N reference architecture (10→100 MW pod block) whose scaled ratios Meridian validates against |
 | `power-validation.js` | Shared DOM-free simulation engine (traces, chain loads, BESS, 19 checks) — used by both pages, unit-testable under node |

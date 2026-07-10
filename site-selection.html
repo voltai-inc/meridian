@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site Selection — Voltai Data Center</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+@font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-700.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-500.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:600;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-600.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-500.woff2') format('woff2')}
+
+:root{
+  --bg:#f6f8fb; --surface:#ffffff; --sunken:#eef2f6;
+  --ink:#060a0e; --body:#141d26; --muted:#5b646e; --faint:#8a929b;
+  --border:#d2dae2; --hairline:rgba(6,10,14,.08); --border-strong:#bfc6ce;
+  --volt:#AF0000; --volt-vivid:#c92121; --volt-tint:#fbeeee;
+  --ok-text:#1e7a5a; --warn-text:#8a6a14;
+  --disp:'Space Grotesk',sans-serif; --f:'IBM Plex Sans',-apple-system,sans-serif; --m:'IBM Plex Mono',monospace;
+  --nav-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f);font-size:13.5px;line-height:1.55}
+.eyebrow{font-family:var(--m);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;padding:0 20px;z-index:1100;gap:20px}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.brand .prod{font-family:var(--m);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.nav-spacer{flex:1}
+.ref-link{font-size:11.5px;color:var(--muted);text-decoration:none;padding:6px 11px;border:1px solid var(--border);border-radius:5px;background:var(--surface);transition:.12s}
+.ref-link:hover{color:var(--ink);border-color:var(--border-strong)}
+.btn-primary{background:var(--ink);color:#fff;border:none;padding:7px 16px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.12s}
+.btn-primary:hover{background:#26323d}
+
+.app{display:grid;grid-template-columns:340px 1fr;margin-top:var(--nav-h);height:calc(100vh - var(--nav-h))}
+.rail{background:var(--surface);border-right:1px solid var(--hairline);overflow-y:auto;display:flex;flex-direction:column}
+#map{height:100%;background:#e9edf1}
+
+.rail-head{padding:16px 18px 14px;border-bottom:1px solid var(--hairline)}
+.rail-head .eyebrow{display:block;margin-bottom:10px}
+.stat-row{display:flex;gap:8px}
+.stat{flex:1;background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:9px 11px}
+.stat-val{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--ink);line-height:1.1}
+.stat-label{font-size:10.5px;color:var(--muted);margin-top:2px}
+.seg{display:flex;gap:2px;background:var(--sunken);border:1px solid var(--hairline);border-radius:5px;padding:2px;margin-top:12px}
+.seg button{flex:1;padding:6px 4px;font-size:12px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;font-family:var(--f);transition:.12s}
+.seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(6,10,14,.08)}
+.src-note{font-size:11px;color:var(--muted);margin-top:11px;line-height:1.5}
+.src-note a{color:var(--volt)}
+
+.site-list{flex:1;padding:6px 0 20px}
+.group-label{padding:14px 18px 6px;display:flex;align-items:baseline;gap:8px}
+.group-label .n{font-family:var(--m);font-size:10.5px;color:var(--faint)}
+.site-item{display:flex;gap:10px;padding:10px 18px;cursor:pointer;border-left:2px solid transparent;transition:background .1s}
+.site-item:hover{background:var(--sunken)}
+.site-item.sel{background:var(--volt-tint);border-left-color:var(--volt)}
+.site-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.site-dot.pipe{background:var(--volt)}
+.site-dot.pros{background:#3f3f3f}
+.site-dot.approx{background:transparent;border:2px dashed currentColor}
+.site-dot.approx.pipe{color:var(--volt)}
+.site-dot.approx.pros{color:#3f3f3f}
+.si-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.si-meta{font-family:var(--m);font-size:11px;color:var(--muted);margin-top:2px}
+.si-meta .mw{color:var(--volt);font-weight:500}
+
+/* leaflet brand overrides */
+.leaflet-container{font-family:var(--f)}
+.leaflet-popup-content-wrapper{border-radius:8px;border:1px solid var(--border);box-shadow:0 6px 24px rgba(6,10,14,.14);padding:0}
+.leaflet-popup-content{margin:0;width:300px!important}
+.pop{padding:14px 16px 13px}
+.pop h3{font-family:var(--disp);font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:2px}
+.pop .addr{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.pop .badges{display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--m);letter-spacing:.07em}
+.badge.pipe{background:var(--volt-tint);color:var(--volt);border:1px solid #f0cbcb}
+.badge.pros{background:var(--sunken);color:var(--muted);border:1px solid var(--border)}
+.badge.approx{background:#fbf6e9;color:var(--warn-text);border:1px solid #ecd9a8}
+.pop .row{display:flex;justify-content:space-between;gap:10px;padding:3.5px 0;border-bottom:1px solid var(--hairline);font-size:12px}
+.pop .row:last-of-type{border-bottom:none}
+.pop .k{color:var(--muted)}
+.pop .v{font-family:var(--m);font-size:11.5px;color:var(--ink);text-align:right}
+.pop .notes{font-size:11.5px;color:var(--body);line-height:1.5;margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)}
+.pop .act{margin-top:11px;display:flex;gap:8px;align-items:center}
+.pop .act .btn-primary{font-size:11.5px;padding:7px 13px}
+.leaflet-popup-tip{border:1px solid var(--border)}
+.legend{position:absolute;bottom:18px;right:14px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 13px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 10px rgba(6,10,14,.08)}
+.legend .li{display:flex;align-items:center;gap:8px;font-family:var(--m);font-size:11px;color:var(--muted)}
+.legend .sw{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+@media(max-width:900px){.app{grid-template-columns:1fr}.rail{display:none}}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <a class="brand" href="index.html" title="Back to the dashboard"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:14px;width:auto;align-self:center"><span class="prod">SITE SELECTION</span></a>
+  <div class="nav-spacer"></div>
+  <a class="ref-link" href="https://docs.google.com/spreadsheets/d/1tqWTBHRI-uMr99Z1UsvjehRkiJ3rdhrv_WokfQSFIT8/edit?gid=1481162912" target="_blank" rel="noopener">Source sheet ↗</a>
+  <a class="btn-primary" href="site-intelligence.html">Open Meridian →</a>
+</nav>
+
+<div class="app">
+  <div class="rail">
+    <div class="rail-head">
+      <span class="eyebrow">Candidate sites · pipeline tracker</span>
+      <div class="stat-row" id="stats"></div>
+      <div class="seg" id="stage-seg">
+        <button class="on" data-f="all" onclick="setFilter('all')">All</button>
+        <button data-f="Pipeline" onclick="setFilter('Pipeline')">Pipeline</button>
+        <button data-f="Prospecting" onclick="setFilter('Prospecting')">Prospecting</button>
+      </div>
+      <div class="src-note">Synced from the <a href="https://docs.google.com/spreadsheets/d/1tqWTBHRI-uMr99Z1UsvjehRkiJ3rdhrv_WokfQSFIT8/edit?gid=1481162912" target="_blank" rel="noopener">site tracker sheet</a> · July 9, 2026. Dashed pins are approximate locations. Click a site to evaluate it in Meridian.</div>
+    </div>
+    <div class="site-list" id="site-list"></div>
+  </div>
+  <div style="position:relative"><div id="map"></div>
+    <div class="legend">
+      <div class="li"><span class="sw" style="background:#AF0000"></span>Pipeline</div>
+      <div class="li"><span class="sw" style="background:#3f3f3f"></span>Prospecting</div>
+      <div class="li"><span class="sw" style="background:none;border:2px dashed #8a929b"></span>Location approximate</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ─── DATA — synced from the site tracker sheet (gid 1481162912), July 9 2026 ─
+// mwNum = conservative lower bound used to prefill Meridian; null = unknown.
+// approx = pin placed at town/parish level, exact parcel TBD.
+const SITES = [
+ {id:'vidalia', name:'Vidalia Mills', addr:'1 King Timahoe Dr, Vidalia LA 71373', stage:'Pipeline', state:'Louisiana',
+  mw:'50–70 MW', mwNum:50, size:'870K sqft · 68.5 ac', type:'Auction (former factory)', price:'Beat $30M',
+  contact:'Bonnette Auctions', utility:'', climate:'hot_humid', lat:31.5654, lng:-91.4429, approx:true,
+  notes:'Competing offer $30M; $1M upfront paid. Auction 9/10 — pre-auction offer possible. By-right zoning likely. Fiber TBD. Flood risk to assess.'},
+ {id:'calvert', name:'Calvert City', addr:'Calvert City KY (off-market)', stage:'Pipeline', state:'Kentucky',
+  mw:'15 MW now → 50+ MW', mwNum:15, size:'200 ac (50 buildable)', type:'Powered land', price:'TBD',
+  contact:'Cushman & Wakefield', utility:'', climate:'temperate', lat:37.0334, lng:-88.35, approx:true,
+  notes:'15 MW now; 50+ MW in 36 mo. By-right DC zoning. NDA signed — data room forthcoming.'},
+ {id:'olds', name:'Canada Olds', addr:'6102/6402 48 Avenue, Olds AB', stage:'Pipeline', state:'Alberta, Canada',
+  mw:'20 MW', mwNum:20, size:'448K sqft · 40.3 ac', type:'Special manufacturing / retrofit', price:'~$30M',
+  contact:'JLL (Casey Stuart)', utility:'', climate:'cold_dry', lat:51.7869, lng:-114.1028, approx:false,
+  notes:'Rezoning done; power contracts discharged — renegotiation needed. Zayo fiber on-site. Bid deadline July 13. Built 2017–2020.'},
+ {id:'sawmill', name:'Sawmill Parkway', addr:'Dublin/Powell area — Columbus OH', stage:'Pipeline', state:'Ohio',
+  mw:'~24 MW', mwNum:24, size:'105K sqft · 27.5 ac', type:'Spec build', price:'TBD (construction cost)',
+  contact:'KBC Advisors', utility:'AEP', climate:'temperate', lat:40.1598, lng:-83.0913, approx:true,
+  notes:'AEP delivery 24–36 months — biggest open item; AEP validation pending. Zoning resolved via approved master plan. Developer delivers site with power.'},
+ {id:'encova', name:'Encova / New Albany', addr:'6650 New Albany Rd E, New Albany OH', stage:'Pipeline', state:'Ohio',
+  mw:'TBD', mwNum:null, size:'Existing DC + expansion land', type:'Existing data center', price:'>$15M',
+  contact:'KBC Advisors', utility:'AEP', climate:'temperate', lat:40.1034, lng:-82.8042, approx:false,
+  notes:'Tenant exiting early 2027 (cloud migration); existing utility relationship; power specs pending.'},
+ {id:'southgate', name:'Southgate Spec Build', addr:'Heath OH', stage:'Pipeline', state:'Ohio',
+  mw:'20+ MW', mwNum:20, size:'110–152K sqft', type:'New spec build', price:'TBD',
+  contact:"Southgate Corp / Atria (Robert O'Neill)", utility:'AEP', climate:'temperate', lat:40.0228, lng:-82.4446, approx:true,
+  notes:'Oct 2026 occupancy; 20 MW+ confirmed; exact usable MW and economics need validation. AEP meeting being set.'},
+ {id:'sub139', name:'13.9-Acre Substation Site', addr:'Louisiana (exact location TBD)', stage:'Pipeline', state:'Louisiana',
+  mw:'10–20 MW', mwNum:10, size:'13.9 ac', type:'Land (greenfield)', price:'$2.7M',
+  contact:'LED pipeline', utility:'Entergy', climate:'hot_humid', lat:30.65, lng:-91.7, approx:true,
+  notes:'Adjacent to substation; lowest-cost entry. Ground-up — no existing structures. Entergy TBD.'},
+ {id:'denim', name:'501 Denim Way', addr:'501 Denim Way, Madison County MS', stage:'Prospecting', state:'Mississippi',
+  mw:'10–50 MW+', mwNum:10, size:'TBD', type:'TBD', price:'TBD',
+  contact:'Madison County EDA (Emily Harrison)', utility:'Entergy', climate:'hot_humid', lat:32.5151, lng:-90.0979, approx:false,
+  notes:'Entergy capacity study starting. Needs dedicated substation at this scale.'},
+ {id:'foti', name:'Foti Highway 18', addr:'Highway 18 — Louisiana', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
+  contact:'LED / MMCRE (Ransom Pipes)', utility:'Entergy', climate:'hot_humid', lat:30.03, lng:-90.82, approx:true,
+  notes:'Entergy contact pending. Via Louisiana LED (Daniel Michel).'},
+ {id:'ronaldson', name:'12555 Ronaldson Rd', addr:'12555 Ronaldson Rd, Baton Rouge LA', stage:'Prospecting', state:'Louisiana',
+  mw:'8–10 MW+', mwNum:8, size:'TBD', type:'Acquisition', price:'TBD',
+  contact:'Greater Baton Rouge EDA (Jayson Newell)', utility:'Entergy', climate:'hot_humid', lat:30.5605, lng:-91.1764, approx:false,
+  notes:'Former Stupp steel operation. Entergy intro pending via Greater BR EDA.'},
+ {id:'pepsi', name:'Former Pepsi Plant', addr:'383 West 10th St, Reserve LA', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'Acquisition', price:'TBD',
+  contact:'portSL (Micah Cormier)', utility:'Entergy', climate:'hot_humid', lat:30.0688, lng:-90.556, approx:true,
+  notes:'Reserve site confirmed (not Baton Rouge). Open to other portSL portfolio sites too.'},
+ {id:'britco', name:'Britco + Ascension Parish', addr:'Ascension Parish LA', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
+  contact:'Ascension EDC (Kate MacArthur)', utility:'Entergy', climate:'hot_humid', lat:30.2385, lng:-90.9201, approx:true,
+  notes:'Power capacity check pending. Follow-up sent.'},
+ {id:'ampacet', name:'Ampacet Warehouse', addr:'DeRidder LA', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'Acquisition', price:'TBD',
+  contact:'Alliance SWLA (Gus Fontenot) → Greater Beauregard (Lisa Adams)', utility:'', climate:'hot_humid', lat:30.8723, lng:-93.2817, approx:false,
+  notes:'Referred to Lisa Adams. No response yet.'},
+ {id:'hwy51', name:'19120 Hwy 51', addr:'19120 Hwy 51 — Louisiana', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
+  contact:'Carpenter Properties (Rob Carpenter)', utility:'Entergy', climate:'hot_humid', lat:30.32, lng:-90.44, approx:true,
+  notes:'Called today. Awaiting power details from Rob.'},
+ {id:'martco', name:'Martco Mill', addr:'Louisiana', stage:'Prospecting', state:'Louisiana',
+  mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
+  contact:'OneAcadiana (Megan)', utility:'', climate:'hot_humid', lat:31.42, lng:-92.79, approx:true,
+  notes:'Outreach started. No response yet.'},
+ {id:'nwpid', name:'NWPID Site', addr:'US 371 & Henerietta Cullen, LA 71021', stage:'Prospecting', state:'Louisiana',
+  mw:'12.7 MW', mwNum:12.7, size:'39 ac', type:'Land (greenfield)', price:'TBD',
+  contact:'Webster Parish LED', utility:'', climate:'hot_humid', lat:32.969, lng:-93.4507, approx:false,
+  notes:'In discussions with Lisa; initial power study provided (confirm currency) and price pending.'},
+ {id:'evangeline', name:'1016 SW Evangeline', addr:'Lafayette LA', stage:'Prospecting', state:'Louisiana',
+  mw:'1 MW (raise w/ Entergy)', mwNum:1, size:'12 ac', type:'Light manufacturing', price:'$70K/mo',
+  contact:'—', utility:'Entergy', climate:'hot_humid', lat:30.2215, lng:-92.0088, approx:false,
+  notes:'Call or email Entergy.'},
+];
+
+// ─── MAP ─────────────────────────────────────────────────────────────────
+const map = L.map('map',{zoomControl:true, scrollWheelZoom:true});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:19,
+}).addTo(map);
+
+function meridianLink(s){
+  if (!s.mwNum) return 'site-intelligence.html';
+  const p = new URLSearchParams({mode:'2', demo:'0', mw:s.mwNum, loc:s.addr, utility:s.utility||'Utility TBD', climate:s.climate});
+  return 'site-intelligence.html#'+p.toString();
+}
+function popHTML(s){
+  return `<div class="pop">
+    <h3>${s.name}</h3>
+    <div class="addr">${s.addr}</div>
+    <div class="badges">
+      <span class="badge ${s.stage==='Pipeline'?'pipe':'pros'}">${s.stage.toUpperCase()}</span>
+      ${s.approx?'<span class="badge approx">LOCATION APPROX.</span>':''}
+    </div>
+    <div class="row"><span class="k">Power</span><span class="v">${s.mw}</span></div>
+    <div class="row"><span class="k">Size</span><span class="v">${s.size}</span></div>
+    <div class="row"><span class="k">Type</span><span class="v">${s.type}</span></div>
+    <div class="row"><span class="k">Price</span><span class="v">${s.price}</span></div>
+    <div class="row"><span class="k">Source</span><span class="v" style="font-size:10.5px">${s.contact}</span></div>
+    <div class="notes">${s.notes}</div>
+    <div class="act"><a class="btn-primary" href="${meridianLink(s)}">Evaluate in Meridian →</a></div>
+  </div>`;
+}
+
+const markers = {};
+SITES.forEach(s=>{
+  const pipe = s.stage==='Pipeline';
+  const m = L.circleMarker([s.lat,s.lng],{
+    radius: pipe?9:7,
+    color: pipe?'#AF0000':'#3f3f3f',
+    weight: 2,
+    dashArray: s.approx?'3 3':null,
+    fillColor: pipe?'#AF0000':'#3f3f3f',
+    fillOpacity: s.approx?0.25:0.8,
+  }).addTo(map);
+  m.bindPopup(popHTML(s),{maxWidth:320});
+  m.bindTooltip(`${s.name} · ${s.mw}`,{direction:'top',offset:[0,-8]});
+  m.on('click',()=>selectSite(s.id,false));
+  markers[s.id]=m;
+});
+map.fitBounds(L.latLngBounds(SITES.map(s=>[s.lat,s.lng])).pad(0.08));
+
+// ─── RAIL ────────────────────────────────────────────────────────────────
+let filter='all', selId=null;
+function fmtStats(){
+  const pipe=SITES.filter(s=>s.stage==='Pipeline').length;
+  const mwSum=SITES.reduce((t,s)=>t+(s.mwNum||0),0);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-val">${SITES.length}</div><div class="stat-label">Sites tracked</div></div>
+    <div class="stat"><div class="stat-val">${pipe}</div><div class="stat-label">In pipeline</div></div>
+    <div class="stat"><div class="stat-val">${Math.round(mwSum)}+<span style="font-family:var(--m);font-size:11px;font-weight:400;color:var(--muted)"> MW</span></div><div class="stat-label">Identified (lower bound)</div></div>`;
+}
+function renderList(){
+  const el=document.getElementById('site-list');
+  const groups=[['Pipeline','Active deals'],['Prospecting','Early outreach']];
+  el.innerHTML=groups.map(([g,sub])=>{
+    const rows=SITES.filter(s=>s.stage===g && (filter==='all'||filter===g));
+    if(!rows.length) return '';
+    return `<div class="group-label"><span class="eyebrow">${g}</span><span class="n">${rows.length} · ${sub}</span></div>`+
+      rows.map(s=>`<div class="site-item${s.id===selId?' sel':''}" id="li-${s.id}" onclick="selectSite('${s.id}',true)">
+        <span class="site-dot ${s.stage==='Pipeline'?'pipe':'pros'}${s.approx?' approx':''}"></span>
+        <span><span class="si-name">${s.name}</span><br>
+        <span class="si-meta"><span class="mw">${s.mw}</span> · ${s.state}${s.type&&s.type!=='TBD'?' · '+s.type:''}</span></span>
+      </div>`).join('');
+  }).join('');
+}
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('#stage-seg button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  Object.entries(markers).forEach(([id,m])=>{
+    const s=SITES.find(x=>x.id===id);
+    const show=filter==='all'||s.stage===filter;
+    if(show && !map.hasLayer(m)) m.addTo(map);
+    if(!show && map.hasLayer(m)) map.removeLayer(m);
+  });
+  renderList();
+}
+function selectSite(id, fly){
+  selId=id;
+  renderList();
+  const s=SITES.find(x=>x.id===id), m=markers[id];
+  if(fly){ map.flyTo([s.lat,s.lng], Math.max(map.getZoom(),9), {duration:.7}); setTimeout(()=>m.openPopup(),750); }
+  const li=document.getElementById('li-'+id); if(li) li.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+fmtStats(); renderList();
+</script>
+</body>
+</html>
