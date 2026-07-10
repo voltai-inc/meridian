@@ -116,7 +116,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
     <a href="site-intelligence.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13 3.5 3.5 12 2.5l1.5 3-1 8z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg>Meridian</a>
     <a href="procurement.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h12v9H2z"/><path d="M5.5 5V3.5a2.5 2.5 0 0 1 5 0V5"/></svg>Procurement<span class="ext">demo</span></a>
     <span class="sep">Modules</span>
-    <a href="power-signoff.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 1.5 3.5 9h4l-1 5.5 5-7.5h-4z"/></svg>Workload Power</a>
+    <a href="power-signoff.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 1.5 3.5 9h4l-1 5.5 5-7.5h-4z"/></svg>Design Review</a>
     <a href="helio.html"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="4" width="5.5" height="3.5"/><rect x="9" y="4" width="5.5" height="3.5"/><rect x="1.5" y="9.5" width="5.5" height="3.5"/><rect x="9" y="9.5" width="5.5" height="3.5"/><path d="M8 1.5v13" stroke-dasharray="2 2"/></svg>Helio Reference</a>
     <a href="http://51.21.243.237:5173/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M8 8 14 5M8 8 2 5M8 8v6.5"/></svg>Digital Twin<span class="ext">↗</span></a>
     <a href="http://13.61.152.27/quick-check" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5 13.5 3.5v4c0 3.5-2.5 6-5.5 7-3-1-5.5-3.5-5.5-7v-4z"/><path d="m5.5 8 1.8 1.8L10.8 6"/></svg>Compliance Agent<span class="ext">↗</span></a>
@@ -208,7 +208,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
           <path d="M162 46 L162 92" stroke-width="1.6"/>
           <circle cx="162" cy="92" r="2.6"/>
         </svg></div>
-        <h2>Workload Power</h2>
+        <h2>Design Review</h2>
       </a>
 
       <a class="tool" href="helio.html">
@@ -263,7 +263,7 @@ Pipeline (relative links work):
 - Meridian (site-intelligence.html): the core product — takes a utility study or site power claim and evaluates compute readiness: per-chip compute design, MFU at scale, workload power verdicts, envelope check, economics sensitivity, off-taker spec sheet.
 - Procurement (procurement.html): demo of the BOM → RFQ → PO flow — receives Meridian's Build-tab BOM, matches lines to a vendor library, drafts printable RFQs. Production version (equipment-library backed) is in build.
 Modules & reference:
-- Workload Power (power-signoff.html): full stress-test bench behind Meridian's inline verdict — electrical design vs AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail.
+- Design Review (power-signoff.html): the deep-dive review bench behind Meridian's inline verdict — a facility electrical design (scaled Helio block or the EPC's actual values) stress-tested against AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail. Power sign-off is the first review dimension; cooling and network are roadmap.
 - Helio Reference (helio.html): the 2N reference architecture (10→100 MW block) Meridian validates against.
 - Digital Twin (http://51.21.243.237:5173/): interactive 3D facility simulator.
 - Compliance Agent (http://13.61.152.27/quick-check): upload documents, run compliance checks against frameworks (ASHRAE TC9.9, NVIDIA DSX CDU, IEC).

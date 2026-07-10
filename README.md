@@ -14,7 +14,7 @@ Live: `meridian-web-swart.vercel.app` · Static HTML/JS, no backend, no build st
 
 ## Pages
 
-The dashboard presents the tools as a pipeline — **01 Find (Site Selection) → 02 Evaluate (Meridian) → 03 Procure (Procurement, in build)** — with Workload Power, Helio, Digital Twin, and Compliance as modules/reference behind the evaluation.
+The dashboard presents the tools as a pipeline — **01 Find (Site Selection) → 02 Evaluate (Meridian) → 03 Procure (Procurement, in build)** — with Design Review (workload power sign-off), Helio, Digital Twin, and Compliance as modules/reference behind the evaluation.
 
 | Page | What it is |
 |------|-----------|
@@ -23,7 +23,7 @@ The dashboard presents the tools as a pipeline — **01 Find (Site Selection) �
 | `example-feasibility-study.html` | Printable illustrative utility feasibility study — the input document Meridian expects |
 | `site-intelligence.html` | **Meridian** (pipeline step 02, the product): single Design workspace — per-chip power verdicts, inline workload power validation, envelope check, deliverables |
 | `procurement.html` | **Procurement** (pipeline step 03, demo): receives Meridian's Build-tab BOM via URL hash, matches lines against a demo vendor library, drafts printable RFQs, tracks BOM → RFQ → quoted → PO. The production, library-data-backed version is a teammate's build; this page demos the seam |
-| `power-signoff.html` | **Workload Power Validation** — the full bench behind Meridian's inline verdict, every design knob exposed; Meridian deep-links in prefilled |
+| `power-signoff.html` | **Design Review — Workload Power Sign-off**: the deep-dive review bench behind Meridian's inline verdict — every design knob exposed (the EPC design import surface, v1); Meridian deep-links in prefilled. Power sign-off is the first review dimension; cooling/network are roadmap tabs |
 | `helio.html` | **Helio** — the 2N reference architecture (10→100 MW pod block) whose scaled ratios Meridian validates against |
 | `power-validation.js` | Shared DOM-free simulation engine (traces, chain loads, BESS, 19 checks) — used by both pages, unit-testable under node |
 

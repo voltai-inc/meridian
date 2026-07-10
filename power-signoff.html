@@ -3,76 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Workload Power Validation · Voltai</title>
+<title>Design Review — Workload Power Sign-off · Voltai</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root { --blue:#3a3a3a; --green:#1E8449; --amber:#D9A400; --red:#C0392B; --ink:#1a1a1a; }
-  * { box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; color: var(--ink); margin: 0;
-         background: #f4f6f8; }
-  header { background: #fff; border-bottom: 3px solid var(--blue); padding: 14px 22px; }
-  header h1 { font-size: 19px; margin: 0; }
-  header .sub { color: #667; font-size: 12.5px; margin-top: 2px; }
-  .wrap { display: flex; gap: 16px; padding: 16px 22px; align-items: flex-start; }
-  .panel { background: #fff; border: 1px solid #e2e6ea; border-radius: 10px; padding: 14px 16px; }
-  aside.panel { width: 330px; flex-shrink: 0; position: sticky; top: 12px;
-                max-height: calc(100vh - 40px); overflow-y: auto; }
-  main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-  fieldset { border: 1px solid #e2e6ea; border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 10px; }
-  legend { font-size: 12px; font-weight: bold; color: var(--blue); padding: 0 4px; }
-  .row { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; gap: 8px; }
-  .row label { font-size: 12px; flex: 1; }
-  .row input[type=number], .row select { width: 96px; padding: 3px 6px; font-size: 12.5px;
-        border: 1px solid #ccd; border-radius: 5px; text-align: right; }
-  .row select { width: 150px; text-align: left; }
-  .hint { font-size: 10.5px; color: #99a; margin: -2px 0 4px; }
-  button.run { width: 100%; background: var(--blue); color: #fff; border: 0; border-radius: 8px;
-               padding: 11px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 4px; }
-  button.run:hover { background: #245e94; }
-  .presets { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .chip { font-size: 11.5px; border: 1px solid var(--blue); color: var(--blue); background: #fff;
-          border-radius: 20px; padding: 4px 10px; cursor: pointer; }
-  .chip.active { background: var(--blue); color: #fff; }
-  #verdictCard { display: none; }
-  .verdict { display: inline-block; padding: 10px 24px; border-radius: 8px; color: #fff;
-             font-size: 20px; font-weight: bold; }
-  .stats { display: flex; gap: 22px; margin-top: 10px; flex-wrap: wrap; }
-  .stat { font-size: 12px; color: #667; }
-  .stat b { display: block; font-size: 17px; color: var(--ink); }
-  table { border-collapse: collapse; width: 100%; font-size: 12px; }
-  th, td { border: 1px solid #e2e6ea; padding: 5px 8px; text-align: left; vertical-align: top; }
-  th { background: var(--blue); color: #fff; position: sticky; top: 0; }
-  .badge { color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 10.5px; }
-  .detail { color: #778; font-size: 10.5px; margin-top: 1px; }
-  h2 { font-size: 14px; color: var(--blue); margin: 0 0 8px; }
-  canvas { max-width: 100%; }
-  .chartbox { position: relative; height: 260px; }
-  .chartbox.tall { height: 300px; }
-  .foot { color: #99a; font-size: 11px; padding: 4px 22px 18px; }
-  .dl { font-size: 12px; color: var(--blue); cursor: pointer; text-decoration: underline;
-        background: none; border: none; padding: 0; margin-left: 14px; }
-  #spinner { display: none; color: #667; font-size: 13px; margin-top: 8px; }
+@font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-700.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-500.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:600;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-600.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-500.woff2') format('woff2')}
+:root{
+  --bg:#f6f8fb; --surface:#ffffff; --sunken:#eef2f6;
+  --ink:#060a0e; --body:#141d26; --muted:#5b646e; --faint:#8a929b;
+  --border:#d2dae2; --hairline:rgba(6,10,14,.08); --border-strong:#bfc6ce;
+  --volt:#AF0000; --volt-vivid:#c92121; --volt-tint:#fbeeee;
+  --ok:#2fa37a; --ok-text:#1e7a5a; --ok-tint:#edf7f3;
+  --warn:#d8a93a; --warn-text:#8a6a14; --warn-tint:#fbf6e9;
+  --risk:#c0392b; --risk-text:#ab4433; --risk-tint:#fbf0ee;
+  --disp:'Space Grotesk',sans-serif; --f:'IBM Plex Sans',-apple-system,sans-serif; --m:'IBM Plex Mono',monospace;
+  --nav-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f);font-size:13.5px;line-height:1.55}
+.eyebrow{font-family:var(--m);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;padding:0 20px;z-index:100;gap:14px}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.brand .prod{font-family:var(--m);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.nav-spacer{flex:1}
+.ref-link{font-size:11.5px;color:var(--muted);text-decoration:none;padding:6px 11px;border:1px solid var(--border);border-radius:5px;background:var(--surface);transition:.12s}
+.ref-link:hover{color:var(--ink);border-color:var(--border-strong)}
+
+.app{display:grid;grid-template-columns:330px 1fr;margin-top:var(--nav-h);height:calc(100vh - var(--nav-h))}
+.rail{background:var(--surface);border-right:1px solid var(--hairline);overflow-y:auto;padding-bottom:24px}
+.rail-section{border-bottom:1px solid var(--hairline);padding:15px 18px}
+.rail-section .eyebrow{display:block;margin-bottom:10px}
+.rail-note{background:#f5f5f5;border:1px solid #e4e4e4;border-radius:6px;padding:9px 12px;margin:14px 16px 0;font-size:11.5px;color:#3a3a3a;line-height:1.5}
+.rail-note.meridian{background:var(--volt-tint);border-color:#f0cbcb;color:var(--volt)}
+.row{display:flex;align-items:center;justify-content:space-between;margin:6px 0;gap:8px}
+.row label{font-size:12px;color:var(--muted);flex:1;line-height:1.35}
+.row input[type=number]{width:92px;padding:5px 8px;font-size:12.5px;font-family:var(--m);color:var(--ink);border:1px solid var(--border);border-radius:5px;text-align:right;background:var(--surface)}
+.row input:focus{outline:none;border-color:var(--volt-vivid);box-shadow:0 0 0 3px var(--volt-tint)}
+.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45}
+.seg{display:flex;gap:2px;background:var(--sunken);border:1px solid var(--hairline);border-radius:5px;padding:2px;flex-wrap:wrap}
+.seg button{flex:1;padding:6px 4px;font-size:11.5px;font-weight:500;color:var(--muted);border:none;background:none;border-radius:3px;cursor:pointer;font-family:var(--f);white-space:nowrap;transition:.12s}
+.seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(6,10,14,.08)}
+button.run{width:calc(100% - 36px);margin:16px 18px 0;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);transition:.12s}
+button.run:hover{background:#26323d}
+#spinner{display:none;font-family:var(--m);font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+
+.main{overflow-y:auto;padding:22px 28px 80px}
+.ws-section{background:var(--surface);border:1px solid var(--hairline);border-radius:8px;padding:20px 24px;margin-bottom:16px}
+.ws-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.ws-idx{font-family:var(--m);font-size:11px;color:var(--volt);letter-spacing:.08em}
+.ws-title{font-family:var(--disp);font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.02em}
+.ws-sub{font-size:12.5px;color:var(--muted)}
+.ws-head .right{margin-left:auto}
+.verdict-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.verdict-badge{font-family:var(--disp);font-size:24px;font-weight:700;padding:10px 22px;border-radius:7px}
+.v-pass{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
+.v-warn{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
+.v-fail{background:var(--risk-tint);color:var(--risk-text);border:1px solid #f0cdc5}
+.stat-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+@media(max-width:1300px){.stat-tiles{grid-template-columns:repeat(3,1fr)}}
+.stat{background:var(--sunken);border:1px solid var(--hairline);border-radius:6px;padding:11px 13px}
+.stat b{display:block;font-family:var(--m);font-size:14px;font-weight:500;color:var(--ink);line-height:1.3}
+.stat span{font-size:11px;color:var(--muted);margin-top:3px;display:block}
+.dl{font-size:11.5px;color:var(--volt);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;font-family:var(--f)}
+
+table.data{border-collapse:collapse;width:100%}
+table.data th{padding:7px 10px;font-family:var(--m);font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;background:var(--surface);position:sticky;top:0}
+table.data td{padding:8px 10px;font-size:12.5px;color:var(--body);border-bottom:1px solid var(--hairline);vertical-align:top}
+.badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--m);letter-spacing:.08em}
+.b-pass{background:var(--ok-tint);color:var(--ok-text);border:1px solid #bfe3d5}
+.b-warn{background:var(--warn-tint);color:var(--warn-text);border:1px solid #ecd9a8}
+.b-fail{background:var(--risk-tint);color:var(--risk-text);border:1px solid #f0cdc5}
+.detail{color:var(--muted);font-size:11px;margin-top:2px;line-height:1.4}
+.chart-duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1300px){.chart-duo{grid-template-columns:1fr}}
+.chartbox{position:relative;height:260px}
+.chartbox.tall{height:300px}
+.roadmap-tabs{display:flex;gap:8px;align-items:center}
+.dim-tab{font-family:var(--m);font-size:10px;letter-spacing:.08em;padding:4px 10px;border-radius:4px}
+.dim-tab.on{background:var(--volt-tint);color:var(--volt);border:1px solid #f0cbcb;font-weight:600}
+.dim-tab.soon{background:var(--sunken);color:var(--faint);border:1px dashed var(--border)}
+.foot{color:var(--muted);font-size:11px;line-height:1.6;padding:4px 2px 18px}
 </style>
 </head>
 <body>
-<header>
-  <h1>Workload Power Validation <span style="color:#99a;font-weight:normal">— MVP web UI</span></h1>
-  <div class="sub">Stress-tests a facility electrical design against AI workload power transients — before it's built. Facility-side only, not utility capacity modeling.
-  Edit the electrical design, contracted service assumptions, and workload on the left; Run re-simulates in your browser (nothing leaves your machine).</div>
-</header>
 
-<div class="wrap">
-<aside class="panel">
-  <div class="presets">
-    <button class="chip active" data-preset="training">Training (worst case)</button>
-    <button class="chip" data-preset="mixed">Mixed fleet</button>
-    <button class="chip" data-preset="inference">Inference</button>
-    <button class="chip" data-preset="csv">Import CSV…</button>
+<nav class="top">
+  <a class="brand" href="index.html" title="Back to the dashboard"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:14px;width:auto;align-self:center"><span class="prod">DESIGN REVIEW</span></a>
+  <div class="roadmap-tabs">
+    <span class="dim-tab on">POWER SIGN-OFF</span>
+    <span class="dim-tab soon">COOLING TRANSIENTS — ROADMAP</span>
+    <span class="dim-tab soon">NETWORK READINESS — ROADMAP</span>
   </div>
-  <input type="file" id="csvFile" accept=".csv" style="display:none">
-  <div class="hint" id="csvInfo"></div>
+  <div class="nav-spacer"></div>
+  <a class="ref-link" href="helio.html" target="_blank">Helio Reference ↗</a>
+  <a class="ref-link" href="site-intelligence.html">← Meridian</a>
+</nav>
 
-  <fieldset><legend>Design (2N reference block)</legend>
+<div class="app">
+<aside class="rail">
+  <div class="rail-note" id="meridian-note" style="display:none"></div>
+  <div class="rail-note"><strong>The design import surface.</strong> A facility electrical design goes in — the scaled Helio reference block, or the EPC's actual one-line values typed below — and gets stress-tested against the workload envelope. Nothing leaves your browser.</div>
+
+  <div class="rail-section">
+    <span class="eyebrow">Workload under review</span>
+    <div class="seg" id="preset-seg">
+      <button class="on" data-preset="training">Training</button>
+      <button data-preset="mixed">Mixed</button>
+      <button data-preset="inference">Inference</button>
+      <button data-preset="csv">CSV…</button>
+    </div>
+    <input type="file" id="csvFile" accept=".csv" style="display:none">
+    <div class="hint" id="csvInfo">Training = worst case (fully synchronized fleet). CSV imports measured telemetry (time_s, power_mw) for calibrated review.</div>
+  </div>
+
+  <div class="rail-section">
+    <span class="eyebrow">Design under review — 2N block</span>
     <div class="row"><label>Critical IT load (MW)</label><input type="number" id="itMw" value="12" step="0.5"></div>
     <div class="row"><label>Per-path capacity: feed/MV/TX/LV (MW)</label><input type="number" id="pathMw" value="17.1" step="0.1"></div>
     <div class="row"><label>UPS rating per path (MW)</label><input type="number" id="upsMw" value="12" step="0.5"></div>
@@ -85,15 +134,18 @@
     <div class="row"><label>BESS smoothing target (s)</label><input type="number" id="bessTau" value="30" step="5"></div>
     <div class="row"><label>Mech base load (MW)</label><input type="number" id="mechBase" value="0.6" step="0.1"></div>
     <div class="row"><label>Cooling MW per IT MW</label><input type="number" id="coolRatio" value="0.20" step="0.02"></div>
-  </fieldset>
+  </div>
 
-  <fieldset><legend>Service assumptions</legend>
+  <div class="rail-section">
+    <span class="eyebrow">Service assumptions — from the utility</span>
     <div class="row"><label>Contracted capacity (MW)</label><input type="number" id="contracted" value="16" step="0.5"></div>
     <div class="row"><label>Ramp limit (MW/s, assumed)</label><input type="number" id="rampLim" value="1.0" step="0.1"></div>
     <div class="row"><label>Oscillation limit (× avg load)</label><input type="number" id="oscLim" value="0.10" step="0.01"></div>
-  </fieldset>
+    <div class="hint">Ramp / oscillation limits are inputs pending the utility's large-load study — Voltai does not predict them.</div>
+  </div>
 
-  <fieldset id="wlFields"><legend>Workload</legend>
+  <div class="rail-section" id="wlFields">
+    <span class="eyebrow">Workload timing</span>
     <div class="row"><label>Duration (s)</label><input type="number" id="duration" value="1800" step="300"></div>
     <div class="row wl-train"><label>Iteration period (s)</label><input type="number" id="iterPeriod" value="3" step="0.5"></div>
     <div class="row wl-train"><label>Duty cycle (high phase)</label><input type="number" id="duty" value="0.70" step="0.05"></div>
@@ -103,65 +155,85 @@
     <div class="row wl-train"><label>Checkpoint duration (s)</label><input type="number" id="ckptDur" value="20" step="5"></div>
     <div class="row wl-train"><label>Job ends at (fraction of run)</label><input type="number" id="jobEnd" value="0.85" step="0.05"></div>
     <div class="row wl-mixed" style="display:none"><label>Training share of fleet</label><input type="number" id="trainShare" value="0.6" step="0.1"></div>
-  </fieldset>
+  </div>
 
-  <button class="run" id="runBtn">Run validation simulation</button>
-  <div id="spinner">Simulating…</div>
+  <button class="run" id="runBtn">Run the review</button>
+  <div id="spinner">SIMULATING…</div>
 </aside>
 
-<main>
-  <div class="panel" id="verdictCard">
-    <span class="verdict" id="verdictBadge">—</span>
-    <button class="dl" id="dlJson">download results JSON</button>
-    <div class="stats">
-      <div class="stat"><b id="stCounts">—</b>checks pass / warn / fail</div>
-      <div class="stat"><b id="stPeak">—</b>facility peak at meter</div>
-      <div class="stat"><b id="stHeadroom">—</b>headroom vs contracted</div>
-      <div class="stat"><b id="stRamp">—</b>worst grid ramp (no BESS → BESS)</div>
-      <div class="stat"><b id="stOsc">—</b>0.05–1 Hz oscillation (no BESS → BESS)</div>
+<main class="main">
+  <div class="ws-section" id="verdictCard" style="display:none">
+    <div class="ws-head"><span class="ws-idx">01</span><span class="ws-title">VERDICT</span><span class="ws-sub">does this design survive this workload?</span>
+      <span class="right"><button class="dl" id="dlJson">Download results JSON</button></span></div>
+    <div class="verdict-row"><span class="verdict-badge" id="verdictBadge">—</span></div>
+    <div class="stat-tiles">
+      <div class="stat"><b id="stCounts">—</b><span>checks pass / warn / fail</span></div>
+      <div class="stat"><b id="stPeak">—</b><span>facility peak at meter</span></div>
+      <div class="stat"><b id="stHeadroom">—</b><span>headroom vs contracted</span></div>
+      <div class="stat"><b id="stRamp">—</b><span>worst grid ramp · raw → BESS</span></div>
+      <div class="stat"><b id="stOsc">—</b><span>0.05–1 Hz oscillation p2p · raw → BESS</span></div>
     </div>
   </div>
 
-  <div class="panel" id="checksCard" style="display:none">
-    <h2>All checks</h2>
-    <div style="max-height:340px;overflow-y:auto">
-    <table id="checksTable">
-      <thead><tr><th style="width:58px">Status</th><th>Check</th><th>Observed</th><th>Limit</th><th style="width:86px">Margin</th></tr></thead>
+  <div class="ws-section" id="checksCard" style="display:none">
+    <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">ALL CHECKS</span><span class="ws-sub">component loading (2N + N-1) · grid limits · islanded genset</span></div>
+    <div style="max-height:360px;overflow-y:auto">
+    <table class="data" id="checksTable">
+      <thead><tr><th style="width:70px">Status</th><th>Check</th><th>Observed</th><th>Limit</th><th style="width:86px">Margin</th></tr></thead>
       <tbody></tbody>
     </table>
     </div>
   </div>
 
-  <div class="panel" style="display:none" id="c1card"><h2>Facility power at the utility meter</h2>
-    <div class="chartbox"><canvas id="chartTimeline"></canvas></div></div>
-  <div class="panel" style="display:none" id="c2card"><h2>60-second zoom — transients as the grid sees them</h2>
-    <div class="chartbox"><canvas id="chartZoom"></canvas></div></div>
-  <div class="panel" style="display:none" id="c3card"><h2>Component loading vs. ratings (p95)</h2>
-    <div class="chartbox tall"><canvas id="chartLoading"></canvas></div></div>
-  <div class="panel" style="display:none" id="c4card"><h2>Demand spectrum — forced-oscillation screen</h2>
-    <div class="chartbox"><canvas id="chartSpectrum"></canvas></div></div>
+  <div class="ws-section" id="chartsCard" style="display:none">
+    <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WHAT THE GRID SEES</span><span class="ws-sub">meter power, transients, component stress, oscillation spectrum</span></div>
+    <div class="chart-duo">
+      <div>
+        <span class="eyebrow">Facility power at the utility meter</span>
+        <div class="chartbox"><canvas id="chartTimeline"></canvas></div>
+      </div>
+      <div>
+        <span class="eyebrow">60-second zoom — transients as the grid sees them</span>
+        <div class="chartbox"><canvas id="chartZoom"></canvas></div>
+      </div>
+      <div>
+        <span class="eyebrow">Component loading vs. ratings (p95)</span>
+        <div class="chartbox tall"><canvas id="chartLoading"></canvas></div>
+      </div>
+      <div>
+        <span class="eyebrow">Demand spectrum — forced-oscillation screen</span>
+        <div class="chartbox tall"><canvas id="chartSpectrum"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Hierarchical facility power flow (not AC load flow); ratings are design inputs; utility ramp/oscillation limits are inputs from the utility's large-load study, not predictions by Voltai. Synthetic traces reproduce published fluctuation characteristics — import measured telemetry (CSV: time_s, power_mw) for calibrated review. The simulation runs fully in your browser.</div>
 </main>
 </div>
-
-<div class="foot">MVP caveats: hierarchical facility power flow (not AC load flow); ratings are design placeholders;
-utility ramp/oscillation limits are inputs from the utility's large-load study, not predictions by Voltai. Synthetic traces reproduce
-published fluctuation characteristics — import measured telemetry (CSV: time_s, power_mw) for calibrated validation.
-Charts need internet once (CDN); the simulation itself runs fully offline.</div>
 
 <script src="power-validation.js"></script>
 <script>
 "use strict";
 const $ = (id) => document.getElementById(id);
-const COLORS = { PASS: "#1E8449", WARN: "#D9A400", FAIL: "#C0392B" };
+// brand palette for charts + status
+const C = { ink:'#060a0e', grey:'#7a7a7a', greyFill:'rgba(6,10,14,.16)', red:'#AF0000',
+            riskLine:'#ab4433', warnBar:'#d8a93a', muted:'#5b646e', grid:'#e2e8ee' };
+const BADGE = { PASS:'b-pass', WARN:'b-warn', FAIL:'b-fail' };
+if (window.Chart) {
+  Chart.defaults.font.family = "'IBM Plex Sans',-apple-system,sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = C.muted;
+  Chart.defaults.borderColor = C.grid;
+}
 let preset = "training";
 let csvTrace = null;
 let lastResults = null;
 const charts = {};
 
-document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", () => {
+document.querySelectorAll("#preset-seg button").forEach(ch => ch.addEventListener("click", () => {
   if (ch.dataset.preset === "csv") { $("csvFile").click(); return; }
   preset = ch.dataset.preset;
-  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === ch));
+  document.querySelectorAll("#preset-seg button").forEach(c => c.classList.toggle("on", c === ch));
   document.querySelectorAll(".wl-train").forEach(r => r.style.display = preset === "inference" ? "none" : "flex");
   document.querySelectorAll(".wl-mixed").forEach(r => r.style.display = preset === "mixed" ? "flex" : "none");
 }));
@@ -183,7 +255,7 @@ $("csvFile").addEventListener("change", (ev) => {
     const dt = t[1] - t[0];
     csvTrace = { t: Float64Array.from(t), p: Float64Array.from(p), dt, name: f.name, params: { source: f.name } };
     preset = "csv";
-    document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.preset === "csv"));
+    document.querySelectorAll("#preset-seg button").forEach(c => c.classList.toggle("on", c.dataset.preset === "csv"));
     $("csvInfo").textContent = `Loaded ${f.name}: ${p.length} samples, dt ${dt.toFixed(3)} s, ` +
       `mean ${(p.reduce((a,b)=>a+b,0)/p.length).toFixed(2)} MW`;
   };
@@ -256,15 +328,15 @@ function drawTimeline(sim, site) {
   charts.timeline = new Chart($("chartTimeline"), {
     type: "line",
     data: { labels: e1.xs.map(v => v.toFixed(1)), datasets: [
-      { label: "Meter max (no BESS)", data: e1.maxs, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: "rgba(46,117,182,0.25)" },
-      { label: "Meter min (no BESS)", data: e1.mins, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 },
-      { label: "Meter (BESS-smoothed)", data: e2.means, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
-      { label: `Contracted ${site.contracted_mw} MW`, data: e1.xs.map(() => site.contracted_mw), borderColor: "#C0392B", borderDash: [6, 4], borderWidth: 1.2, pointRadius: 0 },
+      { label: "Raw meter max (before BESS)", data: e1.maxs, borderColor: C.grey, borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: C.greyFill },
+      { label: "Raw meter min", data: e1.mins, borderColor: C.grey, borderWidth: 1, pointRadius: 0 },
+      { label: "After BESS smoothing", data: e2.means, borderColor: C.red, borderWidth: 2, pointRadius: 0 },
+      { label: `Contracted ${site.contracted_mw} MW`, data: e1.xs.map(() => site.contracted_mw), borderColor: C.riskLine, borderDash: [6, 4], borderWidth: 1.4, pointRadius: 0 },
     ]},
     options: { animation: false, maintainAspectRatio: false,
-      scales: { x: { title: { display: true, text: "minutes" }, ticks: { maxTicksLimit: 12 } },
-                y: { title: { display: true, text: "MW" } } },
-      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } } } },
+      scales: { x: { title: { display: true, text: "time (minutes)" }, ticks: { maxTicksLimit: 12 } },
+                y: { title: { display: true, text: "power at meter (MW)" } } },
+      plugins: { legend: { labels: { boxWidth: 14 } } } },
   });
 }
 
@@ -278,13 +350,13 @@ function drawZoom(sim) {
   charts.zoom = new Chart($("chartZoom"), {
     type: "line",
     data: { labels: xs, datasets: [
-      { label: "Meter (no BESS)", data: raw, borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 },
-      { label: "Meter (BESS-smoothed)", data: sm, borderColor: "#1E8449", borderWidth: 1.8, pointRadius: 0 },
+      { label: "Raw meter (before BESS)", data: raw, borderColor: C.grey, borderWidth: 1, pointRadius: 0 },
+      { label: "After BESS smoothing", data: sm, borderColor: C.red, borderWidth: 2, pointRadius: 0 },
     ]},
     options: { animation: false, maintainAspectRatio: false,
-      scales: { x: { title: { display: true, text: "seconds" }, ticks: { maxTicksLimit: 10 } },
-                y: { title: { display: true, text: "MW" } } },
-      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } } } },
+      scales: { x: { title: { display: true, text: "time (seconds)" }, ticks: { maxTicksLimit: 10 } },
+                y: { title: { display: true, text: "power at meter (MW)" } } },
+      plugins: { legend: { labels: { boxWidth: 14 } } } },
   });
 }
 
@@ -292,7 +364,7 @@ const vline = { id: "vline", afterDraw(chart, args, o) {
   const x = chart.scales.x.getPixelForValue(o.at);
   const { top, bottom } = chart.chartArea;
   const ctx = chart.ctx;
-  ctx.save(); ctx.strokeStyle = "#C0392B"; ctx.lineWidth = 1.5;
+  ctx.save(); ctx.strokeStyle = C.riskLine; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.restore();
 }};
 
@@ -307,13 +379,13 @@ function drawLoading(sim) {
   charts.loading = new Chart($("chartLoading"), {
     type: "bar",
     data: { labels: names, datasets: [
-      { label: "Normal 2N (per path)", data: normal, backgroundColor: "#3a3a3a" },
-      { label: "N-1 (single path)", data: n1, backgroundColor: "#D9A400" },
+      { label: "Normal 2N (per path)", data: normal, backgroundColor: "#4d4d4d", borderRadius: 3 },
+      { label: "N-1 (single path)", data: n1, backgroundColor: C.warnBar, borderRadius: 3 },
     ]},
     options: { indexAxis: "y", animation: false, maintainAspectRatio: false,
       scales: { x: { max: Math.max(120, Math.ceil(Math.max(...n1) / 10) * 10 + 10),
                      title: { display: true, text: "% of continuous rating (p95) — red line = 100%" } } },
-      plugins: { legend: { labels: { boxWidth: 14, font: { size: 10 } } }, vline: { at: 100 } } },
+      plugins: { legend: { labels: { boxWidth: 14 } }, vline: { at: 100 } } },
     plugins: [vline],
   });
 }
@@ -342,16 +414,16 @@ function drawSpectrum(sim, rep) {
   charts.spectrum = new Chart($("chartSpectrum"), {
     type: "line",
     data: { datasets: [{ label: "amplitude (MW)", data: xs.map((x, i) => ({ x, y: ys[i] })),
-      borderColor: "#3a3a3a", borderWidth: 1, pointRadius: 0 }]},
+      borderColor: "#1f1f1f", borderWidth: 1.2, pointRadius: 0 }]},
     options: { animation: false, maintainAspectRatio: false, parsing: false,
       scales: { x: { type: "logarithmic", min: 0.002, max: 5,
                      title: { display: true, text: `Hz — shaded 0.05–1 Hz band is grid-critical; dominant ~${rep.oscRaw.domFreq.toFixed(2)} Hz, ${rep.oscRaw.p2p.toFixed(1)} MW p2p` } },
-                y: { title: { display: true, text: "MW" } } },
+                y: { title: { display: true, text: "amplitude (MW)" } } },
       plugins: { legend: { display: false }, band: {} } },
     plugins: [{ id: "band", beforeDraw(chart) {
       const x1 = chart.scales.x.getPixelForValue(0.05), x2 = chart.scales.x.getPixelForValue(1.0);
       const { top, bottom } = chart.chartArea; const ctx = chart.ctx;
-      ctx.save(); ctx.fillStyle = "rgba(192,57,43,0.10)"; ctx.fillRect(x1, top, x2 - x1, bottom - top); ctx.restore();
+      ctx.save(); ctx.fillStyle = "rgba(175,0,0,0.08)"; ctx.fillRect(x1, top, x2 - x1, bottom - top); ctx.restore();
     }}],
   });
 }
@@ -361,9 +433,9 @@ function renderChecks(rep) {
   tb.innerHTML = "";
   for (const c of rep.checks) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td><span class="badge" style="background:${COLORS[c.status]}">${c.status}</span></td>` +
-      `<td><b>${c.name}</b><div class="detail">${c.detail}</div></td>` +
-      `<td>${c.value}</td><td>${c.limit}</td><td>${c.margin}</td>`;
+    tr.innerHTML = `<td><span class="badge ${BADGE[c.status]}">${c.status}</span></td>` +
+      `<td><b style="color:var(--ink)">${c.name}</b><div class="detail">${c.detail}</div></td>` +
+      `<td style="font-family:var(--m);font-size:11.5px">${c.value}</td><td style="font-family:var(--m);font-size:11.5px">${c.limit}</td><td style="font-family:var(--m);font-size:11.5px">${c.margin}</td>`;
     tb.appendChild(tr);
   }
 }
@@ -385,16 +457,16 @@ $("runBtn").addEventListener("click", () => {
         headroom_mw: rep.headroomMw, checks: rep.checks };
 
       const badge = $("verdictBadge");
-      const label = { PASS: "PASS — validation supported", WARN: "WARN — validation with conditions",
+      const label = { PASS: "PASS — sign-off supported", WARN: "WARN — sign-off with conditions",
                       FAIL: "FAIL — redesign required" }[rep.verdict];
       badge.textContent = label;
-      badge.style.background = COLORS[rep.verdict];
+      badge.className = "verdict-badge " + { PASS: "v-pass", WARN: "v-warn", FAIL: "v-fail" }[rep.verdict];
       $("stCounts").textContent = `${rep.counts.PASS} / ${rep.counts.WARN} / ${rep.counts.FAIL}`;
       $("stPeak").textContent = `${rep.peakMeter.toFixed(2)} MW`;
       $("stHeadroom").textContent = `${rep.headroomMw.toFixed(2)} MW (${(100 * rep.headroomFrac).toFixed(0)}%)`;
       $("stRamp").textContent = `${rep.rampRaw.toFixed(1)} → ${rep.rampSm.toFixed(2)} MW/s`;
-      $("stOsc").textContent = `${rep.oscRaw.p2p.toFixed(1)} → ${rep.oscSm.p2p.toFixed(2)} MW p2p`;
-      ["verdictCard", "checksCard", "c1card", "c2card", "c3card", "c4card"].forEach(id => $(id).style.display = "block");
+      $("stOsc").textContent = `${rep.oscRaw.p2p.toFixed(1)} → ${rep.oscSm.p2p.toFixed(2)} MW`;
+      ["verdictCard", "checksCard", "chartsCard"].forEach(id => $(id).style.display = "block");
 
       renderChecks(rep);
       drawTimeline(sim, site);
@@ -419,7 +491,6 @@ $("dlJson").addEventListener("click", () => {
   URL.revokeObjectURL(a.href);
 });
 
-// run once on load so the page isn't empty
 // Prefill from Meridian deep link: ?it=..&path=..&ups=..&pdu=..&gen=..&bessp=..&besse=..&mechbase=..&cool=..&contracted=..&ramp=..&wl=training|mixed|inference&trainshare=..&from=meridian
 function applyQueryPrefill() {
   const q = new URLSearchParams(location.search);
@@ -432,15 +503,14 @@ function applyQueryPrefill() {
   setIf("iterPeriod","iter"); setIf("ckptEvery","ckptevery"); setIf("ckptDur","ckptdur"); setIf("syncFrac","sync");
   const wl = q.get("wl");
   if (["training","mixed","inference"].includes(wl)) {
-    const chip = document.querySelector(`.chip[data-preset="${wl}"]`);
-    if (chip) chip.click();
+    const btn = document.querySelector(`#preset-seg button[data-preset="${wl}"]`);
+    if (btn) btn.click();
   }
   if (q.get("from") === "meridian") {
-    const note = document.createElement("div");
-    note.className = "hint";
-    note.style.cssText = "margin-bottom:10px;padding:8px 10px;border:1px solid #3a3a3a;border-radius:6px;color:#3a3a3a";
+    const note = $("meridian-note");
+    note.className = "rail-note meridian";
     note.textContent = "Prefilled from Meridian — design sized from the selected site, chip, and workload. Adjust anything and re-run.";
-    document.querySelector("aside.panel").prepend(note);
+    note.style.display = "block";
   }
 }
 window.addEventListener("load", () => { applyQueryPrefill(); $("runBtn").click(); });
