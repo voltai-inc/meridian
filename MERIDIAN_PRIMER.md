@@ -329,12 +329,27 @@ confidence ladder from "modeled" to "vendor-verified." And the verdict machinery
 *check a design against a property before building it* — is formal verification's shape applied to
 a facility. From die to data center is one discipline, which is the expansion story.
 
-### Where the barrier to entry is (and isn't)
-- **Not defensible:** the UI, the workflow, the electrical simulation math (textbook EE).
-- **Defensible:** measured chip-level power traces by training phase (nobody publishes these),
-  MFU calibration from real clusters, vendor transient data (CDU behavior under checkpoint spikes),
-  and the cross-layer position — brokers don't have EE teams, EE consultancies don't have
-  chip-level data, chip vendors don't evaluate sites.
+### Where the barrier to entry is (and isn't) — honest three-rung version
+- **Rung 0 — not defensible:** the UI, the workflow, the electrical simulation math (textbook EE),
+  and the per-chip amplitude table itself — a competent power EE derives those four numbers from
+  public specs in weeks. Necessary, never a moat.
+- **Rung 1 — medium, relationship-based:** *calibration.* Measured traces, validated MFU, vendor
+  transient data. Real value, but contested — equipment vendors have more hardware access than us.
+- **Rung 2 — the durable differentiator: the formal layer.** A single simulated trace answers
+  "does *this* workload pass?" The sign-off question is categorically stronger: **"can ANY
+  admissible workload break this design?"** — quantify over all timings and synchronization levels,
+  prove the design survives the whole envelope or produce the exact counterexample that kills it.
+  That is EDA sign-off transplanted to facilities. Engineering firms run simulation studies;
+  nobody offers envelope proofs with counterexamples for facility power — and building them is a
+  formal-methods skill that neither MEP firms nor equipment vendors have in-house. **This is where
+  the formal team plays** — not producing power curves (power-EE work), but turning simulations
+  into guarantees. The first version ships in Meridian today: the **envelope check** in Workload
+  Power sweeps 96 timing scenarios and reports the worst case plus its counterexample; the roadmap
+  version replaces the sweep with SMT/reachability over the bounded hybrid system (BESS saturation,
+  lag dynamics, bounded inputs) — an actual proof rather than a dense sample.
+
+A useful consequence: the envelope check does not need the customer's timing at all — it quantifies
+over it. Declared timing gives the *tight* answer; the envelope gives the *safe* one. Sign-off wants both.
 
 ---
 

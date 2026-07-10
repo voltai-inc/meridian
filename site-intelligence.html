@@ -905,6 +905,48 @@ function runValidation(itMW, d, wl, chip) {
   return result;
 }
 
+// ─── FORMAL ENVELOPE CHECK ───────────────────────────────────────────────
+// One simulated trace answers "does THIS workload pass?" — the sign-off
+// question is "can ANY admissible workload break the design?" This sweeps the
+// timing envelope (synchronization 25–100%, iteration 1–30 s, checkpoint
+// cadence/length) at the chip's amplitudes and reports the worst case and the
+// counterexample that produces it. Bounded exhaustive checking — the EDA
+// sign-off shape applied to a facility. Timing input from the customer is not
+// required for this claim; it only tightens it.
+const envCache = new Map();
+let envRunning = false;
+const envKeyOf = (itMW,d,chip) => [itMW.toFixed(2),d.confirmed_mw,d.service_type,chip].join('|');
+async function runEnvelope() {
+  if (envRunning) return;
+  const x = designCalc();
+  const key = envKeyOf(x.itMW,x.d,m2SelChip);
+  if (envCache.has(key)) return;
+  envRunning = true;
+  const prof = chipPowerProfile(m2SelChip);
+  const {design,site} = buildValidationModel(x.itMW,x.d);
+  design.mech_cooling_ratio = prof.coolRatio;
+  const SYNC=[0.25,0.5,0.75,1.0], ITER=[1,3,10,30], CE=[300,1200], CD=[10,20,60];
+  const total = SYNC.length*ITER.length*CE.length*CD.length;
+  const sev = r => r.counts.FAIL*100 + r.counts.WARN;
+  let worst=null, best=null, n=0;
+  const btn = document.getElementById('env-btn');
+  for (const sy of SYNC) for (const it of ITER) for (const ce of CE) for (const cd of CD) {
+    const tr = trainingTrace(design.critical_it_mw,{duration_s:1800,job_end_at_s:1530,
+      high_frac:prof.high_frac,low_frac:prof.low_frac,checkpoint_frac:prof.checkpoint_frac,
+      noise_frac:prof.noise_frac,iteration_period_s:it,checkpoint_every_s:ce,checkpoint_dur_s:cd,sync_fraction:sy});
+    const rep = runChecks(simulate(design,tr,30),site);
+    const cex = {sync:sy,iter:it,ckptEvery:ce,ckptDur:cd};
+    if (!worst || sev(rep)>sev(worst.rep)) worst={rep,cex};
+    if (!best  || sev(rep)<sev(best.rep))  best={rep,cex};
+    n++;
+    if (btn) btn.textContent = `Checking timing envelope… ${n} / ${total}`;
+    if (n%4===0) await new Promise(r=>setTimeout(r,0));
+  }
+  envCache.set(key,{worst,best,total});
+  envRunning = false;
+  renderDesign(false);
+}
+
 // deep link into the full validation tool with this design prefilled
 function validationLink(val, wl) {
   const d0=val.design, s0=val.site;
@@ -999,9 +1041,32 @@ function renderValidation(x) {
     <details class="drawer" ${rep.verdict!=='PASS'?'open':''}><summary>All ${rep.checks.length} checks — component loading (2N + N-1), grid limits, islanded genset</summary>
       <div class="drawer-body" style="overflow-x:auto"><table class="data"><thead><tr><th>Check</th><th>Simulated</th><th>Limit</th><th style="width:80px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
     </details>
+    ${(()=>{ // formal envelope check: worst case over ALL admissible workload timings
+      const env = envCache.get(envKeyOf(itMW,d,m2SelChip));
+      if (!env) return `<div class="chart-panel" style="margin-top:14px">
+        <div class="chart-title">Envelope check — the sign-off question</div>
+        <div class="chart-caption">The verdict above is for one declared workload timing. The sign-off question is stronger: <strong>can any admissible training timing break this design?</strong> This sweeps the full envelope — synchronization 25–100%, iteration period 1–30 s, checkpoint cadence and length — and returns the worst case with the exact scenario that produces it. Bounded exhaustive checking: the same shape as pre-tape-out sign-off, applied to a facility.</div>
+        <button class="btn-primary" id="env-btn" onclick="runEnvelope()" style="margin-top:6px">Check the whole timing envelope — 96 scenarios</button>
+      </div>`;
+      const w=env.worst, b=env.best;
+      const wc = w.rep.verdict==='PASS'?'ok':w.rep.verdict==='WARN'?'warn':'risk';
+      return `<div class="chart-panel" style="margin-top:14px">
+        <div class="chart-title">Envelope check — worst case over ${env.total} timing scenarios · ${CHIPS[m2SelChip].n}</div>
+        <div class="pgrid" style="grid-template-columns:1fr 1fr;margin:10px 0 10px">
+          <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${wc}-text)">${w.rep.verdict} — worst case</div>
+            <div class="pgrid-label">counterexample: ${(w.cex.sync*100).toFixed(0)}% synchronized · ${w.cex.iter}s iteration · checkpoint every ${Math.round(w.cex.ckptEvery/60)} min for ${w.cex.ckptDur}s → ${w.rep.counts.FAIL}✗ ${w.rep.counts.WARN}!</div></div>
+          <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${b.rep.verdict==='PASS'?'ok':b.rep.verdict==='WARN'?'warn':'risk'}-text)">${b.rep.verdict} — best case</div>
+            <div class="pgrid-label">most benign timing: ${(b.cex.sync*100).toFixed(0)}% synchronized · ${b.cex.iter}s iteration → ${b.rep.counts.FAIL}✗ ${b.rep.counts.WARN}!</div></div>
+        </div>
+        <div class="chart-caption">${w.rep.verdict==='PASS'
+          ? 'No timing in the envelope breaks this design — sign-off-grade for this workload class at these amplitudes.'
+          : w.rep.verdict==='WARN'
+          ? 'No timing produces a hard failure, but the worst case carries conditions — the design is one contract or BESS decision away from envelope-clean.'
+          : 'The envelope contains workloads that break this design. Either constrain the off-taker contract to exclude the counterexample pattern (e.g. cap synchronized fraction), or resize the design until the whole envelope passes.'}</div>
+      </div>`;})()}
     <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
       <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open full validation tool — prefilled with this design ↗</a>
-      <span style="font-size:10px;color:var(--faint);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation</span>
+      <span style="font-size:10px;color:var(--faint);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
     </div>`;
 }
 

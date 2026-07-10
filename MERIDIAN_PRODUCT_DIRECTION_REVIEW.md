@@ -352,13 +352,17 @@ Goal: make Meridian feel like more than a calculator.
 
 ### Later
 
-Goal: turn modeled assumptions into verified intelligence.
+Goal: turn modeled assumptions into verified intelligence — from simulation to sign-off.
 
 - Calibrate MFU with chip-team or partner telemetry.
 - Get Vertiv / cooling vendor transient curves.
 - Add measured power traces.
 - Add network/topology simulation.
 - Create repeatable brownfield site evaluation package.
+- **Formal envelope sign-off:** replace the v1 bounded timing sweep (shipped July 2026) with
+  SMT/reachability proofs over the bounded hybrid system — "no admissible workload can violate the
+  contract/ramp/oscillation limits," with counterexamples when false. This is the formal team's
+  product surface and the durable differentiation over simulation-study consultancies.
 
 ---
 
