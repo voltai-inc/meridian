@@ -107,3 +107,60 @@ Gates for further engineering (in order, each triggered by pull, not by roadmap)
 
 Everything else in the earlier roadmap docs (telemetry calibration, network simulation, SMT
 sign-off) hangs off the same principle: build when a partner's artifact demands it.
+
+---
+
+## "If review comes after the EPC, what's our edge?"
+
+Two answers, one precedent:
+
+1. **Being the reviewer is the business.** Schematic review — the company's main product — is
+   also "after the designer." Downstream in time is not downstream in value: the reviewer owns
+   the acceptance criteria. Whoever defines *what the design must survive* sits commercially
+   upstream of whoever draws it.
+2. **The review engine runs at every stage, with progressively better inputs.** Assumption-based
+   screen before any study → study-verified evaluation → design sign-off after the EPC. It's
+   one engine fed better data over the deal's life, not a late-stage checkpoint. The constant
+   across all three is the thing nobody else has: **the demand-side model** — how an AI fleet
+   actually pulls power. EPCs size to nameplate and code; utilities ask "what does your load
+   do?"; developers can't answer. That translation is the product at every stage.
+
+## The utility constraint is the use case, not the objection
+
+What the Entergy conversations (July 2026) established: a $50K non-refundable study per site
+*per load scenario*, valid ~60 days; anything above 15–20 MW means a customer-owned substation
+at 36–48 months; Mississippi mandates interruptible service for data centers; transformers are
+a 3–4 year lead. The utility process — not land, capital, or equipment — gates every site in
+the pipeline.
+
+That is the strongest argument *for* the toolkit, in three specific places:
+
+- **Before the study:** which sites are worth $50K and a 60-day window, and at what MW should
+  we file? (Site Selection + Meridian's assumption-based screen — the "pre-power-study
+  briefing" workflow.)
+- **Into the study:** large-load studies ask the developer to characterize the load. An AI
+  training fleet's synchronized transients are exactly what nobody can characterize — our
+  envelope and traces are that characterization.
+- **After interruptible service:** where curtailment is mandatory, backup/BESS sizing against
+  the *real* workload shape is the difference between a survivable design and a stranded one —
+  which is precisely what Workload Power checks.
+
+Business model follows the two levels: **assumption-based = cheap, high-volume screening**
+(top of funnel, protects the $50K decisions); **verification = per-deal diligence artifacts**
+(spec sheet, load characterization, design sign-off) priced against decisions with 10–15-year
+ESA minimum-bill clauses attached. Small fee, huge decision — the same asymmetry the PCB
+review product sells.
+
+## Roadmap shape — same curve as arcturus
+
+Arcturus went **knowledge agent → schematic review agent → (now) schematic generation**. The DC
+toolkit is walking the identical curve, one stage behind:
+
+| Arcturus stage | DC analog | Status |
+|----------------|-----------|--------|
+| Knowledge agent | Site/study/equipment knowledge: Site Selection, study parsing, procurement library | demos shipped; parsing later |
+| Review agent | Workload power sign-off (19 checks + envelope) | v1 shipped; calibration = credibility |
+| Generation | Demand side: workload optimizer under a fixed MW envelope (the EE-proposed direction — Meridian verifies, the optimizer generates). Supply side, later: auto-instantiated basis-of-design from Helio | not started — correctly |
+
+Generation comes last on purpose, exactly as it did for boards: you earn the right to generate
+by being trusted to review.
