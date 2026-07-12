@@ -322,6 +322,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 }
 </style>
 <script src="power-validation.js"></script>
+<script src="serving-model.js"></script>
 </head>
 <body>
 
@@ -405,6 +406,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       <div class="section-tabs" id="section-tabs">
         <a href="#sec-power" onclick="scrollToSec(event,'sec-power')">Power</a>
         <a href="#sec-compute" onclick="scrollToSec(event,'sec-compute')">Compute</a>
+        <a href="#sec-serving" onclick="scrollToSec(event,'sec-serving')">Serving plan</a>
         <a href="#sec-valid" onclick="scrollToSec(event,'sec-valid')">Workload power</a>
         <a href="#sec-econ" onclick="scrollToSec(event,'sec-econ')">Sensitivity</a>
         <a href="#sec-build" onclick="scrollToSec(event,'sec-build')">Build</a>
@@ -413,6 +415,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     <div class="workspace">
       <div class="ws-section" id="sec-power"></div>
       <div class="ws-section" id="sec-compute"></div>
+      <div class="ws-section" id="sec-serving"></div>
       <div class="ws-section" id="sec-valid"></div>
       <div class="ws-section" id="sec-econ"></div>
       <div class="ws-section" id="sec-build"></div>
@@ -473,6 +476,9 @@ const CHIPS = {
   MI300X: {n:'AMD MI300X OAM',       g:64, kw:110, kw_max:125, cool:'CDU', rate:1.75, cap:22000, smooth:0.00, mt:.38, mi:.55, tf:1307, hbm:7.68, ver:false, st:'ship', lead:'10–12 mo', leadHi:12, volt:'ac480'},
   GAUDI3: {n:'Intel Gaudi 3',        g:64, kw:90,  kw_max:110, cool:'CDU', rate:1.00, cap:18000, smooth:0.00, mt:.42, mi:.60, tf:800,  hbm:3.7,  ver:false, st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
 };
+// HBM capacity (GB/GPU) — model-weight + KV footprint for the serving-plan sizing engine.
+const CHIP_MEM_GB = {GB300:288,GB200:192,B200:192,H200:141,H100:80,VERA:288,MI355X:288,MI300X:192,GAUDI3:128};
+Object.entries(CHIP_MEM_GB).forEach(([k,m])=>{ if (CHIPS[k]) CHIPS[k].mem=m; });
 // data-viz palette — brand monochrome (black/grey) + Voltai red; every step ≥3:1 on white.
 // Identity is carried by the direct end-of-curve labels, not color alone.
 const CHIP_COLORS = {
@@ -500,6 +506,9 @@ let view = 'screen';
 let usingDemo = true;
 let m2SelChip='GB300', m2Wl='train', m2ModelB=70, m2Batch=32;
 let m2PwrCost=0.05, m2DiscR=0.10, m2Mult=20;
+// serving plan (inference sizing) — named model, traffic archetype, and the
+// prefill/decode chip split (heterogeneous when they differ). reqs=0 → use preset.
+let m2Model='QWEN3_235B', m2Traffic='chat', m2PfChip='GB300', m2DcChip='GB300', m2Reqs=0;
 // workload timing profile — the CUSTOMER'S data (framework, checkpoint policy, job schedule).
 // Defaults = conservative fully-synchronized training archetype; ask the off-taker for theirs.
 const WLPROF_DEFAULT = {iter:3.0, ckptEvery:1200, ckptDur:20, sync:1.0};
@@ -1018,6 +1027,7 @@ function renderDesign(flash) {
   renderKPIs(x,flash);
   renderPower(x);
   renderCompute(x);
+  renderServing(x);
   renderValidation(x);
   renderEcon(x);
   renderBuild(x);
@@ -1214,6 +1224,94 @@ function renderCompute(x) {
     </div></details>`;
 }
 
+// ─── SERVING PLAN (inference sizing) ─────────────────────────────────────
+// Disaggregated prefill/decode chip counts, throughput, latency (TTFT/TPOT),
+// CPU nodes and IT MW for a named model under a traffic archetype — the
+// demand-side sizing the off-taker actually asks for. Engine: serving-model.js.
+function renderServing(x) {
+  const {d} = x;
+  const el = document.getElementById('sec-serving');
+  if (!el || typeof ServingModel==='undefined') { if(el) el.innerHTML=''; return; }
+  const P = ServingModel.sizeServing({model:m2Model, prefillChip:m2PfChip, decodeChip:m2DcChip,
+                                      traffic:m2Traffic, reqs:m2Reqs, chips:CHIPS});
+  const tps = n => n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?Math.round(n/1e3)+'K':Math.round(n);
+  const msf = ms => ms>=1000?(ms/1000).toFixed(2)+' s':Math.round(ms)+' ms';
+  const co = (id,sel) => `<select id="${id}" onchange="setServing('${id}',this.value)" style="border:none;background:none;font-size:12px;outline:none">
+      ${Object.keys(CHIPS).map(k=>`<option value="${k}"${sel===k?' selected':''}>${CHIPS[k].n}</option>`).join('')}</select>`;
+  const okc='var(--ok-text)', bad='var(--risk-text)';
+
+  const head = `<div class="ws-head"><span class="ws-idx">02·b</span><span class="ws-title">SERVING PLAN</span>
+      <span class="ws-sub">inference sizing — prefill vs decode chips, throughput, latency, CPU nodes · modeled, not measured</span></div>`;
+  const controls = `<div class="assume-row" style="margin-bottom:14px;flex-wrap:wrap">
+      <div class="assume"><label>Model</label><div class="in">
+        <select id="sv-model" onchange="setServing('sv-model',this.value)" style="border:none;background:none;font-size:12px;outline:none">
+          ${Object.entries(ServingModel.MODELS).map(([k,m])=>`<option value="${k}"${m2Model===k?' selected':''}>${m.n} · ${m.tag}</option>`).join('')}
+        </select></div></div>
+      <span class="eyebrow" style="align-self:center;margin-left:6px">Traffic</span>
+      <div class="seg" id="sv-traffic-seg">
+        ${Object.entries(ServingModel.TRAFFIC).map(([k,t])=>`<button class="${m2Traffic===k?'on':''}" onclick="setServing('sv-traffic','${k}')">${t.n}</button>`).join('')}
+      </div>
+      <div class="assume"><label>Requests / sec</label><div class="in">
+        <input type="number" id="sv-reqs" value="${P?P.reqs:''}" min="1" style="width:74px;border:none;background:none;font-size:12px;outline:none" onchange="setServing('sv-reqs',this.value)"></div></div>
+      <div class="assume"><label>Prefill chip</label><div class="in">${co('sv-pf',m2PfChip)}</div></div>
+      <div class="assume"><label>Decode chip</label><div class="in">${co('sv-dc',m2DcChip)}</div></div>
+    </div>`;
+
+  if (!P) { el.innerHTML = head+controls+`<div class="chart-caption">Select a model, traffic profile and chips to size a serving fleet.</div>`; return; }
+
+  const t = P.traffic;
+  const fitMW = x.itMW || 0;
+  const fitPct = fitMW>0 ? P.totals.itMW/fitMW : 0;
+  const fitCol = fitPct>1?bad:fitPct>0.75?'var(--warn-text)':okc;
+  const ttftCol = P.prefill.ttftOk?okc:bad, tpotCol = P.decode.tpotOk?okc:bad;
+
+  // headline stats
+  const stats = `<div class="pgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:2px">
+      <div class="pgrid-cell"><div class="pgrid-val">${fc(P.totals.gpus)}</div><div class="pgrid-label">accelerators total<br>(${fc(P.prefill.gpus)} prefill · ${fc(P.decode.gpus)} decode)</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${fc(P.totals.cpuNodes)}</div><div class="pgrid-label">CPU / host nodes<br>head · router · control plane</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${fitCol}">${P.totals.itMW.toFixed(2)}<span style="font-size:15px"> MW</span></div><div class="pgrid-label">IT power of this plan<br>${fitMW>0?`${pct(fitPct)} of site's ${fitMW.toFixed(0)} MW usable`:'demand side'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${tps(P.totals.outTokps)}</div><div class="pgrid-label">output tokens/sec<br>delivered aggregate</div></div>
+    </div>`;
+
+  // latency / SLA
+  const sla = `<div class="pgrid" style="grid-template-columns:repeat(4,1fr);margin:10px 0 2px">
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${ttftCol};font-size:20px">${msf(P.totals.ttftMs)}</div><div class="pgrid-label">TTFT (time to first token)<br>SLA ${msf(P.totals.ttftBudgetMs)} · ${P.prefill.ttftOk?'✓ met':'✗ missed'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${tpotCol};font-size:20px">${msf(P.totals.tpotMs)}</div><div class="pgrid-label">TPOT (per output token)<br>SLA ${msf(P.totals.tpotBudgetMs)} · ${P.decode.tpotOk?'✓ met':'✗ missed'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="font-size:20px">${Math.round(P.totals.tokPerSecPerUser)}</div><div class="pgrid-label">tokens/sec/user<br>per-user decode speed</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="font-size:20px">${P.decode.batch}</div><div class="pgrid-label">decode batch (concurrency)<br>${P.decode.memBound?'memory-bandwidth bound':'compute bound'}</div></div>
+    </div>`;
+
+  // prefill vs decode split bar
+  const totG = P.totals.gpus||1;
+  const pfPct = 100*P.prefill.gpus/totG, dcPct=100*P.decode.gpus/totG;
+  const pfCol=CHIP_COLORS[P.prefill.chipKey]||'#888', dcCol=CHIP_COLORS[P.decode.chipKey]||'#555';
+  const splitBar = `<div style="display:flex;height:26px;border-radius:5px;overflow:hidden;margin:4px 0 10px;font-family:var(--m);font-size:11px;color:#fff">
+      <div style="width:${pfPct}%;background:${pfCol};display:flex;align-items:center;justify-content:center" title="prefill">${pfPct>12?'prefill '+pct(pfPct/100):''}</div>
+      <div style="width:${dcPct}%;background:${dcCol};display:flex;align-items:center;justify-content:center" title="decode">${dcPct>12?'decode '+pct(dcPct/100):''}</div>
+    </div>`;
+
+  const stageTable = `<table class="data"><thead><tr><th>Stage</th><th>Bottleneck</th><th>Chip</th><th>GPUs / replica</th><th>Replicas</th><th>GPUs</th><th>Key latency</th></tr></thead><tbody>
+      <tr><td style="font-weight:600;color:var(--ink)">Prefill</td><td>compute (TFLOPS)</td><td class="mono">${P.prefill.chip.n}</td><td class="mono">${P.prefill.gpusPerReplica}</td><td class="mono">${fc(P.prefill.replicas)}</td><td class="mono" style="font-weight:600">${fc(P.prefill.gpus)}</td><td class="mono">TTFT ${msf(P.totals.ttftMs)}</td></tr>
+      <tr><td style="font-weight:600;color:var(--ink)">Decode</td><td>memory bandwidth (HBM)</td><td class="mono">${P.decode.chip.n}</td><td class="mono">${P.decode.gpusPerReplica}</td><td class="mono">${fc(P.decode.replicas)}</td><td class="mono" style="font-weight:600">${fc(P.decode.gpus)}</td><td class="mono">TPOT ${msf(P.totals.tpotMs)}</td></tr>
+    </tbody></table>`;
+
+  const hetero = P.heterogeneous
+    ? `<span class="badge verified" style="background:#eef4ff;color:#1e4bd8;border-color:#c7d8ff">HETEROGENEOUS</span> prefill and decode run on different silicon — the compute-bound and bandwidth-bound phases are sized to the chip that fits each.`
+    : `<span class="badge unverified">HOMOGENEOUS</span> one platform for both phases. Try a bandwidth-rich chip for decode + a compute-dense chip for prefill to see the heterogeneous split.`;
+  const agenticNote = m2Traffic==='agentic'
+    ? `<div class="chart-caption" style="margin-top:6px">Agentic traffic carries a <strong>${(P.ctx/1000).toFixed(0)}K-token</strong> shared context (tool outputs, history). That inflates the KV cache, capping decode batch at <strong>${P.decode.batch}</strong> (vs 256 for chat) — so agentic needs far more decode silicon per delivered token than a chatbot. This is why "how many chips" has no single answer without the workload.</div>`
+    : '';
+
+  el.innerHTML = head + controls + stats + sla +
+    `<div class="chart-duo"><div class="chart-panel full">
+        <div class="chart-title">Prefill / decode split — ${P.model.n} · ${t.n} @ ${fc(P.reqs)} req/s</div>
+        <div class="chart-caption">${t.note}. Disaggregation sizes each phase on its own bottleneck — prefill on compute, decode on memory bandwidth.</div>
+        ${splitBar}${stageTable}
+        <div class="chart-caption" style="margin-top:8px">${hetero}</div>${agenticNote}
+      </div></div>
+     <div class="chart-caption" style="margin-top:6px">This plan needs <strong>${P.totals.itMW.toFixed(2)} MW IT</strong>${fitMW>0?` — ${pct(fitPct)} of this site's ${fitMW.toFixed(0)} MW usable IT`:''}. Its rack count / density / cooling class hand to the <strong>Helio inference-optimized pod</strong>; its power draw feeds <strong>Workload power</strong> for the transient envelope check.</div>`;
+}
+
 function renderEcon(x) {
   const {d,fin} = x;
   const pnl = fin.mdl.slice(0,8);
@@ -1346,6 +1444,14 @@ function selectChip(k) {
 function setWl(w) {
   m2Wl = w;
   renderDesign(true); // the workload controls render from state inside Compute Design
+}
+function setServing(id,val) {
+  if (id==='sv-model') m2Model=val;
+  else if (id==='sv-traffic') { m2Traffic=val; m2Reqs=0; } // reset reqs to the new preset's default
+  else if (id==='sv-reqs') { const n=parseInt(val,10); m2Reqs = isFinite(n)&&n>0 ? n : 0; }
+  else if (id==='sv-pf') m2PfChip=val;
+  else if (id==='sv-dc') m2DcChip=val;
+  renderServing(designCalc());
 }
 function setView(v) {
   view = 'design';

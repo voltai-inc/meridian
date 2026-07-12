@@ -26,6 +26,7 @@ The dashboard presents the tools as a pipeline — **01 Find (Site Selection) �
 | `power-signoff.html` | **Design Review — Workload Power Sign-off**: the deep-dive review bench behind Meridian's inline verdict — every design knob exposed (the EPC design import surface, v1); Meridian deep-links in prefilled. Power sign-off is the first review dimension; cooling/network are roadmap tabs |
 | `helio.html` | **Helio** — the 2N reference architecture (10→100 MW pod block) whose scaled ratios Meridian validates against |
 | `power-validation.js` | Shared DOM-free simulation engine (traces, chain loads, BESS, 19 checks) — used by both pages, unit-testable under node |
+| `serving-model.js` | **Serving plan** engine (pipeline step 02·b): disaggregated prefill/decode chip sizing, throughput, TTFT/TPOT, CPU nodes, heterogeneous + agentic — DOM-free, node-testable, drives the Serving Plan tab in Meridian |
 
 External: Digital Twin at `http://51.21.243.237:5173/` · Compliance Agent at `http://13.61.152.27/quick-check`. Procurement (BOM → RFQ → PO) is a placeholder in build.
 
@@ -45,6 +46,7 @@ and the chip's demand shape.
 | Doc | Read it for |
 |-----|------------|
 | `PRODUCT_PICTURE.md` | **Start here — the team walkthrough**: the pipeline with screenshots and a demo script, who authors vs. reviews what, the spec→design→review loop, the boundary, wedge/barrier, business model, roadmap (absorbed the July direction review, now deleted) |
+| `STRUCTURAL_CHANGE_2026-07-12.md` | The intake-driven package proposal + the new **Serving Plan** module (deepened inference sizing) — from the Jul 12 DC Sync and the voltai.world review |
 | `UPDATE_2026-07-11.md` | Weekly update: the field evidence (Entergy calls, Atria RFI, intake form) for why this path, what shipped, strategic directions, next steps |
 | `MERIDIAN_PRIMER.md` | First-principles education: training vs inference, MFU, parallelism, topology, supply/demand, sensitivity results, hardware-team feasibility questions, known gaps |
 | `MERIDIAN_TEAM_DOC.md` | Internal product brief: what it is, current state, what we still need, business context |
