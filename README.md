@@ -10,7 +10,7 @@ and verifies what a site can actually carry: compute design per chip platform, w
 performance, whether the electrical design survives the workload's power behavior, and a 2-page
 off-taker spec sheet. Utility capacity is always an input — never a prediction.
 
-Live: `meridian-web-swart.vercel.app` · Static HTML/JS, no backend, no build step.
+Live: `voltai.world` · Static HTML/JS, no backend, no build step.
 
 ## Pages
 
