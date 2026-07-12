@@ -10,30 +10,48 @@ show only what's real for the chosen mode.
 
 ## The shape
 
-- **Main product = single-mode verification.** The user lands in the mode they already know
-  (they have an off-taker / a defined use case) and sees only that world.
-- **Two real modes:** **Training** and **Inference**.
-- **One quiet, optional tab — "What fits this site?" (Compare).** A shallow both-modes view for the
-  *only* user who doesn't yet know the mode: a merchant developer — or **Voltai itself** — screening
-  a powered site with no tenant. Opt-in, never a gate. Not part of paid diligence.
+- **The design unit is always single-mode.** You design a **Training** hall as training and an
+  **Inference** hall as inference — never a blended half-and-half hall. Real campuses enforce this:
+  even when a campus runs both, the two are *physically separated into distinct buildings or data
+  halls* — so the natural design unit is one mode.
+- **Two single-mode design tabs:** **Training** and **Inference**. The user works in the mode they
+  already know (they have an off-taker / a defined use case).
+- **A Campus view that composes them.** Most new core campuses run **both** workloads (~70% of new
+  cloud campuses, per industry reporting) — so mixing is the common case, not a niche. But it's a
+  *composition*, not a blend: allocate the site's MW across one or more training blocks and inference
+  blocks, design each in its own single-mode tab, and **roll up** to one combined power profile,
+  BOM, and spec sheet. Its empty state — nothing placed yet — is the **"what fits this site?"**
+  screening view for a bare, tenant-less site (the merchant / Voltai-pseudo-off-taker case).
 
 ```
         SITE  (MW, voltage, climate, service type — always an input)
-                         │
-        ┌────────────────┼─────────────────┐
-        ▼                ▼                  ▼
-   ┌─────────┐     ┌───────────┐     ┌──────────────────┐
-   │TRAINING │     │ INFERENCE │     │ Compare (opt-in)  │
-   │  tab    │     │   tab     │     │ "what fits here?" │
-   └────┬────┘     └─────┬─────┘     └────────┬──────────┘
-        │                │            (shallow; drops you
-        └────────────────┴───────────────► into a real mode)
-                         │
-              DELIVERABLES (spec sheet + BOM) — shared
+                          │
+                 ┌────────┴─────────┐
+                 │   CAMPUS view    │  overview: allocate MW across blocks,
+                 │  compose + roll  │  roll up combined power/BOM/spec.
+                 │       up         │  (empty state = "what fits here?")
+                 └────────┬─────────┘
+              places one or more single-mode blocks:
+                 ┌────────┴─────────┐
+                 ▼                  ▼
+           ┌──────────┐       ┌───────────┐
+           │ TRAINING │       │ INFERENCE │   each block designed
+           │  block   │       │   block   │   in its own single mode
+           └────┬─────┘       └─────┬─────┘
+                └──── rolled up ────┘
+                          │
+              DELIVERABLES (combined spec sheet + BOM)
 ```
 
-"Mixed" is retired as a mode: a campus doing both is *training pods + inference pods*, each designed
-in its own tab. Two clean modes beat a blurry third.
+So "Mixed" is real and common — but it lives at the **campus** level as a sum of single-mode blocks,
+never as a blurred third mode inside one hall.
+
+**A useful consequence for power:** because the two are physically segregated, the campus's meter
+profile = *smooth inference load* + *swinging training load*. Adding inference alongside training
+**dilutes the training swings' share of total contracted MW** — so a mixed campus can pass the
+transient check that a pure-training site of the same MW would fail. The Campus roll-up should
+surface this (the current tool already carries a "training share of fleet" knob — the plumbing is
+half there).
 
 ---
 
@@ -124,7 +142,8 @@ per mode*: Training = pick one cluster chip; Inference = pick a chip per stage.
 ## Open items / next
 1. Confirm this structure, then rebuild Meridian around the mode fork (route the existing pieces;
    don't add more).
-2. Decide the Compare tab's depth (recommend: MW + rough $/unit for a training vs inference build
-   on this site — nothing more).
+2. Decide the Campus view's depth: block allocation (X MW training + Y MW inference) → rolled-up
+   power profile, combined BOM, one spec sheet. Its empty state doubles as the "what fits this
+   site?" screening view. Keep the screening comparison shallow (MW + rough $/unit per mode).
 3. Fold the naming work (`STRUCTURAL_CHANGE_2026-07-12.md`) in at the same time (customer-facing
    labels; the Meridian/AMD collision).
