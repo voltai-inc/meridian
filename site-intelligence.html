@@ -132,6 +132,13 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--sur
 .section-tabs a{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding-bottom:9px;border-bottom:2px solid transparent}
 .section-tabs a:hover{color:var(--ink)}
 .section-tabs a.on{color:var(--volt);border-bottom-color:var(--volt)}
+/* top-level workload mode — the spine: training vs inference vs campus */
+.mode-bar{display:flex;align-items:center;gap:8px;padding:12px 2px 2px;flex-wrap:wrap}
+.mode-eyebrow{font-family:var(--m);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.mode-bar button{font-family:var(--m);font-size:12px;font-weight:600;letter-spacing:.02em;padding:7px 16px;border:1.5px solid var(--line,#d8dee6);background:#fff;color:var(--muted);border-radius:7px;cursor:pointer;transition:all .12s}
+.mode-bar button:hover{color:var(--ink);border-color:#b9c2cc}
+.mode-bar button.on{background:var(--volt);border-color:var(--volt);color:#fff}
+.mode-hint{font-size:11px;color:var(--muted);margin-left:6px;align-self:center}
 
 /* ── WORKSPACE SECTIONS ───────────────────────────────────────────────── */
 .workspace{padding:22px 28px 80px;display:flex;flex-direction:column;gap:18px}
@@ -322,6 +329,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 }
 </style>
 <script src="power-validation.js"></script>
+<script src="serving-model.js"></script>
 </head>
 <body>
 
@@ -402,9 +410,18 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   <div class="main-scroll" id="design-scroll">
     <div class="kpi-wrap">
       <div class="kpi-strip" id="kpi-strip"></div>
+      <div class="mode-bar" id="mode-bar">
+        <span class="mode-eyebrow">What is this site for?</span>
+        <button data-mode="train" onclick="setWl('train')">Training</button>
+        <button data-mode="infer" onclick="setWl('infer')">Inference</button>
+        <button data-mode="mix" onclick="setWl('mix')">Campus (both)</button>
+        <span class="mode-hint" id="mode-hint"></span>
+      </div>
       <div class="section-tabs" id="section-tabs">
         <a href="#sec-power" onclick="scrollToSec(event,'sec-power')">Power</a>
         <a href="#sec-compute" onclick="scrollToSec(event,'sec-compute')">Compute</a>
+        <a href="#sec-serving" onclick="scrollToSec(event,'sec-serving')">Serving plan</a>
+        <a href="#sec-campus" onclick="scrollToSec(event,'sec-campus')">Campus</a>
         <a href="#sec-valid" onclick="scrollToSec(event,'sec-valid')">Workload power</a>
         <a href="#sec-econ" onclick="scrollToSec(event,'sec-econ')">Sensitivity</a>
         <a href="#sec-build" onclick="scrollToSec(event,'sec-build')">Build</a>
@@ -413,6 +430,8 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
     <div class="workspace">
       <div class="ws-section" id="sec-power"></div>
       <div class="ws-section" id="sec-compute"></div>
+      <div class="ws-section" id="sec-serving"></div>
+      <div class="ws-section" id="sec-campus"></div>
       <div class="ws-section" id="sec-valid"></div>
       <div class="ws-section" id="sec-econ"></div>
       <div class="ws-section" id="sec-build"></div>
@@ -473,6 +492,9 @@ const CHIPS = {
   MI300X: {n:'AMD MI300X OAM',       g:64, kw:110, kw_max:125, cool:'CDU', rate:1.75, cap:22000, smooth:0.00, mt:.38, mi:.55, tf:1307, hbm:7.68, ver:false, st:'ship', lead:'10–12 mo', leadHi:12, volt:'ac480'},
   GAUDI3: {n:'Intel Gaudi 3',        g:64, kw:90,  kw_max:110, cool:'CDU', rate:1.00, cap:18000, smooth:0.00, mt:.42, mi:.60, tf:800,  hbm:3.7,  ver:false, st:'ship', lead:'12–14 mo', leadHi:14, volt:'ac480'},
 };
+// HBM capacity (GB/GPU) — model-weight + KV footprint for the serving-plan sizing engine.
+const CHIP_MEM_GB = {GB300:288,GB200:192,B200:192,H200:141,H100:80,VERA:288,MI355X:288,MI300X:192,GAUDI3:128};
+Object.entries(CHIP_MEM_GB).forEach(([k,m])=>{ if (CHIPS[k]) CHIPS[k].mem=m; });
 // data-viz palette — brand monochrome (black/grey) + Voltai red; every step ≥3:1 on white.
 // Identity is carried by the direct end-of-curve labels, not color alone.
 const CHIP_COLORS = {
@@ -500,6 +522,28 @@ let view = 'screen';
 let usingDemo = true;
 let m2SelChip='GB300', m2Wl='train', m2ModelB=70, m2Batch=32;
 let m2PwrCost=0.05, m2DiscR=0.10, m2Mult=20;
+// serving plan (inference sizing) — named model, traffic archetype, and the
+// prefill/decode chip split (heterogeneous when they differ). reqs=0 → use preset.
+let m2Model='QWEN3_235B', m2Traffic='chat', m2PfChip='GB300', m2DcChip='GB300', m2Reqs=0;
+let m2CampusShare=0.6; // campus mode: fraction of site MW allocated to training (rest = inference)
+// The workload mode is the spine: each mode shows only its relevant sections.
+const MODE_SECTIONS = {
+  train: ['sec-power','sec-compute','sec-valid','sec-econ','sec-build'],
+  infer: ['sec-power','sec-serving','sec-valid','sec-econ','sec-build'],
+  mix:   ['sec-power','sec-campus','sec-econ','sec-build'],
+};
+const MODE_HINT = {
+  train: 'Building a model — one cluster of identical chips in lockstep. Efficiency (MFU) and power-transient survival matter here.',
+  infer: 'Serving a finished model — prefill/decode sizing, throughput and latency. Power is steady, not the training swing.',
+  mix:   'A campus running both — allocate the site across training and inference blocks; each block is designed in its own mode.',
+};
+function applyMode(){
+  const vis = MODE_SECTIONS[m2Wl] || MODE_SECTIONS.train;
+  document.querySelectorAll('.workspace > .ws-section').forEach(el=>{ el.style.display = vis.includes(el.id)?'':'none'; });
+  document.querySelectorAll('#section-tabs a').forEach(a=>{ a.style.display = vis.includes(a.getAttribute('href').slice(1))?'':'none'; });
+  document.querySelectorAll('#mode-bar button').forEach(b=>b.classList.toggle('on', b.dataset.mode===m2Wl));
+  const h=document.getElementById('mode-hint'); if(h) h.textContent = MODE_HINT[m2Wl]||'';
+}
 // workload timing profile — the CUSTOMER'S data (framework, checkpoint policy, job schedule).
 // Defaults = conservative fully-synchronized training archetype; ask the off-taker for theirs.
 const WLPROF_DEFAULT = {iter:3.0, ckptEvery:1200, ckptDur:20, sync:1.0};
@@ -518,7 +562,7 @@ const fc = n => Math.round(n).toLocaleString();
 const pct = n => ((n||0)*100).toFixed(0)+'%';
 const today = () => new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 const climLabel = c => ({cold_dry:'Cold/dry',temperate:'Temperate',hot_dry:'Hot/dry',hot_humid:'Hot/humid'}[c]||c);
-const wlLabel = w => ({train:'Training',infer:'Inference',mix:'Mixed'}[w]||w);
+const wlLabel = w => ({train:'Training',infer:'Inference',mix:'Campus'}[w]||w);
 const chipVisible = (k,arch) => { const v=CHIPS[k].volt; return arch==='both'?true:arch==='ac480'?(v==='ac480'||v==='both'):(v==='dc800'||v==='both'); };
 const voltCompat = (c,poiV) => c.volt==='both' || (poiV>=115 ? true : c.volt==='ac480');
 
@@ -930,6 +974,24 @@ function buildTraceSVG(val) {
 function renderValidation(x) {
   const {d,val,itMW} = x;
   const {rep,design,site} = val;
+  // Inference power is a gentle daily wave, not the synchronized training swing — so the question
+  // collapses to "does the steady draw fit the contract?" The full transient bench is a TRAINING tool.
+  if (m2Wl==='infer') {
+    const okv = rep.headroomMw>=0;
+    document.getElementById('sec-valid').innerHTML = `
+      <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">POWER FIT</span><span class="ws-sub">does this inference fleet's steady draw sit inside the contract?</span>
+        <span class="badge ${okv?'verified':'unverified'}">${okv?'FITS':'OVER'}</span></div>
+      <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>Why this is short.</strong> Inference is millions of independent requests — the fleet draws a smooth, slightly wavy line, not training's synchronized square wave. There are no checkpoint cliffs, no forced oscillation, no islanded-genset step to survive. So the power question is simply whether the steady load fits inside the contracted envelope with margin. The heavy transient bench — oscillation, checkpoint dips, job-end cliff, the 96-scenario envelope — is a <strong>training</strong> concern; switch to Training or Campus to run it.</div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="pgrid-cell"><div class="pgrid-val">${rep.peakMeter.toFixed(1)} MW</div><div class="pgrid-label">Steady draw at meter vs ${site.contracted_mw} MW contracted</div></div>
+        <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${okv?'ok':'risk'}-text)">${rep.headroomMw.toFixed(1)} MW</div><div class="pgrid-label">Headroom (${(rep.headroomFrac*100).toFixed(0)}%)</div></div>
+        <div class="pgrid-cell"><div class="pgrid-val">${itMW.toFixed(1)} MW</div><div class="pgrid-label">IT load · ${CHIPS[m2SelChip].cool} cooling</div></div>
+      </div>
+      <div class="callout ${okv?'info':'risk'}" style="margin-top:14px">${okv
+        ? 'The inference fleet fits inside the contracted envelope with margin — no transient survivability problem to solve. Backup sizing is a routine steady-load exercise.'
+        : 'The steady inference draw already exceeds the contract before any transient — reduce the fleet or raise contracted MW.'} Sizing this fleet (prefill/decode chips, throughput, latency) is in <strong>Serving plan</strong>.</div>`;
+    return;
+  }
   const vClass = rep.verdict==='PASS'?'ok':rep.verdict==='WARN'?'warn':'risk';
   const vText = rep.verdict==='PASS'
     ? 'The scaled Helio reference design absorbs this workload — every component, grid and islanded check passes.'
@@ -1018,10 +1080,13 @@ function renderDesign(flash) {
   renderKPIs(x,flash);
   renderPower(x);
   renderCompute(x);
+  renderServing(x);
+  renderCampus(x);
   renderValidation(x);
   renderEcon(x);
   renderBuild(x);
   renderSpecRail(x,flash);
+  applyMode();
   const bv = document.getElementById('m2-batch-val'); if (bv) bv.textContent = m2Batch;
   if (focusId) { const el=document.getElementById(focusId); if (el && el!==ae) { el.value = typedVal; el.focus(); } }
 }
@@ -1159,19 +1224,7 @@ function renderCompute(x) {
   document.getElementById('sec-compute').innerHTML = `
     <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">COMPUTE DESIGN</span><span class="ws-sub">site-ready design alternatives — click a platform, the spec updates</span></div>
     <div class="assume-row" style="margin-bottom:14px">
-      <span class="eyebrow" style="align-self:center;margin-right:4px">Workload</span>
-      <div class="seg" id="wl-seg">
-        <button data-wl="train" class="${m2Wl==='train'?'on':''}" onclick="setWl('train')">Training</button>
-        <button data-wl="mix" class="${m2Wl==='mix'?'on':''}" onclick="setWl('mix')">Mixed</button>
-        <button data-wl="infer" class="${m2Wl==='infer'?'on':''}" onclick="setWl('infer')">Inference</button>
-      </div>
-      ${m2Wl==='mix'?`<div class="assume"><label>Training share of fleet</label>
-        <div class="range-row" style="width:170px">
-          <input type="range" min="10" max="90" step="5" value="${Math.round(m2TrainShare*100)}"
-            oninput="m2TrainShare=this.value/100;document.getElementById('m2-ts-val').textContent=this.value+'%'"
-            onchange="renderDesign(true)">
-          <span class="range-val" id="m2-ts-val">${Math.round(m2TrainShare*100)}%</span>
-        </div></div>`:''}
+      <span class="eyebrow" style="align-self:center;margin-right:4px">Training model</span>
       <div class="assume"><label>Model size</label><div class="in">
         <select id="m2-model" onchange="m2ModelB=parseFloat(this.value);renderDesign(true)" style="border:none;background:none;font-size:12px;outline:none">
           ${[[7,'7B — small'],[70,'70B — frontier open-weights'],[405,'405B — large frontier'],[1000,'1T-class — MoE frontier']].map(([v,l])=>`<option value="${v}"${m2ModelB===v?' selected':''}>${l}</option>`).join('')}
@@ -1189,29 +1242,147 @@ function renderCompute(x) {
       <div class="chart-panel">
         <div class="chart-title">Why ${c.n} here</div>
         ${buildRationale(m2SelChip,d.poi_voltage,d.climate,m2Wl)}
-        ${opPt?`<div class="pgrid" style="grid-template-columns:1fr 1fr;margin-top:12px">
-          <div class="pgrid-cell"><div class="pgrid-val">${fc(opPt.user)}</div><div class="pgrid-label">tokens/sec/user @ batch ${opPt.b}</div></div>
-          <div class="pgrid-cell"><div class="pgrid-val">${fc(opPt.mw)}</div><div class="pgrid-label">tokens/sec/MW @ batch ${opPt.b}</div></div>
-        </div>`:''}
-      </div>
-      <div class="chart-panel full">
-        <div class="chart-title">Inference Pareto — per-user speed vs. per-MW efficiency · ${m2ModelB>=1000?'1T':m2ModelB+'B'} model · all chips @ 1 MW IT</div>
-        <div class="chart-caption">The chip fastest for one user is often the worst per watt at scale — there is no single winner, and the ranking shifts with batch size. The black ring is your operating point.</div>
-        <div class="range-row" style="max-width:340px;margin:6px 0 4px">
-          <span style="font-size:11.5px;color:var(--muted);white-space:nowrap">Batch size</span>
-          <input type="range" id="m2-batch" min="0" max="9" value="${Math.max(0,BATCHES.indexOf(m2Batch))}"
-            oninput="m2Batch=BATCHES[this.value];document.getElementById('m2-batch-val').textContent=m2Batch"
-            onchange="renderDesign(true)">
-          <span class="range-val" id="m2-batch-val">${m2Batch}</span>
-        </div>
-        ${buildParetoSVG(m2SelChip,m2ModelB,m2Batch)}
-        <div class="chart-legend">${Object.keys(CHIPS).map(k=>`<span class="chart-legend-item${k===m2SelChip?' sel':''}" onclick="${voltCompat(CHIPS[k],d.poi_voltage)?`selectChip('${k}')`:''}"><span class="legend-dot" style="background:${CHIP_COLORS[k]}"></span>${CHIPS[k].n}</span>`).join('')}</div>
       </div>
     </div>
     <details class="drawer" id="dsx-drawer"><summary>DSX compatibility detail — 6-point check</summary><div class="drawer-body">${dsxTable}</div></details>
     <details class="drawer"><summary>Compare all chips at this site</summary><div class="drawer-body" style="overflow-x:auto">
       <table class="data"><thead><tr><th>Platform</th><th>GPUs</th><th>Racks</th><th>MFU (${wlLabel(m2Wl).toLowerCase()})</th><th>Sust. PFLOPS</th><th>CapEx / PFLOPS</th><th>Scenario rate</th><th>Lead</th><th>Cooling</th><th>Notes</th></tr></thead><tbody>${cmpRows}</tbody></table>
     </div></details>`;
+}
+
+// ─── SERVING PLAN (inference sizing) ─────────────────────────────────────
+// Disaggregated prefill/decode chip counts, throughput, latency (TTFT/TPOT),
+// CPU nodes and IT MW for a named model under a traffic archetype — the
+// demand-side sizing the off-taker actually asks for. Engine: serving-model.js.
+function renderServing(x) {
+  const {d} = x;
+  const el = document.getElementById('sec-serving');
+  if (!el || typeof ServingModel==='undefined') { if(el) el.innerHTML=''; return; }
+  const P = ServingModel.sizeServing({model:m2Model, prefillChip:m2PfChip, decodeChip:m2DcChip,
+                                      traffic:m2Traffic, reqs:m2Reqs, chips:CHIPS});
+  const tps = n => n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?Math.round(n/1e3)+'K':Math.round(n);
+  const msf = ms => ms>=1000?(ms/1000).toFixed(2)+' s':Math.round(ms)+' ms';
+  const co = (id,sel) => `<select id="${id}" onchange="setServing('${id}',this.value)" style="border:none;background:none;font-size:12px;outline:none">
+      ${Object.keys(CHIPS).map(k=>`<option value="${k}"${sel===k?' selected':''}>${CHIPS[k].n}</option>`).join('')}</select>`;
+  const okc='var(--ok-text)', bad='var(--risk-text)';
+
+  const head = `<div class="ws-head"><span class="ws-idx">02·b</span><span class="ws-title">SERVING PLAN</span>
+      <span class="ws-sub">inference sizing — prefill vs decode chips, throughput, latency, CPU nodes · modeled, not measured</span></div>`;
+  const controls = `<div class="assume-row" style="margin-bottom:14px;flex-wrap:wrap">
+      <div class="assume"><label>Model</label><div class="in">
+        <select id="sv-model" onchange="setServing('sv-model',this.value)" style="border:none;background:none;font-size:12px;outline:none">
+          ${Object.entries(ServingModel.MODELS).map(([k,m])=>`<option value="${k}"${m2Model===k?' selected':''}>${m.n} · ${m.tag}</option>`).join('')}
+        </select></div></div>
+      <span class="eyebrow" style="align-self:center;margin-left:6px">Traffic</span>
+      <div class="seg" id="sv-traffic-seg">
+        ${Object.entries(ServingModel.TRAFFIC).map(([k,t])=>`<button class="${m2Traffic===k?'on':''}" onclick="setServing('sv-traffic','${k}')">${t.n}</button>`).join('')}
+      </div>
+      <div class="assume"><label>Requests / sec</label><div class="in">
+        <input type="number" id="sv-reqs" value="${P?P.reqs:''}" min="1" style="width:74px;border:none;background:none;font-size:12px;outline:none" onchange="setServing('sv-reqs',this.value)"></div></div>
+      <div class="assume"><label>Prefill chip</label><div class="in">${co('sv-pf',m2PfChip)}</div></div>
+      <div class="assume"><label>Decode chip</label><div class="in">${co('sv-dc',m2DcChip)}</div></div>
+    </div>`;
+
+  if (!P) { el.innerHTML = head+controls+`<div class="chart-caption">Select a model, traffic profile and chips to size a serving fleet.</div>`; return; }
+
+  const t = P.traffic;
+  const fitMW = x.itMW || 0;
+  const fitPct = fitMW>0 ? P.totals.itMW/fitMW : 0;
+  const fitCol = fitPct>1?bad:fitPct>0.75?'var(--warn-text)':okc;
+  const ttftCol = P.prefill.ttftOk?okc:bad, tpotCol = P.decode.tpotOk?okc:bad;
+
+  // headline stats
+  const stats = `<div class="pgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:2px">
+      <div class="pgrid-cell"><div class="pgrid-val">${fc(P.totals.gpus)}</div><div class="pgrid-label">accelerators total<br>(${fc(P.prefill.gpus)} prefill · ${fc(P.decode.gpus)} decode)</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${fc(P.totals.cpuNodes)}</div><div class="pgrid-label">CPU / host nodes<br>head · router · control plane</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${fitCol}">${P.totals.itMW.toFixed(2)}<span style="font-size:15px"> MW</span></div><div class="pgrid-label">IT power of this plan<br>${fitMW>0?`${pct(fitPct)} of site's ${fitMW.toFixed(0)} MW usable`:'demand side'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${tps(P.totals.outTokps)}</div><div class="pgrid-label">output tokens/sec<br>delivered aggregate</div></div>
+    </div>`;
+
+  // latency / SLA
+  const sla = `<div class="pgrid" style="grid-template-columns:repeat(4,1fr);margin:10px 0 2px">
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${ttftCol};font-size:20px">${msf(P.totals.ttftMs)}</div><div class="pgrid-label">TTFT (time to first token)<br>SLA ${msf(P.totals.ttftBudgetMs)} · ${P.prefill.ttftOk?'✓ met':'✗ missed'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:${tpotCol};font-size:20px">${msf(P.totals.tpotMs)}</div><div class="pgrid-label">TPOT (per output token)<br>SLA ${msf(P.totals.tpotBudgetMs)} · ${P.decode.tpotOk?'✓ met':'✗ missed'}</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="font-size:20px">${Math.round(P.totals.tokPerSecPerUser)}</div><div class="pgrid-label">tokens/sec/user<br>per-user decode speed</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="font-size:20px">${P.decode.batch}</div><div class="pgrid-label">decode batch (concurrency)<br>${P.decode.memBound?'memory-bandwidth bound':'compute bound'}</div></div>
+    </div>`;
+
+  // prefill vs decode split bar
+  const totG = P.totals.gpus||1;
+  const pfPct = 100*P.prefill.gpus/totG, dcPct=100*P.decode.gpus/totG;
+  const pfCol=CHIP_COLORS[P.prefill.chipKey]||'#888', dcCol=CHIP_COLORS[P.decode.chipKey]||'#555';
+  const splitBar = `<div style="display:flex;height:26px;border-radius:5px;overflow:hidden;margin:4px 0 10px;font-family:var(--m);font-size:11px;color:#fff">
+      <div style="width:${pfPct}%;background:${pfCol};display:flex;align-items:center;justify-content:center" title="prefill">${pfPct>12?'prefill '+pct(pfPct/100):''}</div>
+      <div style="width:${dcPct}%;background:${dcCol};display:flex;align-items:center;justify-content:center" title="decode">${dcPct>12?'decode '+pct(dcPct/100):''}</div>
+    </div>`;
+
+  const stageTable = `<table class="data"><thead><tr><th>Stage</th><th>Bottleneck</th><th>Chip</th><th>GPUs / replica</th><th>Replicas</th><th>GPUs</th><th>Key latency</th></tr></thead><tbody>
+      <tr><td style="font-weight:600;color:var(--ink)">Prefill</td><td>compute (TFLOPS)</td><td class="mono">${P.prefill.chip.n}</td><td class="mono">${P.prefill.gpusPerReplica}</td><td class="mono">${fc(P.prefill.replicas)}</td><td class="mono" style="font-weight:600">${fc(P.prefill.gpus)}</td><td class="mono">TTFT ${msf(P.totals.ttftMs)}</td></tr>
+      <tr><td style="font-weight:600;color:var(--ink)">Decode</td><td>memory bandwidth (HBM)</td><td class="mono">${P.decode.chip.n}</td><td class="mono">${P.decode.gpusPerReplica}</td><td class="mono">${fc(P.decode.replicas)}</td><td class="mono" style="font-weight:600">${fc(P.decode.gpus)}</td><td class="mono">TPOT ${msf(P.totals.tpotMs)}</td></tr>
+    </tbody></table>`;
+
+  const hetero = P.heterogeneous
+    ? `<span class="badge verified" style="background:#eef4ff;color:#1e4bd8;border-color:#c7d8ff">HETEROGENEOUS</span> prefill and decode run on different silicon — the compute-bound and bandwidth-bound phases are sized to the chip that fits each.`
+    : `<span class="badge unverified">HOMOGENEOUS</span> one platform for both phases. Try a bandwidth-rich chip for decode + a compute-dense chip for prefill to see the heterogeneous split.`;
+  const agenticNote = m2Traffic==='agentic'
+    ? `<div class="chart-caption" style="margin-top:6px">Agentic traffic carries a <strong>${(P.ctx/1000).toFixed(0)}K-token</strong> shared context (tool outputs, history). That inflates the KV cache, capping decode batch at <strong>${P.decode.batch}</strong> (vs 256 for chat) — so agentic needs far more decode silicon per delivered token than a chatbot. This is why "how many chips" has no single answer without the workload.</div>`
+    : '';
+
+  el.innerHTML = head + controls + stats + sla +
+    `<div class="chart-duo"><div class="chart-panel full">
+        <div class="chart-title">Prefill / decode split — ${P.model.n} · ${t.n} @ ${fc(P.reqs)} req/s</div>
+        <div class="chart-caption">${t.note}. Disaggregation sizes each phase on its own bottleneck — prefill on compute, decode on memory bandwidth.</div>
+        ${splitBar}${stageTable}
+        <div class="chart-caption" style="margin-top:8px">${hetero}</div>${agenticNote}
+      </div></div>
+     <div class="chart-caption" style="margin-top:6px">This plan needs <strong>${P.totals.itMW.toFixed(2)} MW IT</strong>${fitMW>0?` — ${pct(fitPct)} of this site's ${fitMW.toFixed(0)} MW usable IT`:''}. Its rack count / density / cooling class hand to the <strong>Helio inference-optimized pod</strong>; its power draw feeds <strong>Workload power</strong> for the transient envelope check.</div>`;
+}
+
+// ─── CAMPUS (composition of single-mode blocks) ──────────────────────────
+// Most new campuses run BOTH workloads, but physically separated into distinct
+// halls. So the campus isn't a blended mode — it's an allocation of the site's
+// MW across a training block and an inference block, each designed single-mode.
+function renderCampus(x) {
+  const {d,pue} = x;
+  const el = document.getElementById('sec-campus'); if (!el) return;
+  const share = m2CampusShare, siteMW = d.confirmed_mw;
+  const trMW = siteMW*share, inMW = siteMW*(1-share);
+  const c = CHIPS[m2SelChip];
+  const trIT = trMW/pue, trRacks = Math.floor(trIT*1000/c.kw), trGpus = trRacks*c.g;
+  const inIT = inMW/pue;
+  const edge = share<=0.05 || share>=0.95;
+  const soleMode = share>=0.95?'train':'infer';
+  const bar = `<div style="display:flex;height:30px;border-radius:6px;overflow:hidden;margin:6px 0 16px;font-family:var(--m);font-size:11px;color:#fff">
+      <div style="width:${(share*100).toFixed(0)}%;background:var(--volt);display:flex;align-items:center;justify-content:center">${share>0.12?'Training '+pct(share):''}</div>
+      <div style="width:${((1-share)*100).toFixed(0)}%;background:#3c4550;display:flex;align-items:center;justify-content:center">${(1-share)>0.12?'Inference '+pct(1-share):''}</div>
+    </div>`;
+  el.innerHTML = `
+    <div class="ws-head"><span class="ws-idx">02</span><span class="ws-title">CAMPUS</span><span class="ws-sub">split this site across training + inference blocks — each designed in its own mode</span></div>
+    <div class="assume-row" style="margin-bottom:6px">
+      <span class="eyebrow" style="align-self:center;margin-right:6px">Allocation of ${siteMW} MW</span>
+      <div class="range-row" style="width:280px">
+        <input type="range" min="0" max="100" step="5" value="${Math.round(share*100)}"
+          oninput="m2CampusShare=this.value/100;document.getElementById('cs-val').textContent=this.value+'% training'"
+          onchange="renderDesign(true)">
+        <span class="range-val" id="cs-val">${Math.round(share*100)}% training</span>
+      </div>
+    </div>
+    ${bar}
+    <div class="pgrid" style="grid-template-columns:1fr 1fr;margin-bottom:2px">
+      <div class="pgrid-cell" style="text-align:left">
+        <div class="pgrid-val" style="color:var(--volt)">${trMW.toFixed(0)} MW</div>
+        <div class="pgrid-label">TRAINING block · ${trIT.toFixed(0)} MW IT · ~${fc(trGpus)} ${c.n} GPUs · violent synchronized power → full transient check</div>
+        <button class="btn-ghost" style="margin-top:8px" onclick="setWl('train')">Design the training block →</button>
+      </div>
+      <div class="pgrid-cell" style="text-align:left">
+        <div class="pgrid-val" style="color:#3c4550">${inMW.toFixed(0)} MW</div>
+        <div class="pgrid-label">INFERENCE block · ${inIT.toFixed(0)} MW IT · prefill/decode fleet · smooth, steady power → simple fit</div>
+        <button class="btn-ghost" style="margin-top:8px" onclick="setWl('infer')">Design the inference block →</button>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top:14px"><strong>Why splitting helps the power problem.</strong> Training's synchronized swing rides on only the training block — ${pct(share)} of the site — while the inference ${pct(1-share)} draws a smooth line. So the swing seen at the meter is diluted to roughly <strong>${pct(share)}</strong> of contracted MW. A pure-training site of the same ${siteMW} MW would face the full swing on 100% of its load — which is exactly why a mixed campus can pass a transient check that an all-training site of the same size fails.</div>
+    ${edge?`<div class="callout warn" style="margin-top:12px">At this allocation the site is essentially single-mode — you probably want the <a onclick="setWl('${soleMode}')" style="color:var(--volt);cursor:pointer;font-weight:600">${soleMode==='train'?'Training':'Inference'}</a> mode directly rather than a campus split.</div>`:''}
+    <div class="chart-caption" style="margin-top:10px">Deliverables roll up: the combined BOM and off-taker spec sheet sum both blocks. Each block's design (chips, MFU or serving plan, power) is done in its own mode via the buttons above.</div>`;
 }
 
 function renderEcon(x) {
@@ -1346,6 +1517,14 @@ function selectChip(k) {
 function setWl(w) {
   m2Wl = w;
   renderDesign(true); // the workload controls render from state inside Compute Design
+}
+function setServing(id,val) {
+  if (id==='sv-model') m2Model=val;
+  else if (id==='sv-traffic') { m2Traffic=val; m2Reqs=0; } // reset reqs to the new preset's default
+  else if (id==='sv-reqs') { const n=parseInt(val,10); m2Reqs = isFinite(n)&&n>0 ? n : 0; }
+  else if (id==='sv-pf') m2PfChip=val;
+  else if (id==='sv-dc') m2DcChip=val;
+  renderServing(designCalc());
 }
 function setView(v) {
   view = 'design';
