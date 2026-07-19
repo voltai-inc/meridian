@@ -57,5 +57,5 @@ and the chip's demand shape.
 ## Working on this repo
 
 Everything is vanilla HTML/CSS/JS with the Voltai design system (light theme) vendored in `_ds/`.
-`support.js` and `figures/` belong to `helio.html` (generated — do not hand-edit `support.js`).
+`support.js` belongs to `helio.html` (generated — do not hand-edit). (`figures/` removed 2026-07-19 — Helio Rev 0.6 no longer references those images.)
 Deploys to Vercel from `main` (static, `vercel.json`).
