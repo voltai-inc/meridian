@@ -34,7 +34,7 @@ function trainingTrace(cap, opts = {}) {
     high_frac: 1.00, low_frac: 0.45, sync_fraction: 1.0,
     checkpoint_every_s: 1200, checkpoint_dur_s: 20, checkpoint_frac: 0.15,
     startup_ramp_s: 180, job_end_at_s: null, idle_frac: 0.10,
-    noise_frac: 0.02, seed: 7,
+    noise_frac: 0.02, seed: 7, phase_s: 0,
   }, opts);
   const rng = makeRng(o.seed);
   const n = Math.floor(o.duration_s / o.dt);
@@ -43,9 +43,10 @@ function trainingTrace(cap, opts = {}) {
   for (let i = 0; i < n; i++) {
     const ti = i * o.dt;
     t[i] = ti;
-    const phase = (ti % o.iteration_period_s) / o.iteration_period_s;
+    const tw = ti + o.phase_s; // waveform clock — phase_s de-synchronizes concurrent jobs
+    const phase = (tw % o.iteration_period_s) / o.iteration_period_s;
     let w = phase < o.duty_cycle ? o.high_frac : o.low_frac;
-    if (ti % o.checkpoint_every_s < o.checkpoint_dur_s && ti > o.checkpoint_dur_s)
+    if (tw % o.checkpoint_every_s < o.checkpoint_dur_s && ti > o.checkpoint_dur_s)
       w = o.checkpoint_frac;
     const ramp = Math.min(1, ti / o.startup_ramp_s);
     w = o.idle_frac + (w - o.idle_frac) * ramp;
@@ -85,6 +86,71 @@ function mixedTrace(cap, opts = {}) {
   const p = new Float64Array(n);
   for (let i = 0; i < n; i++) p[i] = tr.p[i] + inf.p[i];
   return { t: tr.t.slice(0, n), p, dt: tr.dt, name: "mixed", params: opts };
+}
+
+// ---------- per-model training power profiles -------------------------------
+// The industry default simulates at a flat utilization percentage — no per-model
+// breakdown, no way to differentiate power draw between models or adjacent
+// racks. These profiles derive the trace parameters from model architecture.
+// All numbers are public-spec-derived ESTIMATES for a screening tool; measured
+// per-model telemetry (the partner-data ask) replaces them 1:1.
+const TRAIN_MODELS = {
+  LLAMA3_70B:  { n:'Llama-3.1-70B',   totalB:70,  activeB:70,  moe:false, tag:'dense · workhorse' },
+  GPT_OSS_120: { n:'gpt-oss-120B',    totalB:120, activeB:5.1, moe:true,  tag:'MoE · efficient' },
+  QWEN3_235B:  { n:'Qwen3-235B-A22B', totalB:235, activeB:22,  moe:true,  tag:'MoE · open-weights' },
+  LLAMA3_405B: { n:'Llama-3.1-405B',  totalB:405, activeB:405, moe:false, tag:'dense · frontier' },
+  DEEPSEEK_V3: { n:'DeepSeek-V3',     totalB:671, activeB:37,  moe:true,  tag:'MoE · sparse' },
+};
+
+// Derive the training-trace parameters for a named model on a given cluster.
+// cluster = { gpus, tfPerGpu (dense TFLOPS), mfu }. Returned timing/amplitude
+// factors feed trainingTrace; `derived` carries the audit trail for display.
+function modelTraceParams(model, cluster) {
+  const m = typeof model === "string" ? TRAIN_MODELS[model] : model;
+  if (!m) return null;
+  const gpus = Math.max(1, cluster.gpus), mfu = cluster.mfu ?? 0.5;
+  // Weak-scaling recipe: global batch grows with the cluster (~4k tokens/GPU/step
+  // dense, ~6k MoE), so the step time is set by the MODEL — 6 FLOP/param/token
+  // over the per-GPU effective throughput. This is why a dense-405B fleet and a
+  // sparse-MoE fleet on the same site swing the grid at different frequencies.
+  const tokensPerGpu = m.moe ? 6144 : 4096;
+  const batchTokens = gpus * tokensPerGpu;
+  const iterRaw = (6 * m.activeB * 1e9 * tokensPerGpu) / (cluster.tfPerGpu * 1e12 * mfu);
+  // Checkpoint: bf16 weights + fp32 master + Adam moments ≈ 14 B/param, written
+  // over the checkpoint storage path (~0.4 GB/s per GPU, capped at 500 GB/s —
+  // the parallel-filesystem ceiling, which is what big models actually hit).
+  const ckptBytes = m.totalB * 1e9 * 14;
+  const ckptDur = Math.min(120, Math.max(5, ckptBytes / Math.min(gpus * 0.4e9, 500e9)));
+  // MoE exposes all-to-all expert dispatch: shorter compute duty, softer peak
+  // (lower arithmetic intensity), busier "low" phase (network + HBM active).
+  // Dense overlaps collectives behind compute → longer high-power phase.
+  return {
+    iteration_period_s: Math.min(60, Math.max(0.5, iterRaw)),
+    checkpoint_dur_s: Math.round(ckptDur),
+    duty_cycle: m.moe ? 0.60 : 0.75,
+    high_mult: m.moe ? 0.92 : 1.0,
+    low_mult:  m.moe ? 1.12 : 1.0,
+    derived: { batchTokens, iterRaw, ckptGB: ckptBytes / 1e9, model: m },
+  };
+}
+
+// Aggregate power of several concurrent jobs sharing one site — the
+// "adjacent racks" question. jobs = [{ name, kind:'train'|'infer', share,
+// opts, phase_s, seed }]. Per-job traces are kept so the rack-level view can
+// show who draws what, when; the sum is what the meter (and the shared
+// electrical chain) actually sees.
+function fleetTrace(cap, jobs, common = {}) {
+  const parts = jobs.map((j, i) => {
+    const c = cap * j.share;
+    const trace = j.kind === "infer"
+      ? inferenceTrace(c, Object.assign({ seed: j.seed ?? 11 + i }, common, j.opts || {}))
+      : trainingTrace(c, Object.assign({ seed: j.seed ?? 7 + i, phase_s: j.phase_s ?? 0 }, common, j.opts || {}));
+    return Object.assign({}, j, { trace });
+  });
+  const n = Math.min(...parts.map(x => x.trace.p.length));
+  const p = new Float64Array(n);
+  for (const part of parts) for (let i = 0; i < n; i++) p[i] += part.trace.p[i];
+  return { t: parts[0].trace.t.slice(0, n), p, dt: parts[0].trace.dt, name: "fleet", jobs: parts };
 }
 
 // ---------- simulation -----------------------------------------------------
@@ -358,6 +424,7 @@ function runChecks(sim, site) {
 
 if (typeof module !== "undefined") {
   module.exports = { trainingTrace, inferenceTrace, mixedTrace, simulate, runChecks,
-                     oscillationBand, maxRamp, maxStep, percentile };
+                     oscillationBand, maxRamp, maxStep, percentile,
+                     TRAIN_MODELS, modelTraceParams, fleetTrace };
 }
 
