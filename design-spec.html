@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voltai — Workload-to-Power Simulation · Design Brief</title>
+<style>
+@font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-700.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-weight:600;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-600.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-400.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:500;font-display:swap;src:url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-500.woff2') format('woff2')}
+:root{
+  --ink:#060a0e; --body:#141d26; --muted:#5b646e; --line:#e2e8ee; --panel:#f6f8fa;
+  --volt:#AF0000; --volt-tint:#fbeeee;
+  --f:'IBM Plex Sans',system-ui,sans-serif; --m:'IBM Plex Mono',monospace; --disp:'Space Grotesk',var(--f);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#e8ebee;font-family:var(--f);color:var(--body);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:8.5in;min-height:11in;margin:24px auto;background:#fff;box-shadow:0 2px 24px rgba(6,10,14,.12);padding:.5in .62in .42in;display:flex;flex-direction:column}
+@page{size:letter;margin:0}
+@media print{body{background:#fff}.page{margin:0;box-shadow:none;min-height:auto;height:11in;overflow:hidden;page-break-after:always}.page:last-child{page-break-after:auto}}
+.eyebrow{font-family:var(--m);font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+header{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2.5px solid var(--ink);padding-bottom:10px}
+.wordmark{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:.15em;color:var(--ink)}
+.wordmark span{color:var(--volt)}
+h1{font-family:var(--disp);font-weight:700;font-size:21px;line-height:1.18;color:var(--ink);margin:13px 0 6px}
+.lede{font-size:11.5px;line-height:1.6;max-width:7in}
+h2{font-family:var(--m);font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--volt);margin:14px 0 6px}
+p,li,td,th{font-size:10.5px;line-height:1.55}
+ul{list-style:none}
+li{padding-left:13px;position:relative;margin-bottom:4px}
+li::before{content:'▪';position:absolute;left:0;color:var(--volt);font-size:8.5px;top:2px}
+li b, p b, td b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;margin-top:2px}
+th{font-family:var(--m);font-size:8.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--ink)}
+td{padding:5px 10px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.k{font-family:var(--m);font-size:9.5px;white-space:nowrap;color:var(--ink)}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.step{border:1px solid var(--line);background:var(--panel);padding:7px 9px;position:relative}
+.step b{display:block;font-family:var(--m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt);margin-bottom:3px}
+.step span{font-size:9.5px;line-height:1.45;color:var(--body);display:block}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.databox{margin-top:12px;border-left:3px solid var(--volt);background:var(--volt-tint);padding:9px 14px}
+.est{font-family:var(--m);font-size:8.5px;letter-spacing:.08em;color:#8a6d1f;background:#faf3dc;border:1px solid #ecdfb5;padding:1px 6px;border-radius:2px;vertical-align:1px}
+footer{margin-top:auto;border-top:1px solid var(--line);padding-top:9px;display:flex;justify-content:space-between;align-items:flex-end;font-size:9.5px;color:var(--muted)}
+footer .contact{font-family:var(--m);text-align:right;line-height:1.6;color:var(--ink)}
+footer a{color:var(--volt);text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="wordmark">VOLT<span>AI</span></div>
+    <div class="eyebrow">Workload-to-Power Simulation · Design Brief · July 2026 · Page 1/2</div>
+  </header>
+
+  <h1>Per-workload power simulation for AI data centers — design specification brief</h1>
+  <p class="lede">The industry models data center load as a flat utilization percentage — one number for every workload. This system simulates the <b>actual workload</b>: which model is training or serving, on which fleet, with what timing — and carries that trace through the full electrical chain to a sign-off verdict and off-taker spec sheet. This brief describes the inputs, the models, the checks, and the integration paths, for partner engineering review. Figures derived from public data are marked <span class="est">ESTIMATED</span>; measured telemetry replaces each 1:1.</p>
+
+  <h2>01 · System pipeline</h2>
+  <div class="flow">
+    <div class="step"><b>Declare</b><span>Site (grid MW, POI, climate) · fleet (chip SKU, cooling) · workload (named model or measured trace)</span></div>
+    <div class="step"><b>Synthesize</b><span>Per-model power traces at 0.1 s resolution — iteration swing, checkpoints, sync, fleet mix</span></div>
+    <div class="step"><b>Simulate</b><span>2N electrical chain, mechanical lag, BESS smoothing, islanded operation</span></div>
+    <div class="step"><b>Check</b><span>19 component/grid/islanded checks + a 96-scenario timing-envelope sweep with counterexample</span></div>
+    <div class="step"><b>Output</b><span>Sign-off report, off-taker spec sheet, serving plan, load tables for digital-twin sims</span></div>
+  </div>
+
+  <h2>02 · Workload → power model (the core)</h2>
+  <div class="cols">
+    <div>
+      <p style="margin-bottom:5px"><b>Per-model trace derivation.</b> The training trace is derived from the architecture, not assumed <span class="est">ESTIMATED</span>:</p>
+      <ul>
+        <li><b>Step period</b> — 6 FLOP/param/token over the fleet's effective throughput under a weak-scaling batch recipe: the model sets the grid-forcing frequency. Across five frontier open-weight models on one 200 MW site, forcing spans <b>0.03–1.7 Hz</b> — some inside the grid's sensitive oscillation band, some out.</li>
+        <li><b>Checkpoint signature</b> — optimizer state (≈14 B/param, mixed-precision Adam) over the storage path sets dip depth and length: 1–9 TB, 5–19 s for the same five models.</li>
+        <li><b>Architecture duty</b> — dense (collectives overlapped, long high-power phase, full peak) vs. sparse MoE (all-to-all exposed, shorter duty, softer peak, busier low phase).</li>
+        <li><b>Chip shaping</b> — on-board energy storage damps the synchronized swing per SKU; cooling type sets the mechanical power ratio and lag.</li>
+      </ul>
+    </div>
+    <div>
+      <p style="margin-bottom:5px"><b>Fleet composition — the adjacent-racks question.</b></p>
+      <ul>
+        <li>Concurrent tenants (e.g. two training jobs with de-correlated checkpoint phase + an inference fleet) are simulated per-job and summed — the meter and every shared component see the aggregate; each rack group's draw stays resolved.</li>
+        <li>Inference is modeled as its own regime — smooth diurnal demand plus autocorrelated batch noise; sizing comes from a first-principles roofline serving model (prefill compute-bound / decode bandwidth-bound, per named model, traffic archetype and SLA — heterogeneous fleets fall out of the physics).</li>
+        <li>Output per timestep: per-rack-group draw, adjacent-group differential, diversity credit vs. sum of per-job peaks.</li>
+      </ul>
+      <p style="margin-top:6px"><b>Measured-trace ingestion.</b> Any synthesized trace can be replaced by measured telemetry (CSV import today) — same checks, same reports, verified provenance label.</p>
+    </div>
+  </div>
+
+  <h2>03 · Electrical simulation &amp; checks</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li><b>Chain model</b> — 2N reference block scaled to site: utility feed → MV switchgear → transformer → LV switchgear → UPS → PDU/busway, with per-component ratings, short-time factors and efficiencies; loading recorded at each node, normal and N-1 (full load on the surviving path during the worst transient).</li>
+        <li><b>BESS credit</b> — first-order smoothing (τ = 30 s) against the raw meter trace; power/energy limits enforced; raw exceedance kept as a labeled sensitivity when the BESS is load-bearing.</li>
+        <li><b>Islanded operation</b> — genset firm capacity and step-load tolerance with BESS bridging, under utility loss + single-path failure.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><b>Grid commitments</b> — contracted-capacity headroom, worst 1 s ramp (raw and BESS-smoothed), and a <b>forced-oscillation screen</b>: FFT band-pass 0.05–1 Hz of the meter trace vs. a peak-to-peak limit — periodic training demand can couple to inter-area grid modes.</li>
+        <li><b>Envelope sign-off</b> — the sign-off question is not "does this timing pass?" but "can <b>any</b> admissible timing break the design?" A bounded-exhaustive sweep (synchronization 25–100%, iteration 1–30 s, checkpoint cadence/length — 96 scenarios) returns the worst case with its exact counterexample: pre-tape-out sign-off discipline applied to a facility.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <div>Voltai · AI for semiconductors — chip → board → rack → data center</div>
+    <div class="contact"><a href="https://voltai.com">voltai.com</a></div>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="wordmark">VOLT<span>AI</span></div>
+    <div class="eyebrow">Workload-to-Power Simulation · Design Brief · July 2026 · Page 2/2</div>
+  </header>
+
+  <h2 style="margin-top:16px">04 · Inputs and outputs</h2>
+  <table>
+    <thead><tr><th style="width:1.5in">Interface</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td class="k">IN · site</td><td>Contracted MW, POI voltage, service type, climate (→ PUE, cooling derate), utility study parameters (ramp/oscillation limits — assumed pending the large-load study, and replaced by it).</td></tr>
+      <tr><td class="k">IN · fleet</td><td>Chip SKU (nameplate and peak power, cooling type, on-board smoothing, HBM/FLOPS for the serving model), rack configuration, 480 V AC / 800 V DC distribution compatibility.</td></tr>
+      <tr><td class="k">IN · workload</td><td>Named model (architecture params: total/active parameters, MoE) + traffic archetype and SLA — or explicit timing (iteration, checkpoint policy, synchronized fraction), or measured traces (CSV).</td></tr>
+      <tr><td class="k">OUT · reports</td><td>Sign-off report (19 checks + envelope worst case with counterexample), off-taker spec sheet (workload-conditioned power envelope, BESS/genset sizing, economics), serving plan (chip counts, throughput, latency, MW).</td></tr>
+      <tr><td class="k">OUT · data</td><td>Time-series load tables per node (meter, per-path components, per-rack-group) at 0.1 s resolution — directly consumable by digital-twin thermal/power simulation.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>05 · Integration paths</h2>
+  <p style="margin-bottom:5px">To the question "is the output a SimReady asset?" — the output is the <b>workload-conditioned load profile and the sign-off evidence around it</b>. That data is designed to plug into three places:</p>
+  <ul>
+    <li><b>Omniverse / SimReady digital twins.</b> We build on the open-source Omniverse layer. Today's digital-twin power/thermal simulations drive from a flat load assumption; our per-rack, per-model load tables can drive them from the actual workload — and per-model power behavior is a natural annotation layer on SimReady assets, so a twin knows that the rack it renders draws differently running a dense frontier model than a sparse MoE.</li>
+    <li><b>Pre-deployment power planning.</b> For land/power/shell balancing systems, the simulator produces workload-conditioned load forecasts per site — updated as the model mix changes, rather than fixed at a utilization percentage — plus the transient envelope (BESS/genset implications) per candidate deployment.</li>
+    <li><b>Next-generation silicon.</b> The same derivation runs on unreleased chip parameters: simulated architecture in, facility-level power behavior out — data center readiness evaluated pre-tape-out, alongside the chip.</li>
+  </ul>
+
+  <h2>06 · Validation status &amp; the data ask</h2>
+  <div class="cols">
+    <div>
+      <p style="margin-bottom:5px"><b>Where the model stands.</b> The framework — trace synthesis, chain simulation, checks, envelope sweep — is implemented and self-testing. Calibration is public-spec-derived <span class="est">ESTIMATED</span>: model architectures from open weights, chip power from published specifications, fluctuation characteristics from published operator accounts. No production telemetry has been fitted yet; we label this on every figure rather than blur it.</p>
+      <p><b>What measured data replaces, 1:1:</b> amplitude and duty of the iteration swing per SKU, checkpoint signatures per storage architecture, on-board smoothing behavior, cooling-plant transient response, inference fleet noise statistics.</p>
+    </div>
+    <div>
+      <p style="margin-bottom:5px"><b>The ask.</b> Rack-level power telemetry for known workloads — even short windows (30–60 min) across a handful of models and SKUs — is sufficient to calibrate and to quantify the estimate error honestly.</p>
+      <p><b>In return:</b> every analysis run with partner equipment or data carries a <b style="color:var(--volt)">verified — partner data</b> label in front of the developers, off-takers and financiers making the evaluation decision — differentiation at the point where equipment gets specified, before an engineering firm is engaged.</p>
+    </div>
+  </div>
+
+  <div class="databox">
+    <p><b>Suggested next step.</b> A working session with the simulation/digital-twin and power-planning teams: we walk through the derivation and checks on a live site, they tell us where it's wrong, and we scope a minimal calibration dataset. We treat correction as the fastest path to a tool the ecosystem can rely on.</p>
+  </div>
+
+  <footer>
+    <div style="max-width:4.2in">Voltai builds AI for semiconductor design and verification, and extends that discipline up the stack — chip → board → rack → data center. Backed by Sequoia Capital, Stanford University, and the chairman of Alphabet.</div>
+    <div class="contact">
+      Priyanka Mathikshara · CEO · <a href="mailto:priyanka@voltai.com">priyanka@voltai.com</a><br>
+      Labib Tazwar Rahman · President · <a href="mailto:labib@voltai.com">labib@voltai.com</a><br>
+      Erfan Rostami · CTO · <a href="mailto:erfan@voltai.com">erfan@voltai.com</a>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

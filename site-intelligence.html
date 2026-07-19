@@ -549,7 +549,33 @@ function applyMode(){
 const WLPROF_DEFAULT = {iter:3.0, ckptEvery:1200, ckptDur:20, sync:1.0};
 let m2Prof = {...WLPROF_DEFAULT};
 let m2TrainShare = 0.6; // mixed-fleet training share — draggable in Compute Design
-function setProf(k,v){ const n=parseFloat(v); if (isFinite(n) && (k==='sync' ? n>=0&&n<=1 : n>0)) m2Prof[k]=n; debounce(); }
+// Named model driving the training POWER profile (per-model differentiation —
+// iteration frequency, checkpoint depth/length, MoE duty cycle all derive from
+// the architecture). 'CUSTOM' falls back to the manual timing knobs below.
+let m2TrainModel = 'LLAMA3_405B';
+let m2LastDerived = null; // last model-derived params — seeds m2Prof when the user edits into CUSTOM
+function trainClusterOf(itMW, chip, modelKey) {
+  const c = CHIPS[chip];
+  const gpus = Math.max(1, Math.floor(itMW*1000/c.kw)*c.g);
+  const m = TRAIN_MODELS[modelKey];
+  return { gpus, tfPerGpu: c.tf, mfu: getMFU(chip, gpus, m ? m.totalB : m2ModelB, 'train') };
+}
+function currentModelParams(itMW, chip) {
+  if (!TRAIN_MODELS[m2TrainModel]) return null;
+  return modelTraceParams(m2TrainModel, trainClusterOf(itMW, chip, m2TrainModel));
+}
+function setTrainModel(k){ m2TrainModel = TRAIN_MODELS[k] ? k : 'CUSTOM'; renderDesign(false); }
+function setProf(k,v){
+  const n = parseFloat(v);
+  if (!(isFinite(n) && (k==='sync' ? n>=0&&n<=1 : n>0))) return;
+  // touching a model-derived timing knob switches to CUSTOM, seeded with the derived values
+  if ((k==='iter'||k==='ckptDur') && TRAIN_MODELS[m2TrainModel] && m2LastDerived) {
+    m2Prof.iter = +m2LastDerived.iteration_period_s.toFixed(1);
+    m2Prof.ckptDur = m2LastDerived.checkpoint_dur_s;
+    m2TrainModel = 'CUSTOM';
+  }
+  m2Prof[k] = n; debounce();
+}
 // per-chip assumed rental rates ($/GPU-hr) — seeded from CHIPS, editable under each chip card
 const chipRates = Object.fromEntries(Object.entries(CHIPS).map(([k,c])=>[k,c.rate]));
 const curRate = () => chipRates[m2SelChip];
@@ -861,22 +887,90 @@ function chipPowerProfile(chip) {
 }
 
 const valCacheMap = new Map();
+// Trace options for one training job: chip amplitudes × model-derived timing/duty
+// (or the manual m2Prof knobs when no named model drives it).
+function trainOpts(prof, mp) {
+  return {
+    duration_s:1800, job_end_at_s:1530,
+    high_frac: mp ? +Math.min(1, prof.high_frac*mp.high_mult).toFixed(3) : prof.high_frac,
+    low_frac:  mp ? +Math.min(0.9, prof.low_frac*mp.low_mult).toFixed(3) : prof.low_frac,
+    checkpoint_frac: prof.checkpoint_frac, noise_frac: prof.noise_frac,
+    iteration_period_s: mp ? +mp.iteration_period_s.toFixed(2) : m2Prof.iter,
+    checkpoint_every_s: m2Prof.ckptEvery,
+    checkpoint_dur_s: mp ? mp.checkpoint_dur_s : m2Prof.ckptDur,
+    duty_cycle: mp ? mp.duty_cycle : 0.70,
+    sync_fraction: m2Prof.sync,
+  };
+}
 function runValidation(itMW, d, wl, chip) {
   const prof = chipPowerProfile(chip);
-  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio,m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync,m2TrainShare].join('|');
+  const mp = wl!=='infer' ? currentModelParams(itMW, chip) : null;
+  if (mp) m2LastDerived = mp;
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,wl,prof.high_frac,prof.checkpoint_frac,prof.coolRatio,m2TrainModel,m2Prof.iter,m2Prof.ckptEvery,m2Prof.ckptDur,m2Prof.sync,m2TrainShare].join('|');
   if (valCacheMap.has(key)) return valCacheMap.get(key);
   const {design,site} = buildValidationModel(itMW,d);
   design.mech_cooling_ratio = prof.coolRatio;
-  const tOpts = {duration_s:1800, job_end_at_s:1530, high_frac:prof.high_frac, low_frac:prof.low_frac, checkpoint_frac:prof.checkpoint_frac, noise_frac:prof.noise_frac,
-                 iteration_period_s:m2Prof.iter, checkpoint_every_s:m2Prof.ckptEvery, checkpoint_dur_s:m2Prof.ckptDur, sync_fraction:m2Prof.sync};
+  const tOpts = trainOpts(prof, mp);
   const trace = wl==='infer' ? inferenceTrace(design.critical_it_mw,{duration_s:1800})
               : wl==='mix'   ? mixedTrace(design.critical_it_mw,{...tOpts,training_share:m2TrainShare})
               :                trainingTrace(design.critical_it_mw,tOpts);
   const sim = simulate(design,trace,30);
   const rep = runChecks(sim,site);
-  const result = {design,site,trace,sim,rep,prof};
+  const result = {design,site,trace,sim,rep,prof,mp};
   if (valCacheMap.size>80) valCacheMap.clear();
   valCacheMap.set(key,result);
+  return result;
+}
+
+// ─── PER-MODEL POWER DIFFERENTIATION ─────────────────────────────────────
+// The industry default simulates a data center at a flat utilization percentage.
+// This runs the SAME site + chip against each catalog model and shows that the
+// power draw — forcing frequency, checkpoint signature, ramp, verdict — is a
+// property of the MODEL, not just the MW number.
+const mcCache = new Map();
+function modelCompareData(itMW, d, chip) {
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,chip,m2Prof.ckptEvery,m2Prof.sync].join('|');
+  if (mcCache.has(key)) return mcCache.get(key);
+  const prof = chipPowerProfile(chip);
+  const {design,site} = buildValidationModel(itMW,d);
+  design.mech_cooling_ratio = prof.coolRatio;
+  const rows = Object.keys(TRAIN_MODELS).map(k=>{
+    const p = modelTraceParams(k, trainClusterOf(itMW, chip, k));
+    const tr = trainingTrace(design.critical_it_mw, trainOpts(prof, p));
+    const sim = simulate(design, tr, 30);
+    const rep = runChecks(sim, site);
+    return { k, m:TRAIN_MODELS[k], p, sim, rep };
+  });
+  if (mcCache.size>40) mcCache.clear();
+  mcCache.set(key, rows);
+  return rows;
+}
+
+// ─── ADJACENT RACKS — concurrent jobs sharing one site ───────────────────
+// Three tenants on the same electrical chain: the selected model, a contrasting
+// architecture started ~10 min earlier (checkpoints de-correlated), and an
+// inference block. Per-rack-group power differs at every timestep — the thing
+// a flat-percentage simulation structurally cannot show.
+const rackCache = new Map();
+function rackFleetData(itMW, d, chip) {
+  const selKey = TRAIN_MODELS[m2TrainModel] ? m2TrainModel : 'LLAMA3_405B';
+  const altKey = TRAIN_MODELS[selKey].moe ? 'LLAMA3_405B' : 'DEEPSEEK_V3';
+  const key = [itMW.toFixed(2),d.confirmed_mw,d.service_type,chip,selKey,m2Prof.ckptEvery,m2Prof.sync].join('|');
+  if (rackCache.has(key)) return rackCache.get(key);
+  const prof = chipPowerProfile(chip);
+  const {design,site} = buildValidationModel(itMW,d);
+  design.mech_cooling_ratio = prof.coolRatio;
+  const mk = k => { const o = trainOpts(prof, modelTraceParams(k, trainClusterOf(itMW, chip, k))); delete o.job_end_at_s; return o; };
+  const fleet = fleetTrace(design.critical_it_mw, [
+    { name:TRAIN_MODELS[selKey].n, key:selKey, kind:'train', share:0.5, opts:mk(selKey) },
+    { name:TRAIN_MODELS[altKey].n, key:altKey, kind:'train', share:0.3, opts:mk(altKey), phase_s:600, seed:21 },
+    { name:'Inference tenant', kind:'infer', share:0.2 },
+  ]);
+  const sim = simulate(design, fleet, 30);
+  const rep = runChecks(sim, site);
+  const result = { fleet, sim, rep, selKey, altKey, design, site };
+  if (rackCache.size>20) rackCache.clear();
+  rackCache.set(key, result);
   return result;
 }
 
@@ -971,6 +1065,108 @@ function buildTraceSVG(val) {
   return s;
 }
 
+// compact meter-power sparkline for the per-model comparison rows
+function buildSparkSVG(sim, yMax, W=320, H=46) {
+  const p = sim.pMeter, n = p.length, buckets = 160, per = Math.max(1, Math.floor(n/buckets));
+  const pts = [];
+  for (let i=0;i<n;i+=per){ let mn=1e30,mx=-1e30; for(let j=i;j<Math.min(i+per,n);j++){const v=p[j];if(v<mn)mn=v;if(v>mx)mx=v;} pts.push({x:i/n,mn,mx}); }
+  const sx = f=>2+f*(W-4), sy = v=>2+(1-v/yMax)*(H-4);
+  let up='',dn='';
+  pts.forEach((q,i)=>{up+=`${i?'L':'M'}${sx(q.x).toFixed(1)},${sy(q.mx).toFixed(1)} `;});
+  for(let i=pts.length-1;i>=0;i--) dn+=`L${sx(pts[i].x).toFixed(1)},${sy(pts[i].mn).toFixed(1)} `;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block"><path d="${up+dn}Z" fill="rgba(175,0,0,.38)" stroke="rgba(175,0,0,.55)" stroke-width=".6"/></svg>`;
+}
+
+// per-model comparison strip — same site, same chip, five models, five different grids
+function buildModelCompareHTML(itMW, d, chip) {
+  const rows = modelCompareData(itMW, d, chip);
+  const yMax = Math.max(...rows.map(r=>amax(r.sim.pMeter)))*1.05;
+  const body = rows.map(r=>{
+    const sel = r.k===m2TrainModel;
+    const vc = r.rep.verdict==='PASS'?'ok':r.rep.verdict==='WARN'?'warn':'risk';
+    const hz = 1/r.p.iteration_period_s;
+    return `<tr${sel?' style="background:rgba(175,0,0,.045)"':''}>
+      <td style="white-space:nowrap"><span style="font-weight:600;color:var(--ink)">${r.m.n}</span><br><span style="font-size:10.5px;color:var(--muted)">${r.m.tag}</span></td>
+      <td>${buildSparkSVG(r.sim, yMax)}</td>
+      <td class="mono" style="font-size:11px">${r.p.iteration_period_s.toFixed(1)} s · ${hz>=1?hz.toFixed(1):hz.toFixed(2)} Hz</td>
+      <td class="mono" style="font-size:11px">${r.p.checkpoint_dur_s} s / ${(r.p.derived.ckptGB/1000).toFixed(1)} TB</td>
+      <td class="mono" style="font-size:11px">${amax(r.sim.pMeter).toFixed(1)} MW</td>
+      <td class="mono" style="font-size:11px">${r.rep.rampRaw.toFixed(1)} → ${r.rep.rampSm.toFixed(2)}</td>
+      <td class="mono" style="font-size:11px">${r.rep.oscRaw.p2p.toFixed(1)} MW @ ${r.rep.oscRaw.domFreq.toFixed(2)} Hz</td>
+      <td><span style="color:var(--${vc}-text);font-weight:600">${r.rep.verdict}</span> <span style="font-size:10.5px;color:var(--muted)">${r.rep.counts.FAIL}✗ ${r.rep.counts.WARN}!</span></td>
+      <td>${sel?'<span class="badge verified" style="font-size:9.5px">SELECTED</span>':`<button class="btn-ghost" style="padding:3px 9px;font-size:10.5px" onclick="setTrainModel('${r.k}')">use</button>`}</td>
+    </tr>`;}).join('');
+  return `<div class="chart-panel" style="margin-top:14px">
+    <div class="chart-title">Per-model power draw — same site, same chip, different model <span class="badge unverified" style="margin-left:8px;font-size:9.5px">ESTIMATED · public-spec-derived</span></div>
+    <div class="chart-caption">The industry default simulates a fixed utilization percentage — one number for every workload. Running the actual architecture through the same ${itMW.toFixed(0)} MW ${CHIPS[chip].n} fleet: dense models push long high-power phases and slow heavy checkpoints; sparse MoE swings faster (all-to-all expert dispatch) with softer peaks. Forcing frequency, checkpoint signature, ramp and the sign-off verdict are properties of the <strong>model</strong>, not the MW number.</div>
+    <div style="overflow-x:auto"><table class="data"><thead><tr><th>Model</th><th style="min-width:320px">Meter power · 30 min</th><th>Step · forcing</th><th>Checkpoint</th><th>Peak</th><th>Ramp MW/s raw→BESS</th><th>Oscillation 0.05–1 Hz</th><th>Verdict</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+  </div>`;
+}
+
+// adjacent-racks heatmap — who draws what, when, on the shared chain
+function buildRackPanelHTML(itMW, d, chip) {
+  const {fleet, sim, rep, selKey, altKey} = rackFleetData(itMW, d, chip);
+  const NR = 18, W = 1180, pL = 190, pR = 16, rowH = 13, gap = 1, pT = 6, pB = 30;
+  const H = pT + NR*(rowH+gap) + pB;
+  const buckets = 150;
+  // rack-group rows per job, proportional to share (remainder to the last job)
+  const counts = fleet.jobs.map(j=>Math.round(j.share*NR));
+  counts[counts.length-1] = NR - counts.slice(0,-1).reduce((a,b)=>a+b,0);
+  const tMax = fleet.t[fleet.t.length-1];
+  let cells = '', labels = '', row = 0;
+  const rackCapMw = itMW/NR; // rack-group capacity at full IT draw — the color scale's 100%
+  fleet.jobs.forEach((j,ji)=>{
+    const n = j.trace.p.length, per = Math.max(1, Math.floor(n/buckets));
+    const y0 = pT + row*(rowH+gap);
+    labels += `<text x="${pL-8}" y="${y0 + counts[ji]*(rowH+gap)/2 + 4}" text-anchor="end" font-family="IBM Plex Mono" font-size="10.5" fill="#3c434b">${j.name}</text>`;
+    labels += `<text x="${pL-8}" y="${y0 + counts[ji]*(rowH+gap)/2 + 16}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="#8a929b">${counts[ji]} rack groups · ${(j.share*100).toFixed(0)}%</text>`;
+    // per-bucket MEAN — an honest cell value that keeps checkpoint dips visible
+    const bucketU = [];
+    for (let b=0; b<buckets; b++) {
+      const i0 = Math.floor(b*n/buckets); let s=0, cnt=0;
+      for (let i=i0; i<Math.min(i0+per, n); i++) { s += j.trace.p[i]; cnt++; }
+      bucketU.push(Math.min(1, ((s/Math.max(1,cnt))/counts[ji]) / rackCapMw));
+    }
+    for (let r=0; r<counts[ji]; r++) {
+      const y = pT + row*(rowH+gap);
+      for (let b=0; b<buckets; b++) {
+        const u = bucketU[b];
+        const x = pL + b*(W-pL-pR)/buckets;
+        cells += `<rect x="${x.toFixed(1)}" y="${y}" width="${((W-pL-pR)/buckets+0.3).toFixed(1)}" height="${rowH}" fill="rgba(175,0,0,${(Math.pow(u,1.6)*0.92+0.03).toFixed(3)})"/>`;
+      }
+      row++;
+    }
+    if (ji<fleet.jobs.length-1) cells += `<line x1="${pL}" y1="${pT+row*(rowH+gap)-0.5}" x2="${W-pR}" y2="${pT+row*(rowH+gap)-0.5}" stroke="#fff" stroke-width="2"/>`;
+  });
+  let axis = '';
+  [0,5,10,15,20,25,30].forEach(m=>{ if (m*60<=tMax) axis += `<text x="${(pL+(m*60/tMax)*(W-pL-pR)).toFixed(0)}" y="${H-pB+16}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">${m}</text>`; });
+  axis += `<text x="${(pL+W-pR)/2}" y="${H-2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#5b646e">time (minutes)</text>`;
+  const svg = `<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">${cells}${labels}${axis}</svg>`;
+  // worst instantaneous power differential between rack groups of neighboring jobs
+  const perRack = fleet.jobs.map((j,ji)=>({p:j.trace.p, nr:counts[ji]}));
+  let worstDiff = 0;
+  const nMin = Math.min(...perRack.map(x=>x.p.length));
+  for (let ji=0; ji<perRack.length-1; ji++)
+    for (let i=0; i<nMin; i+=10) {
+      const a = perRack[ji].p[i]/perRack[ji].nr, b = perRack[ji+1].p[i]/perRack[ji+1].nr;
+      const df = Math.abs(a-b); if (df>worstDiff) worstDiff = df;
+    }
+  const sumPeaks = fleet.jobs.reduce((s,j)=>s+amax(j.trace.p),0);
+  const aggPeak = amax(fleet.p);
+  const vc = rep.verdict==='PASS'?'ok':rep.verdict==='WARN'?'warn':'risk';
+  return `<div class="chart-panel" style="margin-top:14px">
+    <div class="chart-title">Adjacent racks — three tenants on one electrical chain <span class="badge unverified" style="margin-left:8px;font-size:9.5px">ESTIMATED · public-spec-derived</span></div>
+    <div class="chart-caption">${TRAIN_MODELS[selKey].n} (50%), ${TRAIN_MODELS[altKey].n} started 10 minutes earlier (30%, checkpoints de-correlated), and an inference tenant (20%) — sharing this site's ${itMW.toFixed(0)} MW. Each row is a rack group; color is its instantaneous draw. Neighboring rows on different jobs pull different power at every timestep — per-model checkpoint bands, iteration flicker and the inference tenant's smooth wave are visibly different regimes. A flat-utilization simulation renders this entire picture as one constant color.</div>
+    ${svg}
+    <div class="pgrid" style="grid-template-columns:repeat(4,1fr);margin-top:10px">
+      <div class="pgrid-cell"><div class="pgrid-val">${(worstDiff*1000).toFixed(0)} kW</div><div class="pgrid-label">Worst instantaneous differential between adjacent rack groups on different jobs</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${aggPeak.toFixed(1)} MW</div><div class="pgrid-label">Fleet peak at meter — what the shared chain actually sees</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val">${(sumPeaks-aggPeak).toFixed(1)} MW</div><div class="pgrid-label">Diversity credit vs sum of per-job peaks (${sumPeaks.toFixed(1)} MW)</div></div>
+      <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${vc}-text)">${rep.verdict}</div><div class="pgrid-label">Full sign-off bench on the aggregate — ${rep.counts.FAIL}✗ ${rep.counts.WARN}! ${rep.counts.PASS}✓</div></div>
+    </div>
+  </div>`;
+}
+
 function renderValidation(x) {
   const {d,val,itMW} = x;
   const {rep,design,site} = val;
@@ -1009,16 +1205,25 @@ function renderValidation(x) {
     <div class="ws-head"><span class="ws-idx">03</span><span class="ws-title">WORKLOAD POWER</span><span class="ws-sub">stress-testing the design against the workload's power draw — before it's built</span>
       <span class="badge ${rep.verdict==='PASS'?'verified':'unverified'}">${rep.verdict} · ${rep.counts.PASS}✓ ${rep.counts.WARN}! ${rep.counts.FAIL}✗</span></div>
     <div class="callout info" style="margin-top:0;margin-bottom:14px"><strong>How to read this.</strong> The curve is the <strong>demand</strong>: what a ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT actually pulls, shaped by the ${c.n} power profile${val.prof.smooth?` (on-board smoothing damps ${(val.prof.smooth*100).toFixed(0)}% of the training-step swing)`:` (no on-board smoothing — the synchronized swing hits the facility raw)`} and ${c.cool} cooling. The chain it is tested against is the <strong>supply</strong>: the Helio 2N reference block scaled to this site — a template, since no site-specific one-line exists pre-engineering. The verdict class is set by the demand shape (chip smoothing, synchronization); supply sizing sets the margins and is asymmetric — oversizing the chain barely helps, undersizing it is catastrophic. The decisive knobs (chip, contract, BESS, gensets) are exposed here and in the full bench. A FAIL means <em>our reference design, sized this way, would not survive this workload</em>. Compute performance (MFU, tokens/sec) is the separate model in Compute Design; both run off the same workload inputs in the left rail.</div>
-    ${m2Wl!=='infer'?`<div class="assume-row" style="margin-bottom:14px">
-      <span class="eyebrow" style="align-self:center;margin-right:6px">Workload profile · from your off-taker</span>
-      <div class="assume"><label>Iteration period</label><div class="in"><input type="number" id="prof-iter" value="${m2Prof.iter}" min="0.5" max="60" step="0.5" oninput="setProf('iter',this.value)"> s</div></div>
+    ${m2Wl!=='infer'?(()=>{
+      const mp = val.mp, mSel = TRAIN_MODELS[m2TrainModel];
+      const iterShown = mp ? +mp.iteration_period_s.toFixed(2) : m2Prof.iter;
+      const ckptShown = mp ? mp.checkpoint_dur_s : m2Prof.ckptDur;
+      return `<div class="assume-row" style="margin-bottom:${mp?'8':'14'}px">
+      <span class="eyebrow" style="align-self:center;margin-right:6px">Workload profile</span>
+      <div class="assume"><label>Training model</label><div class="in"><select id="prof-model" onchange="setTrainModel(this.value)" style="border:none;background:none;font-size:12px;outline:none;max-width:190px">
+        ${Object.entries(TRAIN_MODELS).map(([k,m])=>`<option value="${k}"${m2TrainModel===k?' selected':''}>${m.n} · ${m.tag}</option>`).join('')}
+        <option value="CUSTOM"${m2TrainModel==='CUSTOM'?' selected':''}>Custom timing (off-taker data)</option>
+      </select></div></div>
+      <div class="assume"><label>Iteration period${mp?' · derived':''}</label><div class="in"><input type="number" id="prof-iter" value="${iterShown}" min="0.5" max="60" step="0.5" oninput="setProf('iter',this.value)"> s</div></div>
       <div class="assume"><label>Checkpoint every</label><div class="in"><input type="number" id="prof-ce" value="${m2Prof.ckptEvery}" min="60" step="60" oninput="setProf('ckptEvery',this.value)"> s</div></div>
-      <div class="assume"><label>Checkpoint length</label><div class="in"><input type="number" id="prof-cd" value="${m2Prof.ckptDur}" min="1" step="5" oninput="setProf('ckptDur',this.value)"> s</div></div>
+      <div class="assume"><label>Checkpoint length${mp?' · derived':''}</label><div class="in"><input type="number" id="prof-cd" value="${ckptShown}" min="1" step="5" oninput="setProf('ckptDur',this.value)"> s</div></div>
       <div class="assume"><label>Synchronized fleet</label><div class="in"><input type="number" id="prof-sync" value="${m2Prof.sync}" min="0" max="1" step="0.1" oninput="setProf('sync',this.value)"> ×</div></div>
-      <span style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;max-width:260px;text-align:right">Timing is the customer's data — framework, checkpoint policy, job schedule. Defaults are a conservative fully-synchronized archetype. Measured telemetry imports as CSV in the full bench.</span>
-    </div>`:''}
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;max-width:260px;text-align:right">${mp?'Editing a derived value switches to custom timing.':"Timing is the customer's data — framework, checkpoint policy, job schedule. Measured telemetry imports as CSV in the full bench."}</span>
+    </div>
+    ${mp?`<div style="font-size:11px;color:var(--muted);font-family:var(--m);margin:0 2px 14px">DERIVED · ${mSel.n}: ${fc(mp.derived.batchTokens/1e6)}M tokens/step on ${fc(trainClusterOf(itMW,m2SelChip,m2TrainModel).gpus)} GPUs → ${mp.iteration_period_s.toFixed(1)} s step · checkpoint ${(mp.derived.ckptGB/1000).toFixed(1)} TB → ${mp.checkpoint_dur_s} s · ${mSel.moe?'MoE — all-to-all exposed, 60% compute duty, softer peak':'dense — collectives overlapped, 75% compute duty, full peak'} <span class="badge unverified" style="font-size:9px;margin-left:6px">ESTIMATED</span></div>`:''}`;})():''}
     <div class="chart-panel" style="margin-bottom:14px">
-      <div class="chart-title">Simulated meter power — ${wlLabel(m2Wl).toLowerCase()} fleet at ${itMW.toFixed(1)} MW IT · ${c.n} profile${val.prof.smooth?' · smoothing credited':''} · 30 min</div>
+      <div class="chart-title">Simulated meter power — ${TRAIN_MODELS[m2TrainModel]&&m2Wl==='train'?TRAIN_MODELS[m2TrainModel].n+' training':wlLabel(m2Wl).toLowerCase()+' fleet'} at ${itMW.toFixed(1)} MW IT · ${c.n} profile${val.prof.smooth?' · smoothing credited':''} · 30 min</div>
       <div class="chart-caption">Training steps oscillate every iteration, checkpoints drop the fleet for ~20 s, and the job-end cliff is the worst grid step. The BESS absorbs the fast component; what remains must stay inside the contracted envelope and the utility's ramp limit.</div>
       <div class="chart-legend" style="padding:2px 2px 10px">
         <span class="chart-legend-item" style="cursor:default"><span class="legend-swatch" style="background:rgba(6,10,14,.16);border:1px solid rgba(6,10,14,.25)"></span>Raw meter power (before BESS)</span>
@@ -1036,6 +1241,8 @@ function renderValidation(x) {
       <div class="pgrid-cell"><div class="pgrid-val" style="color:var(--${vClass}-text)">${rep.verdict}</div><div class="pgrid-label">${rep.counts.FAIL} fail · ${rep.counts.WARN} warn · ${rep.counts.PASS} pass</div></div>
     </div>
     <div class="callout ${vClass==='ok'?'info':vClass}">${vText} Electrical chain modeled as the Helio 2N reference block scaled to ${itMW.toFixed(1)} MW IT; ramp/oscillation limits are assumptions pending ${d.utility}'s large-load study.</div>
+    ${m2Wl==='train'?buildModelCompareHTML(itMW,d,m2SelChip):''}
+    ${m2Wl==='train'?buildRackPanelHTML(itMW,d,m2SelChip):''}
     ${findings.length?`<div style="margin-top:14px"><span class="eyebrow" style="display:block;margin-bottom:8px">Findings — ${findings.length} of ${rep.checks.length} checks need attention</span>
       <div style="overflow-x:auto"><table class="data"><thead><tr><th style="width:70px">Status</th><th>Check</th><th>Simulated</th><th>Limit</th></tr></thead><tbody>${rows}</tbody></table></div>
       <div style="font-size:11.5px;color:var(--muted);margin-top:8px">WARN — survivable, but the margin is thin or the BESS is doing load-bearing work. FAIL — a hard limit (rating, contract, ramp) is exceeded. The ${rep.counts.PASS} passing checks and every design knob are in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Design Review ↗</a>.</div></div>`
@@ -1063,9 +1270,20 @@ function renderValidation(x) {
           ? 'No timing produces a hard failure, but the worst case carries conditions — the design is one contract or BESS decision away from envelope-clean.'
           : 'The envelope contains workloads that break this design. Either constrain the off-taker contract to exclude the counterexample pattern (e.g. cap synchronized fraction), or resize the design until the whole envelope passes.'}</div>
       </div>`;})()}
+    <div class="chart-panel" style="margin-top:14px">
+      <div class="chart-title">Data provenance — what's modeled today, what partner data replaces</div>
+      <div class="pgrid" style="grid-template-columns:repeat(3,1fr);margin-top:10px">
+        <div class="pgrid-cell"><div class="pgrid-val" style="font-size:13px"><span class="badge unverified" style="font-size:9.5px">ESTIMATED</span> Today</div>
+          <div class="pgrid-label" style="margin-top:6px">Every trace on this page is synthesized from public data: model architecture (params, sparsity, checkpoint size), chip nameplate power and published fluctuation characteristics, and standard training-recipe assumptions. The framework is real; the calibration is not yet.</div></div>
+        <div class="pgrid-cell"><div class="pgrid-val" style="font-size:13px">The ask · measured telemetry</div>
+          <div class="pgrid-label" style="margin-top:6px">Rack-level power telemetry from operators and vendors — per-workload traces, checkpoint signatures, on-board smoothing behavior, transient response of the cooling plant. Each measured curve replaces its estimated counterpart 1:1; the bench, checks and envelope sweep run unchanged.</div></div>
+        <div class="pgrid-cell"><div class="pgrid-val" style="font-size:13px"><span class="badge verified" style="font-size:9.5px">VERIFIED</span> What that unlocks</div>
+          <div class="pgrid-label" style="margin-top:6px">Analyses carry a "verified — partner data" label at the point of evaluation. The envelope check becomes a sign-off against measured workload envelopes, and the spec sheet a site hands an off-taker or financier is backed by data, not estimates.</div></div>
+      </div>
+    </div>
     <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
       <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open Design Review — prefilled with this design ↗</a>
-      <span style="font-size:11px;color:var(--muted);font-family:var(--m);letter-spacing:.05em">ROADMAP · chip-measured power traces · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
+      <span style="font-size:11px;color:var(--muted);font-family:var(--m);letter-spacing:.05em">ROADMAP · measured per-model power traces (partner data) · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
     </div>`;
 }
 
