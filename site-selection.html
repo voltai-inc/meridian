@@ -112,7 +112,7 @@ nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(-
         <button data-f="Pipeline" onclick="setFilter('Pipeline')">Pipeline</button>
         <button data-f="Prospecting" onclick="setFilter('Prospecting')">Prospecting</button>
       </div>
-      <div class="src-note">Synced from the <a href="https://docs.google.com/spreadsheets/d/1tqWTBHRI-uMr99Z1UsvjehRkiJ3rdhrv_WokfQSFIT8/edit?gid=1481162912" target="_blank" rel="noopener">site tracker sheet</a> · July 9, 2026. Dashed pins are approximate locations. Click a site to evaluate it in Meridian.</div>
+      <div class="src-note">Synced from the <a href="https://docs.google.com/spreadsheets/d/1tqWTBHRI-uMr99Z1UsvjehRkiJ3rdhrv_WokfQSFIT8/edit?gid=1481162912" target="_blank" rel="noopener">site tracker sheet</a> (July 9) + field updates through July 21, 2026. Dashed pins are approximate locations. Click a site to evaluate it in Meridian.</div>
     </div>
     <div class="site-list" id="site-list"></div>
   </div>
@@ -127,7 +127,9 @@ nav.top{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ─── DATA — synced from the site tracker sheet (gid 1481162912), July 9 2026 ─
+// ─── DATA — synced from the site tracker sheet (gid 1481162912) July 9 2026,
+// plus field updates through Jul 21 (Milpitas, Crossett, Warren, Boaz; MS/Donaldsonville status) —
+// sheet may lag this snapshot; reconcile on next sheet sync.
 // mwNum = conservative lower bound used to prefill Meridian; null = unknown.
 // approx = pin placed at town/parish level, exact parcel TBD.
 const SITES = [
@@ -150,7 +152,15 @@ const SITES = [
  {id:'encova', name:'Encova / New Albany', addr:'6650 New Albany Rd E, New Albany OH', stage:'Pipeline', state:'Ohio',
   mw:'TBD', mwNum:null, size:'Existing DC + expansion land', type:'Existing data center', price:'>$15M',
   contact:'KBC Advisors', utility:'AEP', climate:'temperate', lat:40.1034, lng:-82.8042, approx:false,
-  notes:'Tenant exiting early 2027 (cloud migration); existing utility relationship; power specs pending.'},
+  notes:'Tenant exiting early 2027 (cloud migration). Jul 14: KBC coordinating power expansion with AEP — building-expansion sketch requested to show where added power lands. Full power specs still pending.'},
+ {id:'milpitas', name:'851 Buckeye Ct', addr:'851 Buckeye Ct, Milpitas CA', stage:'Pipeline', state:'California',
+  mw:'18 MW (10 MW now)', mwNum:10, size:'TBD', type:'Existing facility', price:'~$18M',
+  contact:'Cushman & Wakefield (Cole Riedel)', utility:'PG&E', climate:'temperate', lat:37.4106, lng:-121.8898, approx:true,
+  notes:'Data room received Jul 13 — under review. 10 MW available now, path to 18 MW to confirm. ~$1M+/MW — above the sub-$800K/MW screen; Silicon Valley market/fiber is the offset.'},
+ {id:'crossett', name:'Crossett Tree Farm', addr:'Crossett AR (parcel TBD)', stage:'Pipeline', state:'Arkansas',
+  mw:'15 MW (confirming)', mwNum:15, size:'Up to 200 ac (subdividable)', type:'Powered land', price:'TBD',
+  contact:'City of Crossett (Mike) / Atria', utility:'Entergy', climate:'hot_humid', lat:33.1282, lng:-91.9613, approx:true,
+  notes:'Single owner, will sell only acreage needed. City confident 15 MW available; possible extra capacity freed by Georgia-Pacific closures. Entergy questionnaires (transmission + DC) received Jul 20 — being completed. Job-creation tax credits + sales/use tax rebates.'},
  {id:'southgate', name:'Southgate Spec Build', addr:'Heath OH', stage:'Pipeline', state:'Ohio',
   mw:'20+ MW', mwNum:20, size:'110–152K sqft', type:'New spec build', price:'TBD',
   contact:"Southgate Corp / Atria (Robert O'Neill)", utility:'AEP', climate:'temperate', lat:40.0228, lng:-82.4446, approx:true,
@@ -162,15 +172,23 @@ const SITES = [
  {id:'denim', name:'501 Denim Way', addr:'501 Denim Way, Madison County MS', stage:'Prospecting', state:'Mississippi',
   mw:'10–50 MW+', mwNum:10, size:'TBD', type:'TBD', price:'TBD',
   contact:'Madison County EDA (Emily Harrison)', utility:'Entergy', climate:'hot_humid', lat:32.5151, lng:-90.0979, approx:false,
-  notes:'Entergy capacity study starting. Needs dedicated substation at this scale.'},
- {id:'foti', name:'Foti Highway 18', addr:'Highway 18 — Louisiana', stage:'Prospecting', state:'Louisiana',
+  notes:'Effectively dead — Entergy cannot serve the 10 MW ask; MS interruptible-service mandate makes the state broadly unattractive.'},
+ {id:'foti', name:'Foti Highway 18 (Donaldsonville)', addr:'Highway 18, Donaldsonville LA', stage:'Prospecting', state:'Louisiana',
   mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
-  contact:'LED / MMCRE (Ransom Pipes)', utility:'Entergy', climate:'hot_humid', lat:30.03, lng:-90.82, approx:true,
-  notes:'Entergy contact pending. Via Louisiana LED (Daniel Michel).'},
+  contact:'LED / MMCRE (Ransom Pipes) / DDG (Brandon Acosta)', utility:'Entergy', climate:'hot_humid', lat:30.10, lng:-90.99, approx:true,
+  notes:'Deprioritized — Entergy flags adjacent substation as likely dedicated to an existing customer. MMCRE/DDG coordinating an Entergy call (Melanie & Tundra) to confirm; intake form already on file from prior BR site.'},
+ {id:'warren', name:'Warren Industrial Building', addr:'Warren AR', stage:'Prospecting', state:'Arkansas',
+  mw:'TBD', mwNum:null, size:'~300K sqft · ~20 ac', type:'Acquisition', price:'TBD',
+  contact:'City of Warren (Mayor Gregg Reep) / Atria', utility:'Municipal or Entergy (TBD)', climate:'hot_humid', lat:33.6126, lng:-92.0645, approx:true,
+  notes:'Mayor engaged; expedited permitting offered. Claimed 116 kV line upgrade unconfirmed — utility intro in progress. Also tracking off-market former poultry plant and 688 Highway 4 Bypass in same city.'},
+ {id:'boaz', name:'Boaz Plant (Tenneco leasehold)', addr:'Boaz AL', stage:'Prospecting', state:'Alabama',
+  mw:'TBD', mwNum:null, size:'TBD', type:'Leasehold → fee (structure TBD)', price:'TBD',
+  contact:'Cresa (Mitch Wolff) / Atria', utility:'TBD', climate:'hot_humid', lat:34.2001, lng:-86.1664, approx:true,
+  notes:'Flyer received Jul 16. Tenneco leasehold through June 2043 — asked whether Tenneco would fund lease termination for fee ownership. Requested 24-mo electrical interval data + serving distributor.'},
  {id:'ronaldson', name:'12555 Ronaldson Rd', addr:'12555 Ronaldson Rd, Baton Rouge LA', stage:'Prospecting', state:'Louisiana',
   mw:'8–10 MW+', mwNum:8, size:'TBD', type:'Acquisition', price:'TBD',
   contact:'Greater Baton Rouge EDA (Jayson Newell)', utility:'Entergy', climate:'hot_humid', lat:30.5605, lng:-91.1764, approx:false,
-  notes:'Former Stupp steel operation. Entergy intro pending via Greater BR EDA.'},
+  notes:'Former Stupp steel operation; 138 kV substation on site. Intake form going in at 15 MW; call with Melanie (Entergy) on the 10 MW minimum before committing the $50K study.'},
  {id:'pepsi', name:'Former Pepsi Plant', addr:'383 West 10th St, Reserve LA', stage:'Prospecting', state:'Louisiana',
   mw:'TBD', mwNum:null, size:'TBD', type:'Acquisition', price:'TBD',
   contact:'portSL (Micah Cormier)', utility:'Entergy', climate:'hot_humid', lat:30.0688, lng:-90.556, approx:true,
@@ -183,10 +201,10 @@ const SITES = [
   mw:'TBD', mwNum:null, size:'TBD', type:'Acquisition', price:'TBD',
   contact:'Alliance SWLA (Gus Fontenot) → Greater Beauregard (Lisa Adams)', utility:'', climate:'hot_humid', lat:30.8723, lng:-93.2817, approx:false,
   notes:'Referred to Lisa Adams. No response yet.'},
- {id:'hwy51', name:'19120 Hwy 51', addr:'19120 Hwy 51 — Louisiana', stage:'Prospecting', state:'Louisiana',
-  mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
-  contact:'Carpenter Properties (Rob Carpenter)', utility:'Entergy', climate:'hot_humid', lat:30.32, lng:-90.44, approx:true,
-  notes:'Called today. Awaiting power details from Rob.'},
+ {id:'hwy51', name:'19120 Hwy 51', addr:'19120 Hwy 51, Hazlehurst MS', stage:'Prospecting', state:'Mississippi',
+  mw:'~10 MW (Entergy)', mwNum:10, size:'TBD', type:'Acquisition', price:'TBD',
+  contact:'Carpenter Properties (Rob Carpenter)', utility:'Entergy', climate:'hot_humid', lat:31.8632, lng:-90.3959, approx:true,
+  notes:'Jul 9: Entergy says it could supply 10 MW (timing unknown); existing service only 400A @ 480V. Caution: Entergy MS interruptible-service mandate for DCs.'},
  {id:'martco', name:'Martco Mill', addr:'Louisiana', stage:'Prospecting', state:'Louisiana',
   mw:'TBD', mwNum:null, size:'TBD', type:'TBD', price:'TBD',
   contact:'OneAcadiana (Megan)', utility:'', climate:'hot_humid', lat:31.42, lng:-92.79, approx:true,

@@ -2,7 +2,7 @@
 
 **This repo is the source of truth for Voltai's data-center project (Meridian).** A new working session — human or AI — should be able to orient from this file alone: what the project is, where everything lives, what's currently in motion, and what to do next.
 
-_Last updated: 2026-07-19._
+_Last updated: 2026-07-21._
 
 ## What this project is
 
@@ -32,7 +32,9 @@ The two feed each other: the software makes our sites credible to tenants and fi
 | `UPDATE_*.md`, `STRUCTURAL_CHANGE_*.md` | Dated changelogs |
 | `VERTIV_ASK.md` | Vertiv collaboration ask (per-chip cooling/power data) |
 
-## Current state (as of 2026-07-19)
+## Current state (as of 2026-07-21)
+
+- **Jul 21 — site tracker updated** (`site-selection.html`, now ahead of the source sheet — reconcile on next sheet sync): added 851 Buckeye Ct Milpitas CA (18 MW total / 10 MW now, ~$18M, C&W data room received Jul 13, above the sub-$800K/MW screen), Crossett AR (200-ac tree farm, 15 MW Entergy confirmation in progress — questionnaires received Jul 20), Warren AR (mayor engaged, 116 kV claim unconfirmed), Boaz AL (Cresa; Tenneco leasehold to 2043, early). Status fixes: 19120 Hwy 51 is Hazlehurst **MS** (Entergy ~10 MW possible), 501 Denim Way effectively dead, Foti/Donaldsonville deprioritized (substation likely customer-dedicated), Encova — KBC coordinating AEP expansion (sketch requested Jul 14). Partner-facing pipeline doc v2 drafted in Google Drive same day.
 
 - **Branch:** `workload-sim-v2` (Serving Plan module, training/inference mode fork, Helio 0.6) is **merged into `main`** as of Jul 19. Work from `main`.
 - **Live deploy:** voltai.world (Vercel, deploys from this repo).
