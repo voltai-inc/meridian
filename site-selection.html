@@ -208,9 +208,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
 }).addTo(map);
 
 function meridianLink(s){
-  if (!s.mwNum) return 'site-intelligence.html';
-  const p = new URLSearchParams({mode:'2', demo:'0', mw:s.mwNum, loc:s.addr, utility:s.utility||'Utility TBD', climate:s.climate});
-  return 'site-intelligence.html#'+p.toString();
+  // Deep-link into the Meridian decision platform with this site preselected.
+  return 'meridian.html?site='+encodeURIComponent(s.id);
 }
 function popHTML(s){
   return `<div class="pop">
