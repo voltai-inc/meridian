@@ -337,9 +337,9 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
   <a class="brand" href="index.html" style="text-decoration:none" title="Back to the Voltai toolkit"><img src="_ds/voltai-logo-red.png" alt="Voltai" style="height:14px;width:auto;align-self:center"><span class="prod">MERIDIAN</span></a>
   <div class="nav-spacer"></div>
   <div class="nav-r">
-    <a class="ref-link" href="power-signoff.html" target="_blank">Design Review ↗</a>
+    <a class="ref-link" href="power-signoff.html" target="_blank">Power Sign-off ↗</a>
     <a class="ref-link" href="helio.html" target="_blank">Helio Reference ↗</a>
-    <a class="ref-link" href="http://51.21.243.237:5173/" target="_blank">Digital Twin ↗</a>
+    <a class="ref-link" href="http://51.21.243.237:5173/">Digital Twin</a>
     <button class="btn-primary" id="nav-cta" onclick="openDeliverables('spec')">Deliverables</button>
   </div>
 </nav>
@@ -464,6 +464,7 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
       <button class="del-tab" id="del-tab-report" onclick="setDelTab('report')">Advisory Report</button>
     </div>
     <div class="del-actions">
+      <button class="del-act" onclick="openSaveProject()">Save to project</button>
       <button class="del-act" onclick="copyShareLink()">Copy link</button>
       <button class="del-act" onclick="printDeliverable()">Print / PDF</button>
     </div>
@@ -474,6 +475,39 @@ hr.div{border:none;border-top:1px solid var(--hairline);margin:22px 0}
 </div>
 
 <div id="toast"></div>
+
+<!-- ════════ SAVE TO PROJECT ════════ -->
+<div id="saveproj-ov" onclick="if(event.target===this)closeSaveProject()">
+  <div class="sp-card">
+    <div class="sp-title">Save requirements to a project</div>
+    <div class="sp-sub">Stores this deliverable's power, chip, workload &amp; site so Pipeline Analysis can load it later.</div>
+    <div class="sp-summary" id="sp-summary"></div>
+    <label class="sp-label">New project name</label>
+    <input id="sp-name" type="text" placeholder="e.g. Imperial Valley — 200 MW GB300" onkeydown="if(event.key==='Enter')doSaveProject()">
+    <button class="sp-btn" onclick="doSaveProject()">Create &amp; save</button>
+    <div id="sp-existing"></div>
+    <button class="sp-cancel" onclick="closeSaveProject()">Cancel</button>
+  </div>
+</div>
+<style>
+#saveproj-ov{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,10,10,.45);align-items:center;justify-content:center;padding:20px}
+#saveproj-ov.on{display:flex}
+.sp-card{background:var(--surface,#fff);border-radius:14px;max-width:440px;width:100%;padding:22px 22px 18px;box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.sp-title{font-size:16px;font-weight:600;color:var(--ink)}
+.sp-sub{font-size:12.5px;color:var(--muted);margin:4px 0 14px}
+.sp-summary{font-family:var(--m);font-size:11.5px;color:var(--body);background:var(--fill);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.7}
+.sp-label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+#sp-name{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-family:var(--f);font-size:13.5px;outline:none}
+#sp-name:focus{border-color:var(--volt,#AF0000)}
+.sp-btn{margin-top:11px;width:100%;border:none;background:var(--ink);color:#fff;border-radius:8px;padding:10px;font-size:13.5px;font-weight:500;cursor:pointer}
+.sp-btn:hover{opacity:.9}
+.sp-existing-h{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em;margin:16px 0 7px}
+.sp-existing-row{display:flex;align-items:center;gap:8px;font-size:12.5px;border:1px solid var(--border);border-radius:7px;padding:7px 10px;margin-bottom:6px;cursor:pointer;background:var(--fill)}
+.sp-existing-row:hover{border-color:var(--volt,#AF0000)}
+.sp-existing-row .nm{font-weight:600;color:var(--ink)}
+.sp-existing-row .up{margin-left:auto;color:var(--muted)}
+.sp-cancel{margin-top:12px;width:100%;background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline}
+</style>
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────
@@ -1245,8 +1279,8 @@ function renderValidation(x) {
     ${m2Wl==='train'?buildRackPanelHTML(itMW,d,m2SelChip):''}
     ${findings.length?`<div style="margin-top:14px"><span class="eyebrow" style="display:block;margin-bottom:8px">Findings — ${findings.length} of ${rep.checks.length} checks need attention</span>
       <div style="overflow-x:auto"><table class="data"><thead><tr><th style="width:70px">Status</th><th>Check</th><th>Simulated</th><th>Limit</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">WARN — survivable, but the margin is thin or the BESS is doing load-bearing work. FAIL — a hard limit (rating, contract, ramp) is exceeded. The ${rep.counts.PASS} passing checks and every design knob are in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Design Review ↗</a>.</div></div>`
-    :`<div class="callout info" style="margin-top:14px">All ${rep.checks.length} checks pass — every component inside its rating, every grid commitment held with margin. Full evidence in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Design Review ↗</a>.</div>`}
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">WARN — survivable, but the margin is thin or the BESS is doing load-bearing work. FAIL — a hard limit (rating, contract, ramp) is exceeded. The ${rep.counts.PASS} passing checks and every design knob are in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Power Sign-off ↗</a>.</div></div>`
+    :`<div class="callout info" style="margin-top:14px">All ${rep.checks.length} checks pass — every component inside its rating, every grid commitment held with margin. Full evidence in <a href="${validationLink(val,m2Wl)}" target="_blank" style="color:var(--volt)">Power Sign-off ↗</a>.</div>`}
     ${(()=>{ // formal envelope check: worst case over ALL admissible workload timings
       const env = envCache.get(envKeyOf(itMW,d,m2SelChip));
       if (!env) return `<div class="chart-panel" style="margin-top:14px">
@@ -1282,7 +1316,7 @@ function renderValidation(x) {
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
-      <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open Design Review — prefilled with this design ↗</a>
+      <a class="btn-ghost" style="text-decoration:none" href="${validationLink(val,m2Wl)}" target="_blank">Open Power Sign-off — prefilled with this design ↗</a>
       <span style="font-size:11px;color:var(--muted);font-family:var(--m);letter-spacing:.05em">ROADMAP · measured per-model power traces (partner data) · telemetry-calibrated MFU &amp; transients · network/topology simulation · SMT-backed envelope proofs</span>
     </div>`;
 }
@@ -1793,6 +1827,65 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('on');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2800);
+}
+
+// ─── PROJECTS (shared with Pipeline Analysis via localStorage) ────────────
+function loadProjects(){ try { return JSON.parse(localStorage.getItem('meridian_projects'))||[]; } catch(e){ return []; } }
+function saveProjects(list){ try { localStorage.setItem('meridian_projects', JSON.stringify(list)); } catch(e){} }
+// Capture the current deliverable as a portable requirements bundle.
+function currentDeliverable(){
+  const d = getM2Data();
+  return {
+    powerMW: Math.round(d.confirmed_mw),
+    chip: m2SelChip,
+    workload: m2Wl,
+    region: 'any',                       // Meridian locations are free-form; Pipeline filter stays open
+    climate: d.climate,
+    location: d.location,
+    utility: d.utility,
+    savedAt: new Date().toISOString(),
+    site: {
+      name: d.name || d.location || 'Meridian site',
+      state: d.location || 'Location TBD',
+      climate: d.climate,
+      utility: d.utility || '',
+      mw: Math.round(d.confirmed_mw) + ' MW',
+      mwNum: Math.round(d.confirmed_mw),
+    },
+  };
+}
+function openSaveProject(){
+  const del = currentDeliverable();
+  document.getElementById('sp-summary').innerHTML =
+    `${del.site.name}<br>${del.powerMW} MW · ${CHIPS[del.chip]?CHIPS[del.chip].n:del.chip} · ${({train:'Training',mix:'Mixed',infer:'Inference'})[del.workload]||del.workload}`;
+  const existing = loadProjects();
+  const ex = document.getElementById('sp-existing');
+  ex.innerHTML = existing.length
+    ? `<div class="sp-existing-h">Or update an existing project</div>` +
+      existing.map(p=>`<div class="sp-existing-row" onclick="doSaveProject('${p.id}')"><span class="nm">${p.name.replace(/</g,'&lt;')}</span><span class="up">update ↻</span></div>`).join('')
+    : '';
+  document.getElementById('sp-name').value = del.site.name + ' — ' + del.powerMW + ' MW ' + del.chip;
+  document.getElementById('saveproj-ov').classList.add('on');
+  setTimeout(()=>document.getElementById('sp-name').focus(),50);
+}
+function closeSaveProject(){ document.getElementById('saveproj-ov').classList.remove('on'); }
+function doSaveProject(existingId){
+  const del = currentDeliverable();
+  const list = loadProjects();
+  if (existingId){
+    const p = list.find(x=>x.id===existingId);
+    if (p){ p.deliverable = del; p.updatedAt = del.savedAt; }
+    saveProjects(list);
+    closeSaveProject();
+    showToast('Updated project “'+(p?p.name:'')+'” — loadable in Pipeline Analysis');
+    return;
+  }
+  const name = (document.getElementById('sp-name').value||'').trim();
+  if (!name){ document.getElementById('sp-name').focus(); return; }
+  list.push({ id: 'p'+Date.now().toString(36), name, createdAt: del.savedAt, deliverable: del });
+  saveProjects(list);
+  closeSaveProject();
+  showToast('Saved “'+name+'” — open Pipeline Analysis to load it');
 }
 
 // ─── DELIVERABLES ────────────────────────────────────────────────────────

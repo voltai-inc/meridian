@@ -54,9 +54,9 @@ const WIZARD = [
     opts: () => REGIONS.map(r => { const n = SITES.filter(s => s.state === r).length; return { v: r, t: r === "any" ? "Any region" : r, s: r === "any" ? "Compare the full pipeline" : `${n} site${n === 1 ? "" : "s"} tracked` }; }),
   },
   {
-    key: "powerMW", q: "How much power do you need?", sub: "Target capacity at the meter. Drives the compute design, CAPEX, and which sites can serve the load.",
-    type: "slider", min: 5, max: 100, step: 5, unit: "MW",
-    scale: ["5 MW", "50 MW", "100 MW"],
+    key: "powerMW", q: "How much power do you need?", sub: "Target capacity at the meter — enter any value. Drives the compute design, CAPEX, and which sites can serve the load.",
+    type: "number", min: 1, step: 5, unit: "MW",
+    presets: [25, 50, 100, 250, 500, 1000],
   },
   {
     key: "chip", q: "Which GPU platform?", sub: "The silicon shapes power behavior, performance, cost, and lead time. Shipping platforms first.",
@@ -79,11 +79,6 @@ const WIZARD = [
       { v: "moderate", t: "Moderate", s: "Balance cost and capability" },
       { v: "tight", t: "Tight", s: "Minimize CAPEX / $ per MW" },
     ],
-  },
-  {
-    key: "timelineMonths", q: "When do you need to be live?", sub: "Time to first training run. Aggressive timelines favor powered land and existing facilities.",
-    type: "slider", min: 12, max: 42, step: 3, unit: "mo",
-    scale: ["12 mo", "27 mo", "42 mo"],
   },
   {
     key: "sustainability", q: "How much does sustainability matter?", sub: "Raises the weight on cooling efficiency, renewable supply, and water availability.",
@@ -192,8 +187,21 @@ function forecastChart(fcData, site) {
 function loadReq() { try { const r = JSON.parse(localStorage.getItem("meridian_req")); return r; } catch (e) { return null; } }
 function saveReq() { try { localStorage.setItem("meridian_req", JSON.stringify(App.req)); } catch (e) {} }
 
+// ─── CUSTOM SITES ─────────────────────────────────────────────────────────────
+// User-added candidate sites, merged into the evaluation pool alongside SITES.
+function loadCustomSites() { try { return JSON.parse(localStorage.getItem("meridian_custom_sites")) || []; } catch (e) { return []; } }
+function saveCustomSites() { try { localStorage.setItem("meridian_custom_sites", JSON.stringify(App.customSites || [])); } catch (e) {} }
+// The full candidate pool the engine ranks against.
+function pool() { return SITES.concat(App.customSites || []); }
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+// Shared across pages: a project can carry a saved Meridian deliverable whose
+// requirements (power, chip, workload, region) can be loaded into the wizard.
+function loadProjects() { try { return JSON.parse(localStorage.getItem("meridian_projects")) || []; } catch (e) { return []; } }
+
 function boot() {
   App.req = Object.assign({}, DEFAULT_REQ, loadReq() || {});
+  App.customSites = loadCustomSites();
   // deep-link handling
   const qs = new URLSearchParams(location.search);
   const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
@@ -202,7 +210,7 @@ function boot() {
   const legacyClimate = hash.get("climate") || qs.get("climate");
   const legacyLoc = hash.get("loc") || qs.get("loc");
 
-  if (legacyMw) App.req.powerMW = Math.max(5, Math.min(100, Math.round(parseFloat(legacyMw) / 5) * 5));
+  if (legacyMw) App.req.powerMW = Math.max(1, Math.round(parseFloat(legacyMw)));
   if (deepSite) {
     App.selectedId = deepSite; App.req._done = true; renderResults();
     return;
@@ -215,6 +223,46 @@ function boot() {
   }
   if (App.req._done && loadReq()) { renderResults(); return; }
   renderWizard();
+}
+
+// ─── REGION-STEP EXTRAS: load-from-project + add-a-site ──────────────────────
+const CLIMATES = ["cold_dry", "temperate", "hot_dry", "hot_humid"];
+const SITE_REGIONS = REGIONS.filter(r => r !== "any");
+
+function regionExtras() {
+  const projects = loadProjects().filter(p => p.deliverable);
+  const projOpts = projects.length
+    ? `<select id="wz-proj">${projects.map(p => `<option value="${p.id}">${esc(p.name)} · ${p.deliverable.powerMW} MW · ${p.deliverable.chip}</option>`).join("")}</select>
+       <button class="wz-btn-sm" onclick="Wizard.loadProject()">Load requirements →</button>`
+    : `<div style="font-size:12px;color:var(--faint)">No saved deliverables yet. In <b>Meridian</b>, open <b>Deliverables</b> and choose <b>Save to project</b>.</div>`;
+
+  const custom = App.customSites || [];
+  const siteList = custom.length
+    ? `<div class="wz-sitelist">${custom.map(s => `<div class="wz-siterow"><span class="nm">${esc(s.name)}</span><span class="meta">${esc(s.state)} · ${s.mwNum} MW</span><button class="x" title="Remove" onclick="Wizard.removeSite('${s.id}')">✕</button></div>`).join("")}</div>`
+    : "";
+
+  return `<div class="wz-extras">
+    <div class="wz-extra">
+      <div class="wz-extra-h">Pull requirements from Meridian</div>
+      <div class="wz-extra-sub">Load a saved deliverable's power, chip, workload &amp; region into this analysis.</div>
+      ${projOpts}
+    </div>
+    <div class="wz-extra">
+      <div class="wz-extra-h">Add your own site</div>
+      <div class="wz-extra-sub">Drop a candidate straight into the pipeline — it's ranked alongside the tracked sites.</div>
+      ${siteList}
+      <button class="wz-btn-ghost" onclick="Wizard.toggleAddSite()">+ Add a site</button>
+      <div class="wz-addsite" id="wz-addsite" style="display:none">
+        <div class="wz-field"><label>Site name</label><input id="as-name" type="text" placeholder="e.g. Riverbend Campus"></div>
+        <div class="wz-field-row">
+          <div class="wz-field"><label>Region</label><select id="as-region">${SITE_REGIONS.map(r => `<option value="${r}">${r}</option>`).join("")}</select></div>
+          <div class="wz-field"><label>Power (MW)</label><input id="as-mw" type="number" min="1" step="5" placeholder="e.g. 100"></div>
+        </div>
+        <div class="wz-field"><label>Climate</label><select id="as-climate">${CLIMATES.map(c => `<option value="${c}">${CLIMATE_LABEL[c]}</option>`).join("")}</select></div>
+        <button class="wz-btn-sm" onclick="Wizard.addSite()">Add to pipeline</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ─── WIZARD RENDER ───────────────────────────────────────────────────────────
@@ -246,16 +294,26 @@ function renderWizard() {
       <input type="range" min="${step.min}" max="${step.max}" step="${step.step}" value="${val}" oninput="Wizard.slide('${step.key}',this.value,${step.pctScale ? 1 : 0})">
       <div class="wz-scale">${step.scale.map(s => `<span>${s}</span>`).join("")}</div>
     </div>`;
+  } else if (step.type === "number") {
+    const val = cur != null ? cur : (step.presets ? step.presets[1] : step.min);
+    control = `<div class="wz-number">
+      <div class="wz-num-field">
+        <input type="number" id="wz-num" min="${step.min}" step="${step.step}" value="${val}"
+          oninput="Wizard.num('${step.key}',this.value)"><span class="wz-num-unit">${step.unit}</span>
+      </div>
+      ${step.presets ? `<div class="wz-presets">${step.presets.map(p => `<button class="wz-preset ${cur === p ? "on" : ""}" onclick="Wizard.setNum('${step.key}',${p})">${p} ${step.unit}</button>`).join("")}</div>` : ""}
+    </div>`;
   }
 
   main.innerHTML = `<div class="wizard">
-    <div class="wz-top"><img src="_ds/voltai-logo-red.png" alt="Voltai"><span class="eyebrow">Meridian · Business Requirements</span></div>
+    <div class="wz-top"><img src="_ds/voltai-logo-red.png" alt="Voltai"><span class="eyebrow">Pipeline Analysis · Business Requirements</span></div>
     <div class="wz-progress"><i style="width:${progress}%"></i></div>
     <div class="wz-step-n">STEP ${String(App.step + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>
     <div class="wz-stage fade-in" id="wz-stage">
       <div class="wz-q">${step.q}</div>
       <div class="wz-sub">${step.sub}</div>
       ${control}
+      ${step.key === "region" ? regionExtras() : ""}
     </div>
     <div class="wz-nav">
       ${App.step > 0 ? `<button class="btn btn-ghost" onclick="Wizard.back()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3 5 8l5 5"/></svg>Back</button>` : ""}
@@ -270,10 +328,58 @@ function renderWizard() {
 const Wizard = {
   pick(key, v) { App.req[key] = v; saveReq(); if (App.step < WIZARD.length - 1) setTimeout(() => this.next(), 160); else renderWizard(); },
   slide(key, v, isPct) { App.req[key] = isPct ? parseFloat(v) / 100 : parseFloat(v); const el = document.getElementById("wz-sval"); const step = WIZARD[App.step]; if (el) el.innerHTML = `${isPct ? Math.round(v) : v}<small> ${step.unit}</small>`; saveReq(); },
+  num(key, v) { let n = parseFloat(v); if (isNaN(n)) return; App.req[key] = n; saveReq(); document.querySelectorAll(".wz-preset").forEach(b => b.classList.remove("on")); },
+  setNum(key, v) { App.req[key] = v; saveReq(); const inp = document.getElementById("wz-num"); if (inp) inp.value = v; document.querySelectorAll(".wz-preset").forEach(b => b.classList.toggle("on", parseFloat(b.textContent) === v)); },
   next() { if (App.step < WIZARD.length - 1) { App.step++; renderWizard(); } else { this.finish(); } },
   back() { if (App.step > 0) { App.step--; renderWizard(); } },
   skipAll() { App.req = Object.assign({}, DEFAULT_REQ, App.req); this.finish(); },
   finish() { App.req._done = true; saveReq(); renderAnalyzing(); },
+
+  // ── add a custom site ──
+  toggleAddSite() { const el = document.getElementById("wz-addsite"); if (el) el.style.display = el.style.display === "none" ? "grid" : "none"; },
+  addSite() {
+    const val = id => (document.getElementById(id) || {}).value;
+    const name = (val("as-name") || "").trim();
+    const state = val("as-region");
+    const mwNum = parseFloat(val("as-mw"));
+    const climate = val("as-climate");
+    if (!name) { alert("Give the site a name."); return; }
+    if (isNaN(mwNum) || mwNum <= 0) { alert("Enter the site's power in MW."); return; }
+    const site = {
+      id: "custom-" + Date.now().toString(36), name, addr: name + " · " + state, stage: "Custom", state,
+      mw: mwNum + " MW", mwNum, size: "—", acres: null, type: "User-added", price: "TBD", priceNum: null,
+      contact: "", utility: "", climate, lat: null, lng: null, approx: true,
+      notes: "User-added candidate site.", custom: true,
+    };
+    App.customSites = (App.customSites || []).concat(site);
+    saveCustomSites();
+    renderWizard();
+  },
+  removeSite(id) { App.customSites = (App.customSites || []).filter(s => s.id !== id); saveCustomSites(); renderWizard(); },
+
+  // ── load requirements from a saved Meridian deliverable ──
+  loadProject() {
+    const sel = document.getElementById("wz-proj");
+    if (!sel) return;
+    const proj = loadProjects().find(p => p.id === sel.value);
+    if (!proj || !proj.deliverable) return;
+    const d = proj.deliverable;
+    App.req.powerMW = d.powerMW || App.req.powerMW;
+    App.req.chip = CHIPS[d.chip] ? d.chip : App.req.chip;
+    if (d.workload) App.req.workload = d.workload;
+    App.req.region = REGIONS.includes(d.region) ? d.region : "any";
+    // add the analyzed site as a candidate if it isn't already there
+    if (d.site && d.site.name && !(App.customSites || []).some(s => s.name === d.site.name)) {
+      App.customSites = (App.customSites || []).concat(Object.assign({
+        id: "proj-" + proj.id, stage: "From Meridian", type: "Meridian deliverable",
+        size: "—", acres: null, price: "TBD", priceNum: null, contact: "", lat: null, lng: null,
+        approx: true, notes: "Loaded from Meridian deliverable “" + proj.name + "”.", custom: true,
+      }, d.site));
+      saveCustomSites();
+    }
+    saveReq();
+    this.finish();
+  },
 };
 
 // ─── ANALYZING (skeleton) ────────────────────────────────────────────────────
@@ -283,7 +389,7 @@ function renderAnalyzing() {
   const steps = ["Scanning candidate pipeline", "Simulating power envelope (19 checks)", "Modeling CAPEX / OPEX / TCO", "Scoring AI-factory readiness", "Ranking & generating recommendation"];
   main.innerHTML = `<div class="analyzing">
     <div class="spinner"></div>
-    <h2>Analyzing ${SITES.length} candidate sites</h2>
+    <h2>Analyzing ${pool().length} candidate sites</h2>
     <div class="eyebrow">Matching your requirements against the pipeline</div>
     <div class="steps">${steps.map((s, i) => `<div class="astep" id="as-${i}"><span class="ai"></span>${s}</div>`).join("")}</div>
   </div>`;
@@ -300,11 +406,11 @@ function renderAnalyzing() {
 
 // ─── RESULTS ─────────────────────────────────────────────────────────────────
 function computeRec() {
-  App.rec = recommend(App.req, SITES);
-  App.evals = rank(SITES, App.req, App.objective);
+  App.rec = recommend(App.req, pool());
+  App.evals = rank(pool(), App.req, App.objective);
   if (!App.selectedId) App.selectedId = App.rec.top.site.id;
 }
-function evalById(id) { return App.rec.all.find(e => e.site.id === id) || evaluate(SITES.find(s => s.id === id), App.req); }
+function evalById(id) { return App.rec.all.find(e => e.site.id === id) || evaluate(pool().find(s => s.id === id), App.req); }
 
 function renderResults() {
   App.view = "results";
@@ -322,7 +428,7 @@ function renderResults() {
     ${compareSection()}
     ${forecastSection(heroEval)}
     <div style="margin-top:40px;text-align:center;color:var(--faint);font-size:11px;font-family:var(--m)">
-      MODELED · NOT MEASURED · PRE-ENGINEERING — figures are planning estimates from the Meridian decision engine. © Voltai Inc. 2026
+      MODELED · NOT MEASURED · PRE-ENGINEERING — figures are planning estimates from the Pipeline Analysis engine. © Voltai Inc. 2026
     </div>
   </div>`;
   window.scrollTo({ top: 0 });
@@ -335,7 +441,6 @@ function topbar() {
     ["Power", r.powerMW + " MW"],
     ["Platform", CHIPS[r.chip] ? r.chip : "—"],
     ["Workload", { train: "Training", infer: "Inference", mix: "Mixed" }[r.workload]],
-    ["Timeline", "≤" + r.timelineMonths + " mo"],
     ["Sustainability", pct(r.sustainability)],
   ].map(([k, v]) => `<span class="chip"><span class="k">${k}</span><b>${esc(v)}</b></span>`).join("");
   return `<div class="topbar">
@@ -363,7 +468,7 @@ function heroSection(e) {
         <div class="loc"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"/><circle cx="8" cy="6" r="1.6"/></svg>${esc(s.addr)}<span class="dotsep">·</span>${esc(s.state)}</div>
         <p class="hero-explain">${exp.why.replace(/(\d+\/100|\d+% confidence)/g, "<b>$1</b>")}</p>${topNote}
         <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="${twinLink(e)}" target="_blank" rel="noopener">
+          <a class="btn btn-primary btn-lg" href="${twinLink(e)}">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M8 8 14 5M8 8 2 5M8 8v6.5"/></svg>Open in Digital Twin</a>
           <a class="btn btn-ghost btn-lg" href="${fullAnalysisLink(e)}">View full analysis</a>
           <button class="btn btn-ghost btn-lg" onclick="Results.addCompare('${s.id}');document.getElementById('sec-compare').scrollIntoView({behavior:'smooth'})">Compare</button>
@@ -376,7 +481,6 @@ function heroSection(e) {
       </div>
     </div>
     <div class="hero-kpis">
-      ${heroKpi("Deploy time", e.ttfr.mo + "<small> mo</small>", "gated by " + e.ttfr.gate)}
       ${heroKpi("Est. CAPEX", fmM(fin.totalCapex), fm(fin.costPerMW) + "/MW")}
       ${heroKpi("Est. OPEX", fmM(fin.opex) + "<small>/yr</small>", cents(e.region.price) + "/kWh")}
       ${heroKpi("Risk level", `<span class="pill ${riskClass(e.risk)}" style="font-size:14px;padding:3px 10px">${e.risk}</span>`, "execution risk")}
@@ -455,7 +559,7 @@ function candidatesSection() {
     const set = new Set(App.surfaceIds);
     evals = evals.slice().sort((a, b) => (set.has(b.site.id) ? 1 : 0) - (set.has(a.site.id) ? 1 : 0));
   }
-  const surfacing = App.surfaceIds && App.surfaceIds.length && App.surfaceIds.length < SITES.length;
+  const surfacing = App.surfaceIds && App.surfaceIds.length && App.surfaceIds.length < pool().length;
   return `<section class="section" id="sec-candidates">
     <div class="section-head"><span class="idx">04</span><h2>Ranked candidate sites</h2><span class="spacer"></span></div>
     <div class="cand-toolbar">
@@ -476,7 +580,6 @@ function candCard(e, i) {
       <div class="met"><span class="ml">Confidence</span><span class="mv">${e.confidence}%</span></div>
       <div class="met"><span class="ml">Cost / MW</span><span class="mv">${fm(e.fin.costPerMW)}</span></div>
       <div class="met"><span class="ml">Risk</span><span class="mv"><span class="pill ${riskClass(e.risk)}">${e.risk}</span></span></div>
-      <div class="met"><span class="ml">Timeline</span><span class="mv">${e.ttfr.mo} mo</span></div>
       <div class="met"><span class="ml">Power</span><span class="mv">${Math.round(e.comp.power)}/100</span></div>
       <div class="met"><span class="ml">Climate</span><span class="mv">${Math.round(e.comp.cooling)}/100</span></div>
     </div>
@@ -504,7 +607,6 @@ function compareSection() {
       ["OPEX / yr", e => -e.fin.opex, false, e => fmM(e.fin.opex)],
       ["10-yr TCO", e => -e.fin.tco10, true, e => fmM(e.fin.tco10)],
       ["ROI", e => e.fin.roi, true, e => pct(e.fin.roi)],
-      ["Deploy time", e => -e.ttfr.mo, true, e => e.ttfr.mo + " mo"],
       ["Risk", e => -e.riskScore, true, e => e.risk],
       ["Readiness", e => e.readiness.overall, true, e => Math.round(e.readiness.overall) + "/100"],
       ["Sustainability", e => e.sustainability, true, e => e.sustainability + "/100"],
@@ -568,7 +670,7 @@ function fullAnalysisLink(e) {
 const Results = {
   editReq() { App.step = 0; renderWizard(); },
   xai(k) { App.xaiTab = k; const e = evalById(App.selectedId); document.getElementById("sec-xai").outerHTML = xaiSection(e); },
-  setObjective(k) { App.objective = k; App.surfaceIds = null; App.evals = rank(SITES, App.req, k); document.getElementById("sec-candidates").outerHTML = candidatesSection(); },
+  setObjective(k) { App.objective = k; App.surfaceIds = null; App.evals = rank(pool(), App.req, k); document.getElementById("sec-candidates").outerHTML = candidatesSection(); },
   clearSurface() { App.surfaceIds = null; document.getElementById("sec-candidates").outerHTML = candidatesSection(); },
   selectSite(id) {
     App.selectedId = id; renderResults();
@@ -618,7 +720,7 @@ const Copilot = {
     inp.value = ""; this.bubble("user", text);
     const sug = document.querySelector(".cp-suggest"); if (sug) sug.remove();
     // local deterministic reasoning drives the dashboard
-    const res = copilot(text, App.req, SITES);
+    const res = copilot(text, App.req, pool());
     this.apply(res);
     const b = this.bubble("bot", res.answer);
     const actLabel = { filter: "Filtered candidates", sort: "Re-ranked candidates", compare: "Opened comparison", recommend: "Updated recommendation" }[res.action];
@@ -633,7 +735,7 @@ const Copilot = {
     else if (res.action === "sort" && res.objective) { App.objective = res.objective; App.surfaceIds = null; if (res.sites && res.sites[0]) App.selectedId = res.sites[0]; }
     else if (res.action === "filter" && res.sites) {
       App.objective = "balanced";
-      App.surfaceIds = res.sites.length < SITES.length ? res.sites : null;
+      App.surfaceIds = res.sites.length < pool().length ? res.sites : null;
       if (res.sites[0]) App.selectedId = res.sites[0];
     } else if (res.action === "recommend") {
       App.surfaceIds = null; App.selectedId = App.rec ? App.rec.top.site.id : App.selectedId;
@@ -647,7 +749,7 @@ const Copilot = {
   async enrich(text, res) {
     const pending = this.bubble("bot", "…");
     const ctx = App.rec.all.slice(0, 6).map(e => `${e.site.name} (${e.site.state}): score ${e.score}, conf ${e.confidence}%, ${cents(e.region.price)}/kWh, risk ${e.risk}, ${fmM(e.fin.totalCapex)} capex, ${e.ttfr.mo}mo`).join("; ");
-    const SYSTEM = `You are the Meridian site-intelligence copilot for Voltai. You help plan AI factory locations from a fixed candidate pipeline. Be concise (2-4 sentences), quantitative, and decision-oriented. The deterministic engine already updated the dashboard: ${res.answer}. Current top sites: ${ctx}. Do not invent sites outside this list.`;
+    const SYSTEM = `You are the Pipeline Analysis copilot for Voltai. You help plan AI factory locations from a fixed candidate pipeline. Be concise (2-4 sentences), quantitative, and decision-oriented. The deterministic engine already updated the dashboard: ${res.answer}. Current top sites: ${ctx}. Do not invent sites outside this list.`;
     try {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", headers: { "content-type": "application/json", "x-api-key": this.getKey(), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
