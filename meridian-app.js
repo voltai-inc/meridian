@@ -44,7 +44,10 @@ const App = {
   rec: null,
 };
 
-const REGIONS = ["any", "Louisiana", "Ohio", "Kentucky", "Mississippi", "Alberta, Canada"];
+// Regions are derived from the shared SITES data layer (meridian-data.js, the same
+// candidate pipeline Site Selection renders) — never a separate hardcoded list, so the
+// "Where are you building?" options always match the sites actually in the pipeline.
+const REGIONS = ["any", ...Array.from(new Set(SITES.map(s => s.state)))];
 
 // ─── WIZARD DEFINITION ───────────────────────────────────────────────────────
 const WIZARD = [
@@ -367,7 +370,12 @@ const Wizard = {
     App.req.powerMW = d.powerMW || App.req.powerMW;
     App.req.chip = CHIPS[d.chip] ? d.chip : App.req.chip;
     if (d.workload) App.req.workload = d.workload;
-    App.req.region = REGIONS.includes(d.region) ? d.region : "any";
+    // Pull the region straight from the Meridian deliverable: prefer an explicit
+    // region, else infer it from the analyzed site's state, else leave it open.
+    const delRegion = REGIONS.includes(d.region) ? d.region
+      : (d.site && REGIONS.includes(d.site.state)) ? d.site.state
+      : "any";
+    App.req.region = delRegion;
     // add the analyzed site as a candidate if it isn't already there
     if (d.site && d.site.name && !(App.customSites || []).some(s => s.name === d.site.name)) {
       App.customSites = (App.customSites || []).concat(Object.assign({

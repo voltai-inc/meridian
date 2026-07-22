@@ -226,8 +226,16 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
 }).addTo(map);
 
 function meridianLink(s){
-  // Deep-link into the Meridian decision platform with this site preselected.
-  return 'meridian.html?site='+encodeURIComponent(s.id);
+  // Deep-link into Meridian (site-intelligence.html) with this site's power design
+  // prefilled — same hash contract Pipeline Analysis uses to open the deep-dive.
+  const p = new URLSearchParams({
+    mode: '2', demo: '0',
+    mw: s.mwNum || 100,
+    loc: s.addr,
+    utility: s.utility || 'Utility TBD',
+    climate: s.climate,
+  });
+  return 'site-intelligence.html#'+p.toString();
 }
 function popHTML(s){
   return `<div class="pop">
