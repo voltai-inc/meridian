@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — Voltai AI Factory Intelligence</title>
+  <style>
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 500;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-500.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/SpaceGrotesk-700.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'IBM Plex Sans';
+      font-weight: 400;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-400.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'IBM Plex Sans';
+      font-weight: 500;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-500.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'IBM Plex Sans';
+      font-weight: 600;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexSans-600.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'IBM Plex Mono';
+      font-weight: 400;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-400.woff2') format('woff2')
+    }
+
+    @font-face {
+      font-family: 'IBM Plex Mono';
+      font-weight: 500;
+      font-display: swap;
+      src: url('_ds/voltai-design-system-7885c8b4-a759-488d-b2ef-cdda965c1e8a/assets/fonts/IBMPlexMono-500.woff2') format('woff2')
+    }
+
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --sunken: #eef2f6;
+      --fill: #e6ebf1;
+      --ink: #060a0e;
+      --body: #1c2530;
+      --muted: #5b646e;
+      --faint: #8a929b;
+      --border: #dfe4ea;
+      --hairline: rgba(6, 10, 14, .07);
+      --border-strong: #c8ced6;
+      --red: #AF0000;
+      --red-vivid: #c92121;
+      --red-tint: #fbeeee;
+      --red-deep: #8a0000;
+      --ok: #1e7a5a;
+      --danger: #c0392b;
+      --danger-tint: #fbecea;
+      --disp: 'Space Grotesk', sans-serif;
+      --f: 'IBM Plex Sans', -apple-system, sans-serif;
+      --m: 'IBM Plex Mono', monospace;
+      --shadow-lg: 0 8px 20px rgba(6, 10, 14, .07), 0 24px 60px rgba(6, 10, 14, .10);
+      --ease: cubic-bezier(.2, 0, 0, 1);
+      --enter: cubic-bezier(.16, 1, .3, 1);
+      --r: 14px;
+      --r-sm: 9px;
+      --r-xs: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--body);
+      font-family: var(--f);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      min-height: 100dvh;
+      background-image: radial-gradient(120% 120% at 100% 0%, rgba(175, 0, 0, .05), transparent 55%)
+    }
+
+    button,
+    input {
+      font-family: inherit
+    }
+
+    .eyebrow {
+      font-family: var(--m);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--faint)
+    }
+
+    .card {
+      width: 100%;
+      max-width: 404px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      padding: 34px 34px 26px;
+      position: relative;
+      overflow: hidden;
+      animation: rise .5s var(--enter) both
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(6, 10, 14, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 10, 14, .025) 1px, transparent 1px);
+      background-size: 22px 22px;
+      -webkit-mask-image: radial-gradient(120% 120% at 100% 0%, #000, transparent 60%);
+      mask-image: radial-gradient(120% 120% at 100% 0%, #000, transparent 60%);
+      pointer-events: none
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1
+    }
+
+    .brand img {
+      height: 19px;
+      width: auto;
+      align-self: flex-start
+    }
+
+    .brand .sub {
+      font-family: var(--m);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    h1 {
+      font-family: var(--disp);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1.15;
+      position: relative;
+      z-index: 1
+    }
+
+    .lead {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-top: 5px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--sunken);
+      border: 1px solid var(--hairline);
+      border-radius: 9px;
+      padding: 3px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 8px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border: none;
+      background: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: .12s
+    }
+
+    .tabs button.on {
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(6, 10, 14, .06)
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      position: relative;
+      z-index: 1
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .field label {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted)
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+      transition: .12s
+    }
+
+    .field input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-tint)
+    }
+
+    .field input::placeholder {
+      color: var(--faint)
+    }
+
+    .err {
+      display: none;
+      background: var(--danger-tint);
+      border: 1px solid #f0cccc;
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12.5px;
+      line-height: 1.45
+    }
+
+    .err.on {
+      display: block
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: var(--r-xs);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: .13s var(--ease);
+      border: 1px solid transparent;
+      padding: 12px 18px;
+      line-height: 1;
+      width: 100%
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: var(--red-vivid)
+    }
+
+    .btn-primary:active {
+      background: var(--red-deep)
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px
+    }
+
+    .hint {
+      margin-top: 16px;
+      padding-top: 15px;
+      border-top: 1px solid var(--hairline);
+      font-size: 11.5px;
+      color: var(--faint);
+      line-height: 1.5;
+      position: relative;
+      z-index: 1
+    }
+
+    .hint b {
+      color: var(--muted);
+      font-weight: 600
+    }
+
+    .hint code {
+      font-family: var(--m);
+      font-size: 11px;
+      background: var(--sunken);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--body)
+    }
+
+    .foot {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 10.5px;
+      color: var(--faint);
+      font-family: var(--m)
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <div class="brand">
+      <img src="_ds/voltai-logo-red.png" alt="Voltai">
+      <span class="sub">AI Factory Intelligence</span>
+    </div>
+
+    <h1 id="title">Welcome back</h1>
+    <p class="lead" id="lead">Sign in to your workspace to continue.</p>
+
+    <div class="tabs">
+      <button id="tab-in" class="on" type="button" onclick="setMode('in')">Sign in</button>
+      <button id="tab-up" type="button" onclick="setMode('up')">Create account</button>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <form id="form" onsubmit="return submitForm(event)">
+      <div class="field" id="f-name" style="display:none">
+        <label for="in-name">Full name</label>
+        <input id="in-name" type="text" autocomplete="name" placeholder="Jane Doe">
+      </div>
+      <div class="field">
+        <label for="in-email">Work email</label>
+        <input id="in-email" type="email" autocomplete="username" placeholder="you@voltai.com" required>
+      </div>
+      <div class="field">
+        <label for="in-pass">Password</label>
+        <input id="in-pass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button class="btn btn-primary" type="submit" id="submit-btn">
+        <span id="submit-label">Sign in</span>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M6 3l5 5-5 5" />
+        </svg>
+      </button>
+    </form>
+
+    <div class="hint">
+      New accounts you create are saved in this browser only.
+    </div>
+    <div class="foot">© Voltai Inc. 2026 · Client-side access gate</div>
+  </main>
+
+  <script>window.__AUTH_PAGE = true;</script>
+  <script src="accounts.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    // Already signed in? Go straight to the dashboard.
+    if (Auth.isAuthed()) location.replace("index.html");
+
+    var mode = "in";
+    function setMode(m) {
+      mode = m;
+      document.getElementById("tab-in").classList.toggle("on", m === "in");
+      document.getElementById("tab-up").classList.toggle("on", m === "up");
+      document.getElementById("f-name").style.display = m === "up" ? "flex" : "none";
+      document.getElementById("title").textContent = m === "up" ? "Create your account" : "Welcome back";
+      document.getElementById("lead").textContent = m === "up"
+        ? "Set up a workspace login to access the toolkit."
+        : "Sign in to your workspace to continue.";
+      document.getElementById("submit-label").textContent = m === "up" ? "Create account" : "Sign in";
+      document.getElementById("in-pass").setAttribute("autocomplete", m === "up" ? "new-password" : "current-password");
+      showErr("");
+      (m === "up" ? document.getElementById("in-name") : document.getElementById("in-email")).focus();
+    }
+    function showErr(msg) {
+      var el = document.getElementById("err");
+      el.textContent = msg || "";
+      el.classList.toggle("on", !!msg);
+    }
+    function submitForm(e) {
+      e.preventDefault();
+      var name = document.getElementById("in-name").value;
+      var email = document.getElementById("in-email").value;
+      var pass = document.getElementById("in-pass").value;
+      var res = mode === "up" ? Auth.signUp(name, email, pass) : Auth.signIn(email, pass);
+      if (!res.ok) { showErr(res.error); return false; }
+      location.href = "index.html";
+      return false;
+    }
+    document.getElementById("in-email").focus();
+  </script>
+</body>
+
+</html>
