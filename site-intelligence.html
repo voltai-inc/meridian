@@ -1848,6 +1848,7 @@ function currentDeliverable(){
     savedAt: new Date().toISOString(),
     site: {
       name: d.name || d.location || 'Meridian site',
+      addr: d.location || 'Location TBD',   // Pipeline Analysis shows the full address
       state: d.location || 'Location TBD',
       climate: d.climate,
       utility: d.utility || '',

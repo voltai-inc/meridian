@@ -232,6 +232,20 @@ function boot() {
 const CLIMATES = ["cold_dry", "temperate", "hot_dry", "hot_humid"];
 const SITE_REGIONS = REGIONS.filter(r => r !== "any");
 
+// A user-typed address still has to land in a power region — the engine prices
+// energy, grid reliability, water and supply off REGION_POWER[state]. Read the
+// region out of the address (region name, or its postal code), else fall back to
+// the region the wizard is targeting, else a neutral label → REGION_DEFAULT.
+const REGION_CODES = { LA: "Louisiana", KY: "Kentucky", OH: "Ohio", MS: "Mississippi", AB: "Alberta, Canada" };
+function regionFromAddress(addr) {
+  const a = (addr || "").trim();
+  if (!a) return "";
+  const named = SITE_REGIONS.find(r => a.toLowerCase().includes(r.split(",")[0].toLowerCase()));
+  if (named) return named;
+  const coded = (a.toUpperCase().match(/\b[A-Z]{2}\b/g) || []).map(c => REGION_CODES[c]).find(Boolean);
+  return coded || "";
+}
+
 function regionExtras() {
   const projects = loadProjects().filter(p => p.deliverable);
   const projOpts = projects.length
@@ -241,7 +255,7 @@ function regionExtras() {
 
   const custom = App.customSites || [];
   const siteList = custom.length
-    ? `<div class="wz-sitelist">${custom.map(s => `<div class="wz-siterow"><span class="nm">${esc(s.name)}</span><span class="meta">${esc(s.state)} · ${s.mwNum} MW</span><button class="x" title="Remove" onclick="Wizard.removeSite('${s.id}')">✕</button></div>`).join("")}</div>`
+    ? `<div class="wz-sitelist">${custom.map(s => `<div class="wz-siterow"><span class="nm">${esc(s.name)}</span><span class="meta">${esc(s.addr)} · ${s.mwNum} MW</span><button class="x" title="Remove" onclick="Wizard.removeSite('${s.id}')">✕</button></div>`).join("")}</div>`
     : "";
 
   return `<div class="wz-extras">
@@ -257,11 +271,11 @@ function regionExtras() {
       <button class="wz-btn-ghost" onclick="Wizard.toggleAddSite()">+ Add a site</button>
       <div class="wz-addsite" id="wz-addsite" style="display:none">
         <div class="wz-field"><label>Site name</label><input id="as-name" type="text" placeholder="e.g. Riverbend Campus"></div>
+        <div class="wz-field"><label>Full address</label><input id="as-addr" type="text" placeholder="e.g. 501 Denim Way, Madison County MS 39110"></div>
         <div class="wz-field-row">
-          <div class="wz-field"><label>Region</label><select id="as-region">${SITE_REGIONS.map(r => `<option value="${r}">${r}</option>`).join("")}</select></div>
           <div class="wz-field"><label>Power (MW)</label><input id="as-mw" type="number" min="1" step="5" placeholder="e.g. 100"></div>
+          <div class="wz-field"><label>Climate</label><select id="as-climate">${CLIMATES.map(c => `<option value="${c}">${CLIMATE_LABEL[c]}</option>`).join("")}</select></div>
         </div>
-        <div class="wz-field"><label>Climate</label><select id="as-climate">${CLIMATES.map(c => `<option value="${c}">${CLIMATE_LABEL[c]}</option>`).join("")}</select></div>
         <button class="wz-btn-sm" onclick="Wizard.addSite()">Add to pipeline</button>
       </div>
     </div>
@@ -343,13 +357,16 @@ const Wizard = {
   addSite() {
     const val = id => (document.getElementById(id) || {}).value;
     const name = (val("as-name") || "").trim();
-    const state = val("as-region");
+    const addr = (val("as-addr") || "").trim();
     const mwNum = parseFloat(val("as-mw"));
     const climate = val("as-climate");
     if (!name) { alert("Give the site a name."); return; }
+    if (!addr) { alert("Enter the site's full address."); return; }
     if (isNaN(mwNum) || mwNum <= 0) { alert("Enter the site's power in MW."); return; }
+    const state = regionFromAddress(addr)
+      || (App.req.region && App.req.region !== "any" ? App.req.region : "Other region");
     const site = {
-      id: "custom-" + Date.now().toString(36), name, addr: name + " · " + state, stage: "Custom", state,
+      id: "custom-" + Date.now().toString(36), name, addr, stage: "Custom", state,
       mw: mwNum + " MW", mwNum, size: "—", acres: null, type: "User-added", price: "TBD", priceNum: null,
       contact: "", utility: "", climate, lat: null, lng: null, approx: true,
       notes: "User-added candidate site.", custom: true,
@@ -380,6 +397,7 @@ const Wizard = {
     if (d.site && d.site.name && !(App.customSites || []).some(s => s.name === d.site.name)) {
       App.customSites = (App.customSites || []).concat(Object.assign({
         id: "proj-" + proj.id, stage: "From Meridian", type: "Meridian deliverable",
+        addr: d.site.addr || d.location || d.site.state || "Location TBD",
         size: "—", acres: null, price: "TBD", priceNum: null, contact: "", lat: null, lng: null,
         approx: true, notes: "Loaded from Meridian deliverable “" + proj.name + "”.", custom: true,
       }, d.site));
@@ -473,7 +491,7 @@ function heroSection(e) {
       <div>
         ${badge}
         <h1>${esc(s.name)}</h1>
-        <div class="loc"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"/><circle cx="8" cy="6" r="1.6"/></svg>${esc(s.addr)}<span class="dotsep">·</span>${esc(s.state)}</div>
+        <div class="loc"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"/><circle cx="8" cy="6" r="1.6"/></svg>${esc(s.addr)}</div>
         <p class="hero-explain">${exp.why.replace(/(\d+\/100|\d+% confidence)/g, "<b>$1</b>")}</p>${topNote}
         <div class="hero-cta">
           <a class="btn btn-primary btn-lg" href="${twinLink(e)}">
@@ -583,7 +601,7 @@ function candCard(e, i) {
   return `<div class="card cand ${sel ? "sel" : ""}" onclick="Results.selectSite('${s.id}')">
     <span class="rankbadge">#${i + 1}</span>
     <div class="chd"><div class="miniring">${miniRing(e.score)}</div>
-      <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="st">${esc(s.state)} · ${s.stage} · ${esc(s.mw)}</div></div></div>
+      <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="st">${esc(s.addr)} · ${s.stage} · ${esc(s.mw)}</div></div></div>
     <div class="metrics">
       <div class="met"><span class="ml">Confidence</span><span class="mv">${e.confidence}%</span></div>
       <div class="met"><span class="ml">Cost / MW</span><span class="mv">${fm(e.fin.costPerMW)}</span></div>
@@ -623,7 +641,7 @@ function compareSection() {
     // pairwise tradeoff narrative (top two by score)
     const sorted = evals.slice().sort((a, b) => b.score - a.score);
     const td = tradeoff(sorted[0], sorted[1]);
-    const th = `<th></th>` + evals.map(e => `<th>${esc(e.site.name)}<br><span style="color:var(--muted);font-weight:400">${esc(e.site.state)}</span></th>`).join("");
+    const th = `<th></th>` + evals.map(e => `<th>${esc(e.site.name)}<br><span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">${esc(e.site.addr)}</span></th>`).join("");
     const body = rows.map(([label, keyFn, higherBetter, fmt]) => {
       const vals = evals.map(keyFn);
       const best = Math.max(...vals);
