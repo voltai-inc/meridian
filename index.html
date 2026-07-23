@@ -730,22 +730,8 @@
 
   <script>
     // ── Claude-powered dashboard chat ─────────────────────────────────────────
-    // Calls the Anthropic API directly from the browser with a built-in key.
-    const BUILTIN_KEY = 'ANTHROPIC_KEY_REMOVED';
-    const SYSTEM = `You are the assistant on Voltai's Data Center dashboard — an internal toolkit for finding a site, evaluating it, and reviewing its design. Be concise and direct.
-Site Selection (relative links work):
-- Site Selection (site-selection.html): map + tracker of candidate powered sites (pipeline and prospecting, synced from the team's site sheet). Click a site to evaluate it.
-- Pipeline Analysis (pipeline-analysis.html): guided evaluation — takes site, chip, and workload requirements and ranks candidate sites on readiness, economics, and risk.
-Design Review:
-- Meridian (site-intelligence.html): the core product — takes a utility study or site power claim and evaluates compute readiness: per-chip compute design, MFU at scale, workload power verdicts, envelope check, economics sensitivity, off-taker spec sheet.
-- Power Sign-off (power-signoff.html): the deep-dive review bench behind Meridian's inline verdict — a facility electrical design (scaled Helio block or the EPC's actual values) stress-tested against AI workload transients (UPS/genset/BESS, ramp, oscillation), pass/warn/fail. Power sign-off is the first review dimension; cooling and network are roadmap.
-- Digital Twin: interactive 3D facility simulator (not currently linked from the dashboard).
-- Compliance Agent: upload documents, run compliance checks against frameworks (ASHRAE TC9.9, NVIDIA DSX CDU, IEC) (not currently linked from the dashboard).
-Modules:
-- Helio Reference (helio.html): the 2N reference architecture (10→100 MW block) Meridian validates against.
-- Procurement Agent (procurement.html): demo of the BOM → RFQ → PO flow — receives Meridian's Build-tab BOM, matches lines to a vendor library, drafts printable RFQs. Production version (equipment-library backed) is in build.
-Key concepts you can explain: training vs inference power behavior, MFU, synchronized fleet transients, chip power profiles (GB300 on-board smoothing), the envelope check, supply vs demand. When a question is better answered inside a tool, say which tool and why.`;
-
+    // Calls the /api/chat serverless proxy, which holds the Anthropic key
+    // server-side (Vercel env var ANTHROPIC_API_KEY). No key ships to the browser.
     const chatMessages = [];
     let busy = false;
 
@@ -770,20 +756,10 @@ Key concepts you can explain: training vs inference power behavior, MFU, synchro
       const pending = bubble('bot', '…');
       busy = true; document.getElementById('send-btn').disabled = true;
       try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-api-key': BUILTIN_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true',
-          },
-          body: JSON.stringify({
-            model: 'claude-opus-4-8',
-            max_tokens: 1024,
-            system: SYSTEM,
-            messages: chatMessages,
-          }),
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ messages: chatMessages }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error?.message || ('HTTP ' + res.status));
